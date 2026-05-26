@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadForge — Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080C12;
+    --bg2: #0D1420;
+    --bg3: #111827;
+    --border: rgba(0,200,255,0.12);
+    --border2: rgba(0,200,255,0.25);
+    --accent: #00C8FF;
+    --accent2: #0066FF;
+    --green: #00E5A0;
+    --red: #FF4D6A;
+    --yellow: #FFD93D;
+    --text: #E8EDF5;
+    --text2: #7A8BA0;
+    --text3: #4A5568;
+    --card: rgba(13,20,32,0.8);
+    --radius: 12px;
+    --radius-lg: 20px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID BG ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── ORBS ── */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb-1 { width: 500px; height: 500px; background: rgba(0,102,255,0.08); top: -150px; right: -100px; }
+  .orb-2 { width: 400px; height: 400px; background: rgba(0,200,255,0.06); bottom: -100px; left: -100px; }
+
+  /* ── SCREENS ── */
+  .screen {
+    display: none;
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+  }
+  .screen.active { display: flex; }
+
+  /* ══════════════════════════════════
+     AUTH SCREENS (login / set-password)
+  ══════════════════════════════════ */
+  .auth-screen {
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 44px 40px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 60px rgba(0,200,255,0.05), 0 24px 60px rgba(0,0,0,0.5);
+    animation: fadeUp 0.5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .auth-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .auth-logo .bolt {
+    font-size: 22px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .auth-logo .name {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .auth-logo .name span { color: var(--accent); }
+
+  .auth-title {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  .auth-sub {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    margin-bottom: 7px;
+    letter-spacing: 0.3px;
+  }
+  .field input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  .field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,200,255,0.1);
+  }
+  .field input::placeholder { color: var(--text3); }
+
+  .btn-primary {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 8px;
+    color: #080C12;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    letter-spacing: 0.3px;
+    margin-top: 4px;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .auth-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .auth-footer a { color: var(--accent); text-decoration: none; }
+  .auth-footer a:hover { text-decoration: underline; }
+
+  .alert {
+    padding: 11px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .alert.error { background: rgba(255,77,106,0.1); border: 1px solid rgba(255,77,106,0.3); color: #FF4D6A; }
+  .alert.success { background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.3); color: var(--green); }
+  .alert.show { display: block; }
+
+  /* ══════════════════════════════════
+     APP SHELL (sidebar + main)
+  ══════════════════════════════════ */
+  .app-screen {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 0;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 24px 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .sidebar-logo .bolt {
+    font-size: 20px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .sidebar-logo .name {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .sidebar-logo .name span { color: var(--accent); }
+
+  .nav-section {
+    padding: 0 12px;
+    flex: 1;
+  }
+  .nav-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text3);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 0 12px;
+    margin-bottom: 6px;
+    margin-top: 16px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text2);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: rgba(0,200,255,0.05); color: var(--text); }
+  .nav-item.active {
+    background: rgba(0,200,255,0.08);
+    color: var(--accent);
+    border-color: var(--border);
+  }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+  .sidebar-bottom {
+    padding: 20px 12px 0;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+  }
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #080C12;
+    flex-shrink: 0;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-email {
+    font-size: 12px;
+    color: var(--text2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .user-plan {
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .btn-logout {
+    width: 100%;
+    padding: 9px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text2);
+    font-size: 13px;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    flex: 1;
+    padding: 40px 48px;
+    overflow-y: auto;
+    min-height: 100vh;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn 0.3s ease both; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .page-header { margin-bottom: 36px; }
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.8px;
+    margin-bottom: 6px;
+  }
+  .page-title span { color: var(--accent); }
+  .page-sub { font-size: 15px; color: var(--text2); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    backdrop-filter: blur(10px);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  /* ══════════════════════════════════
+     DASHBOARD PAGE
+  ══════════════════════════════════ */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+  }
+  .stat-label { font-size: 12px; color: var(--text2); font-weight: 500; margin-bottom: 8px; letter-spacing: 0.3px; }
+  .stat-value { font-size: 28px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--text); letter-spacing: -1px; }
+  .stat-value span { font-size: 13px; color: var(--text2); font-family: 'Space Grotesk', sans-serif; font-weight: 400; margin-left: 4px; }
+
+  /* ── SCRAPER FORM ── */
+  .scraper-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .form-field { }
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+  }
+  .form-select {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--text);
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A8BA0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,200,255,0.1);
+  }
+  .form-select option { background: #0D1420; }
+
+  /* ── CATEGORIES ── */
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .cat-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text2);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .cat-pill:hover { border-color: var(--border2); color: var(--text); }
+  .cat-pill.selected {
+    background: rgba(0,200,255,0.08);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .cat-pill .cat-check {
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid var(--text3);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    font-size: 10px;
+  }
+  .cat-pill.selected .cat-check {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #080C12;
+  }
+
+  .select-all-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    padding: 0;
+    margin-left: auto;
+    display: block;
+    margin-bottom: 8px;
+  }
+  .select-all-btn:hover { text-decoration: underline; }
+
+  /* ── SOURCES ── */
+  .sources-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .source-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text2);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .source-pill.selected {
+    background: rgba(0,200,255,0.08);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .source-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--text3);
+    transition: background 0.15s;
+  }
+  .source-pill.selected .source-dot { background: var(--accent); }
+
+  /* ── LAUNCH BTN ── */
+  .btn-launch {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 10px;
+    color: #080C12;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    letter-spacing: 0.3px;
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .btn-launch:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-launch:active { transform: translateY(0); }
+  .btn-launch:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ══════════════════════════════════
+     RESULTS PAGE
+  ══════════════════════════════════ */
+  .progress-wrap {
+    margin-bottom: 28px;
+  }
+  .progress-bar-bg {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 10px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .progress-pct { color: var(--accent); font-weight: 600; }
+
+  .log-terminal {
+    background: #060A10;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.8;
+    max-height: 280px;
+    overflow-y: auto;
+    margin-bottom: 24px;
+  }
+  .log-line { display: block; }
+  .log-line .ts { color: var(--text3); margin-right: 10px; }
+  .log-line.ok .msg { color: var(--green); }
+  .log-line.info .msg { color: var(--text2); }
+  .log-line.accent .msg { color: var(--accent); }
+  .log-line.warn .msg { color: var(--yellow); }
+
+  .results-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .result-stat {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+  }
+  .result-stat .n {
+    font-size: 30px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -1px;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .result-stat .lbl { font-size: 12px; color: var(--text2); }
+  .result-stat.alta .n { color: var(--green); }
+  .result-stat.media .n { color: var(--yellow); }
+  .result-stat.baja .n { color: var(--red); }
+  .result-stat.total .n { color: var(--accent); }
+
+  .btn-download {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #00C853, var(--green));
+    border: none;
+    border-radius: 10px;
+    color: #060A10;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    letter-spacing: 0.3px;
+  }
+  .btn-download:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .btn-new {
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 10px;
+  }
+  .btn-new:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ══════════════════════════════════
+     HISTORIAL PAGE
+  ══════════════════════════════════ */
+  .history-list { display: flex; flex-direction: column; gap: 10px; }
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 0.15s;
+  }
+  .history-item:hover { border-color: var(--border2); }
+  .history-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: rgba(0,200,255,0.08);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .history-info { flex: 1; min-width: 0; }
+  .history-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-meta { font-size: 12px; color: var(--text2); }
+  .history-leads {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .btn-redownload {
+    padding: 7px 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text2);
+    font-size: 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-redownload:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ══════════════════════════════════
+     CUENTA PAGE
+  ══════════════════════════════════ */
+  .cuenta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .plan-card {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .plan-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+  }
+  .plan-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 8px;
+  }
+  .plan-price {
+    font-size: 40px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -2px;
+    margin-bottom: 4px;
+  }
+  .plan-price span { font-size: 16px; color: var(--text2); font-weight: 400; }
+  .plan-renewal { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+  .plan-features { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .plan-features li {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--text2);
+  }
+  .plan-features li::before { content: '✓'; color: var(--green); font-weight: 700; }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .key { color: var(--text2); }
+  .info-row .val { font-weight: 500; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+  .danger-zone {
+    background: rgba(255,77,106,0.04);
+    border: 1px solid rgba(255,77,106,0.2);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-top: 8px;
+  }
+  .danger-title { font-size: 14px; font-weight: 600; color: var(--red); margin-bottom: 6px; }
+  .danger-sub { font-size: 13px; color: var(--text2); margin-bottom: 16px; }
+  .btn-danger {
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid var(--red);
+    border-radius: 8px;
+    color: var(--red);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-danger:hover { background: rgba(255,77,106,0.1); }
+
+  /* ── TAG ── */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+  .tag.active { background: rgba(0,229,160,0.1); color: var(--green); border: 1px solid rgba(0,229,160,0.3); }
+  .tag.trial  { background: rgba(255,217,61,0.1); color: var(--yellow); border: 1px solid rgba(255,217,61,0.3); }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    letter-spacing: -0.3px;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,200,255,0.2); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(0,200,255,0.35); }
+
+  /* ── SPINNER ── */
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(8,12,18,0.3);
+    border-top-color: #080C12;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── MOBILE ── */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { padding: 24px 20px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .scraper-grid { grid-template-columns: 1fr; }
+    .categories-grid { grid-template-columns: repeat(2,1fr); }
+    .results-summary { grid-template-columns: repeat(2,1fr); }
+    .cuenta-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text2);
+  }
+  .empty-state .emoji { font-size: 40px; margin-bottom: 14px; }
+  .empty-state p { font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- ══════════════════════════════
+     SCREEN: LOGIN
+══════════════════════════════ -->
+<div class="screen auth-screen" id="screen-login">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="bolt">⚡</span>
+      <span class="name">Lead<span>Forge</span></span>
+    </div>
+    <h1 class="auth-title">Bienvenido de nuevo</h1>
+    <p class="auth-sub">Entra en tu panel para lanzar búsquedas y descargar leads.</p>
+    <div class="alert error" id="login-error"></div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="tu@empresa.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="btn-login" onclick="doLogin()">
+      <span id="login-label">Entrar al panel</span>
+      <div class="spinner" id="login-spinner"></div>
+    </button>
+    <div class="auth-footer" style="margin-top:16px">
+      ¿No tienes cuenta? <a href="https://leadforge.es/#pricing">Empieza gratis 14 días →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN: SET PASSWORD
+══════════════════════════════ -->
+<div class="screen auth-screen" id="screen-setpass">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="bolt">⚡</span>
+      <span class="name">Lead<span>Forge</span></span>
+    </div>
+    <h1 class="auth-title">Elige tu contraseña</h1>
+    <p class="auth-sub">Tu cuenta está lista. Elige una contraseña para acceder a tu panel de LeadForge.</p>
+    <div class="alert error" id="setpass-error"></div>
+    <div class="alert success" id="setpass-success"></div>
+    <div class="field">
+      <label>Nueva contraseña</label>
+      <input type="password" id="new-pass" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div class="field">
+      <label>Confirmar contraseña</label>
+      <input type="password" id="confirm-pass" placeholder="Repite la contraseña">
+    </div>
+    <button class="btn-primary" id="btn-setpass" onclick="doSetPassword()">
+      <span id="setpass-label">Activar cuenta</span>
+      <div class="spinner" id="setpass-spinner"></div>
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     SCREEN: APP
+══════════════════════════════ -->
+<div class="screen app-screen" id="screen-app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="bolt">⚡</span>
+      <span class="name">Lead<span>Forge</span></span>
+    </div>
+    <nav class="nav-section">
+      <div class="nav-label">Principal</div>
+      <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
+        <span class="icon">⚡</span> Nueva búsqueda
+      </div>
+      <div class="nav-item" id="nav-historial" onclick="showPage('historial')">
+        <span class="icon">📋</span> Historial
+      </div>
+      <div class="nav-label">Configuración</div>
+      <div class="nav-item" id="nav-cuenta" onclick="showPage('cuenta')">
+        <span class="icon">👤</span> Mi cuenta
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-badge">
+        <div class="user-avatar" id="sidebar-avatar">?</div>
+        <div class="user-info">
+          <div class="user-email" id="sidebar-email">cargando...</div>
+          <div class="user-plan" id="sidebar-plan">PRO</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ── PAGE: DASHBOARD ── -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h1 class="page-title">Nueva <span>búsqueda</span></h1>
+        <p class="page-sub">Configura los parámetros y lanza el scraping de leads.</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Búsquedas este mes</div>
+          <div class="stat-value" id="stat-searches">0 <span>búsquedas</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Leads generados</div>
+          <div class="stat-value" id="stat-leads">0 <span>leads</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Plan activo</div>
+          <div class="stat-value" id="stat-plan">PRO <span style="font-size:11px">✓ activo</span></div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="card">
+        <div class="card-title">Configurar búsqueda</div>
+
+        <div class="scraper-grid">
+          <div class="form-field">
+            <label class="form-label">Sector</label>
+            <select class="form-select" id="select-sector" onchange="updateCategories()">
+              <option value="">— Selecciona sector —</option>
+              <option value="construccion">🏗️ Construcción e Interiorismo</option>
+              <option value="restauracion" disabled>🍽️ Restauración (próximamente)</option>
+              <option value="salud" disabled>🏥 Salud y Bienestar (próximamente)</option>
+              <option value="retail" disabled>🛍️ Retail (próximamente)</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Ciudad</label>
+            <select class="form-select" id="select-ciudad">
+              <option value="">— Selecciona ciudad —</option>
+              <option value="Madrid">📍 Madrid</option>
+              <option value="Barcelona">📍 Barcelona</option>
+              <option value="Valencia">📍 Valencia</option>
+              <option value="Sevilla">📍 Sevilla</option>
+              <option value="Málaga">📍 Málaga</option>
+              <option value="Marbella">📍 Marbella</option>
+              <option value="Bilbao">📍 Bilbao</option>
+              <option value="Zaragoza">📍 Zaragoza</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Categories -->
+        <div class="form-field" id="cats-wrap" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <label class="form-label" style="margin:0">Categorías</label>
+            <button class="select-all-btn" onclick="toggleAllCats()">Seleccionar todas</button>
+          </div>
+          <div class="categories-grid" id="cats-grid"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Sources -->
+        <div class="form-field">
+          <label class="form-label">Fuentes de datos</label>
+          <div class="sources-row">
+            <div class="source-pill selected" id="src-googlemaps" onclick="toggleSource('googlemaps')" title="API oficial — datos completos">
+              <span class="source-dot"></span> Google Maps
+            </div>
+            <div class="source-pill selected" id="src-habitissimo" onclick="toggleSource('habitissimo')" title="Directorio especializado">
+              <span class="source-dot"></span> Habitissimo
+            </div>
+            <div class="source-pill selected" id="src-paginasamarillas" onclick="toggleSource('paginasamarillas')" title="Directorio general">
+              <span class="source-dot"></span> Páginas Amarillas
+            </div>
+            <div class="source-pill selected" id="src-houzz" onclick="toggleSource('houzz')" title="Directorio interiorismo">
+              <span class="source-dot"></span> Houzz
+            </div>
+            <div class="source-pill selected" id="src-sortlist" onclick="toggleSource('sortlist')" title="Directorio de agencias y estudios">
+              <span class="source-dot"></span> Sortlist
+            </div>
+            <div class="source-pill selected" id="src-webs" onclick="toggleSource('webs')" title="Extrae email, tel y redes de la web propia del negocio">
+              <span class="source-dot"></span> Webs propias
+            </div>
+            <div class="source-pill" id="src-linkedin" onclick="toggleSource('linkedin')" title="Vía Google dork — limitado pero estable">
+              <span class="source-dot"></span> LinkedIn <span style="font-size:10px;opacity:0.6">beta</span>
+            </div>
+            <div class="source-pill" id="src-instagram" onclick="toggleSource('instagram')" title="Vía Google dork — limitado pero estable">
+              <span class="source-dot"></span> Instagram <span style="font-size:10px;opacity:0.6">beta</span>
+            </div>
+          </div>
+          <div style="margin-top:10px;font-size:12px;color:var(--text3)">
+            💡 LinkedIn e Instagram usan búsqueda indirecta vía Google — resultados limitados pero sin bloqueos.
+          </div>
+        </div>
+
+        <button class="btn-launch" id="btn-launch" onclick="launchScraping()" disabled>
+          <span>⚡</span>
+          <span id="launch-label">Lanzar scraping</span>
+          <div class="spinner" id="launch-spinner"></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── PAGE: RESULTS ── -->
+    <div class="page" id="page-results">
+      <div class="page-header">
+        <h1 class="page-title">Scraping <span>en curso</span></h1>
+        <p class="page-sub" id="results-sub">Buscando leads en las fuentes seleccionadas…</p>
+      </div>
+
+      <div class="card" style="margin-bottom:20px">
+        <div class="progress-wrap">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+          </div>
+          <div class="progress-meta">
+            <span id="progress-stage">Inicializando…</span>
+            <span class="progress-pct" id="progress-pct">0%</span>
+          </div>
+        </div>
+        <div class="log-terminal" id="log-terminal"></div>
+      </div>
+
+      <div id="results-done" style="display:none">
+        <div class="results-summary">
+          <div class="result-stat total">
+            <span class="n" id="res-total">0</span>
+            <span class="lbl">Total leads</span>
+          </div>
+          <div class="result-stat alta">
+            <span class="n" id="res-alta">0</span>
+            <span class="lbl">🟢 Calidad alta</span>
+          </div>
+          <div class="result-stat media">
+            <span class="n" id="res-media">0</span>
+            <span class="lbl">🟡 Calidad media</span>
+          </div>
+          <div class="result-stat baja">
+            <span class="n" id="res-baja">0</span>
+            <span class="lbl">🔴 Calidad baja</span>
+          </div>
+        </div>
+        <button class="btn-download" onclick="downloadExcel()">
+          <span>📥</span> Descargar Excel de leads
+        </button>
+        <button class="btn-new" onclick="newSearch()">← Nueva búsqueda</button>
+      </div>
+    </div>
+
+    <!-- ── PAGE: HISTORIAL ── -->
+    <div class="page" id="page-historial">
+      <div class="page-header">
+        <h1 class="page-title">Historial de <span>búsquedas</span></h1>
+        <p class="page-sub">Descarga de nuevo cualquier Excel generado anteriormente.</p>
+      </div>
+      <div class="history-list" id="history-list">
+        <div class="empty-state">
+          <div class="emoji">📋</div>
+          <p>Aún no tienes búsquedas guardadas.<br>Lanza tu primera búsqueda para verla aquí.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PAGE: CUENTA ── -->
+    <div class="page" id="page-cuenta">
+      <div class="page-header">
+        <h1 class="page-title">Mi <span>cuenta</span></h1>
+        <p class="page-sub">Gestiona tu suscripción y datos de acceso.</p>
+      </div>
+
+      <div class="cuenta-grid">
+        <!-- Plan card -->
+        <div class="plan-card">
+          <div class="plan-name">Plan Pro</div>
+          <div class="plan-price">99€ <span>/mes</span></div>
+          <div class="plan-renewal">Próxima renovación: <span id="renewal-date">—</span></div>
+          <ul class="plan-features">
+            <li>Búsquedas ilimitadas</li>
+            <li>Google Maps + 3 directorios</li>
+            <li>Todos los sectores disponibles</li>
+            <li>Excel profesional con categorías</li>
+            <li>Scoring de calidad automático</li>
+            <li>Deduplicación inteligente</li>
+          </ul>
+        </div>
+
+        <!-- Info card -->
+        <div class="card">
+          <div class="card-title">Información de cuenta</div>
+          <div class="info-row">
+            <span class="key">Email</span>
+            <span class="val" id="cuenta-email">—</span>
+          </div>
+          <div class="info-row">
+            <span class="key">Estado</span>
+            <span class="val"><span class="tag active" id="cuenta-estado">Activo</span></span>
+          </div>
+          <div class="info-row">
+            <span class="key">Búsquedas realizadas</span>
+            <span class="val" id="cuenta-searches">0</span>
+          </div>
+          <div class="info-row">
+            <span class="key">Miembro desde</span>
+            <span class="val" id="cuenta-desde">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="danger-zone">
+        <div class="danger-title">Cancelar suscripción</div>
+        <div class="danger-sub">Al cancelar mantendrás el acceso hasta el final del período de facturación actual. No se realizarán más cargos.</div>
+        <button class="btn-danger" onclick="cancelSubscription()">Cancelar suscripción</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══════════════════════════════
+     SUPABASE + LÓGICA
+══════════════════════════════ -->
+<script>
+// ══════════════════════════════════════════
+// CONFIGURACIÓN — reemplaza con tus valores
+// ══════════════════════════════════════════
+const SUPABASE_URL  = 'https://TU_PROJECT_REF.supabase.co';
+const SUPABASE_ANON = 'TU_ANON_KEY';
+// URL de la Edge Function que ejecuta el scraping (Sesión 3)
+const SCRAPER_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/leadforge-scraper`;
+
+// ── Supabase minimal client ──────────────
+const sb = {
+  async req(path, opts = {}) {
+    const r = await fetch(SUPABASE_URL + path, {
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Content-Type': 'application/json',
+        ...(this._token ? { 'Authorization': `Bearer ${this._token}` } : {}),
+        ...opts.headers
+      },
+      ...opts
+    });
+    return r;
+  },
+  async signIn(email, password) {
+    const r = await this.req('/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+    const d = await r.json();
+    if (d.access_token) {
+      this._token = d.access_token;
+      localStorage.setItem('lf_session', JSON.stringify(d));
+    }
+    return d;
+  },
+  async updatePassword(password) {
+    const r = await this.req('/auth/v1/user', {
+      method: 'PUT',
+      body: JSON.stringify({ password })
+    });
+    return r.json();
+  },
+  async getUser() {
+    const r = await this.req('/auth/v1/user');
+    return r.ok ? r.json() : null;
+  },
+  async getProfile(userId) {
+    const r = await this.req(`/rest/v1/profiles?id=eq.${userId}&select=*`);
+    const d = await r.json();
+    return Array.isArray(d) ? d[0] : null;
+  },
+  signOut() {
+    this._token = null;
+    localStorage.removeItem('lf_session');
+  },
+  loadSession() {
+    const s = localStorage.getItem('lf_session');
+    if (s) {
+      const d = JSON.parse(s);
+      this._token = d.access_token;
+      return d;
+    }
+    return null;
+  }
+};
+
+// ════════════════════════════════
+// ESTADO GLOBAL
+// ════════════════════════════════
+let appState = {
+  user: null,
+  profile: null,
+  searches: JSON.parse(localStorage.getItem('lf_history') || '[]'),
+  currentSearch: null
+};
+
+// ════════════════════════════════
+// CATEGORÍAS POR SECTOR
+// ════════════════════════════════
+const SECTORES = {
+  construccion: [
+    { id: 'reformistas',   emoji: '🔨', label: 'Reformistas' },
+    { id: 'constructoras', emoji: '🏗️', label: 'Constructoras' },
+    { id: 'arquitectos',   emoji: '📐', label: 'Arquitectos' },
+    { id: 'interioristas', emoji: '🛋️', label: 'Interioristas' },
+    { id: 'decoradores',   emoji: '🎨', label: 'Decoradores' },
+    { id: 'materiales',    emoji: '🏪', label: 'Tiendas materiales' },
+    { id: 'coliving',      emoji: '🏢', label: 'Co-living / Co-working' },
+    { id: 'gimnasios',     emoji: '💪', label: 'Gimnasios / Fitness' },
+    { id: 'hosteleria',    emoji: '🍽️', label: 'Hoteles / Bares / Restaurantes' },
+  ]
+};
+
+// ════════════════════════════════
+// INIT
+// ════════════════════════════════
+window.addEventListener('DOMContentLoaded', async () => {
+  // Detectar token mágico en URL
+  const hash = window.location.hash;
+  if (hash.includes('access_token') && hash.includes('type=recovery')) {
+    const params = new URLSearchParams(hash.slice(1));
+    const token = params.get('access_token');
+    sb._token = token;
+    showScreen('setpass');
+    window.history.replaceState(null, '', window.location.pathname);
+    return;
+  }
+
+  // Intentar sesión guardada
+  const session = sb.loadSession();
+  if (session && session.access_token) {
+    sb._token = session.access_token;
+    const user = await sb.getUser();
+    if (user && user.id) {
+      await loadApp(user);
+      return;
+    }
+  }
+
+  showScreen('login');
+});
+
+// ════════════════════════════════
+// NAVEGACIÓN DE SCREENS
+// ════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + name);
+  if (el) el.classList.add('active');
+}
+
+// ════════════════════════════════
+// LOGIN
+// ════════════════════════════════
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const err   = document.getElementById('login-error');
+  const btn   = document.getElementById('btn-login');
+  const lbl   = document.getElementById('login-label');
+  const spin  = document.getElementById('login-spinner');
+
+  err.classList.remove('show');
+  if (!email || !pass) { showAlert(err, 'Rellena todos los campos.'); return; }
+
+  btn.disabled = true; lbl.style.display = 'none'; spin.style.display = 'block';
+
+  // MODO DEMO — eliminar cuando Supabase esté configurado
+  if (SUPABASE_URL.includes('TU_PROJECT')) {
+    await delay(1000);
+    await loadApp({ id: 'demo', email: email, created_at: new Date().toISOString() }, { plan: 'pro' });
+    return;
+  }
+
+  const data = await sb.signIn(email, pass);
+  btn.disabled = false; lbl.style.display = 'inline'; spin.style.display = 'none';
+
+  if (data.access_token) {
+    const user = await sb.getUser();
+    await loadApp(user);
+  } else {
+    showAlert(err, data.error_description || 'Email o contraseña incorrectos.');
+  }
+}
+
+document.getElementById('login-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ════════════════════════════════
+// SET PASSWORD
+// ════════════════════════════════
+async function doSetPassword() {
+  const pass1 = document.getElementById('new-pass').value;
+  const pass2 = document.getElementById('confirm-pass').value;
+  const err  = document.getElementById('setpass-error');
+  const ok   = document.getElementById('setpass-success');
+  const btn  = document.getElementById('btn-setpass');
+  const lbl  = document.getElementById('setpass-label');
+  const spin = document.getElementById('setpass-spinner');
+
+  err.classList.remove('show'); ok.classList.remove('show');
+  if (!pass1 || pass1.length < 6) { showAlert(err, 'La contraseña debe tener al menos 6 caracteres.'); return; }
+  if (pass1 !== pass2) { showAlert(err, 'Las contraseñas no coinciden.'); return; }
+
+  btn.disabled = true; lbl.style.display = 'none'; spin.style.display = 'block';
+
+  if (SUPABASE_URL.includes('TU_PROJECT')) {
+    await delay(1000);
+    showAlert(ok, '¡Cuenta activada! Entrando al panel…');
+    await delay(1200);
+    await loadApp({ id: 'demo', email: 'demo@leadforge.es', created_at: new Date().toISOString() }, { plan: 'pro' });
+    return;
+  }
+
+  const data = await sb.updatePassword(pass1);
+  btn.disabled = false; lbl.style.display = 'inline'; spin.style.display = 'none';
+
+  if (data.id) {
+    showAlert(ok, '¡Contraseña creada! Entrando al panel…');
+    setTimeout(async () => {
+      const user = await sb.getUser();
+      await loadApp(user);
+    }, 1500);
+  } else {
+    showAlert(err, 'Error al guardar la contraseña. Inténtalo de nuevo.');
+  }
+}
+
+// ════════════════════════════════
+// CARGAR APP
+// ════════════════════════════════
+async function loadApp(user, profileOverride) {
+  appState.user = user;
+
+  let profile = profileOverride;
+  if (!profile && !SUPABASE_URL.includes('TU_PROJECT')) {
+    profile = await sb.getProfile(user.id);
+  }
+  appState.profile = profile || { plan: 'pro' };
+
+  // Poblar UI
+  const email    = user.email || '';
+  const initial  = email.charAt(0).toUpperCase();
+  const planStr  = (appState.profile.plan || 'pro').toUpperCase();
+  const since    = new Date(user.created_at).toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' });
+  const renewal  = new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' });
+
+  document.getElementById('sidebar-avatar').textContent = initial;
+  document.getElementById('sidebar-email').textContent  = email;
+  document.getElementById('sidebar-plan').textContent   = planStr;
+  document.getElementById('stat-plan').innerHTML        = `${planStr} <span style="font-size:11px">✓ activo</span>`;
+  document.getElementById('cuenta-email').textContent   = email;
+  document.getElementById('cuenta-desde').textContent   = since;
+  document.getElementById('renewal-date').textContent   = renewal;
+
+  // Stats locales
+  updateStats();
+  renderHistory();
+
+  showScreen('app');
+  showPage('dashboard');
+}
+
+// ════════════════════════════════
+// LOGOUT
+// ════════════════════════════════
+function doLogout() {
+  sb.signOut();
+  appState = { user: null, profile: null, searches: appState.searches, currentSearch: null };
+  showScreen('login');
+}
+
+// ════════════════════════════════
+// NAVEGACIÓN DE PÁGINAS
+// ════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('page-' + name);
+  const nav  = document.getElementById('nav-' + name);
+  if (page) page.classList.add('active');
+  if (nav)  nav.classList.add('active');
+}
+
+// ════════════════════════════════
+// FORMULARIO — SECTOR / CATS
+// ════════════════════════════════
+function updateCategories() {
+  const sector = document.getElementById('select-sector').value;
+  const wrap   = document.getElementById('cats-wrap');
+  const grid   = document.getElementById('cats-grid');
+  const btn    = document.getElementById('btn-launch');
+
+  grid.innerHTML = '';
+  if (!sector || !SECTORES[sector]) {
+    wrap.style.display = 'none';
+    btn.disabled = true;
+    return;
+  }
+
+  wrap.style.display = 'block';
+  SECTORES[sector].forEach(cat => {
+    const pill = document.createElement('div');
+    pill.className = 'cat-pill selected';
+    pill.id = 'cat-' + cat.id;
+    pill.innerHTML = `<div class="cat-check">✓</div><span>${cat.emoji} ${cat.label}</span>`;
+    pill.onclick = () => toggleCat(cat.id);
+    grid.appendChild(pill);
+  });
+
+  checkLaunchReady();
+}
+
+function toggleCat(id) {
+  const el = document.getElementById('cat-' + id);
+  el.classList.toggle('selected');
+  const check = el.querySelector('.cat-check');
+  check.textContent = el.classList.contains('selected') ? '✓' : '';
+  checkLaunchReady();
+}
+
+function toggleAllCats() {
+  const sector = document.getElementById('select-sector').value;
+  if (!sector || !SECTORES[sector]) return;
+  const cats = SECTORES[sector];
+  const allSelected = cats.every(c => document.getElementById('cat-' + c.id)?.classList.contains('selected'));
+  cats.forEach(c => {
+    const el = document.getElementById('cat-' + c.id);
+    if (!el) return;
+    if (allSelected) {
+      el.classList.remove('selected');
+      el.querySelector('.cat-check').textContent = '';
+    } else {
+      el.classList.add('selected');
+      el.querySelector('.cat-check').textContent = '✓';
+    }
+  });
+  checkLaunchReady();
+}
+
+function toggleSource(id) {
+  document.getElementById('src-' + id).classList.toggle('selected');
+}
+
+function checkLaunchReady() {
+  const sector  = document.getElementById('select-sector').value;
+  const ciudad  = document.getElementById('select-ciudad').value;
+  const cats    = SECTORES[sector] || [];
+  const hasCat  = cats.some(c => document.getElementById('cat-' + c.id)?.classList.contains('selected'));
+  document.getElementById('btn-launch').disabled = !(sector && ciudad && hasCat);
+}
+
+document.getElementById('select-ciudad').addEventListener('change', checkLaunchReady);
+
+// ════════════════════════════════
+// LANZAR SCRAPING (simulado)
+// Cuando esté lista la Edge Function
+// de Supabase, aquí se hace el fetch real
+// ════════════════════════════════
+async function launchScraping() {
+  const sector = document.getElementById('select-sector').value;
+  const ciudad = document.getElementById('select-ciudad').value;
+  const cats   = (SECTORES[sector] || [])
+    .filter(c => document.getElementById('cat-' + c.id)?.classList.contains('selected'))
+    .map(c => c.label);
+
+  const sources = ['googlemaps','habitissimo','paginasamarillas','houzz']
+    .filter(s => document.getElementById('src-' + s)?.classList.contains('selected'));
+
+  appState.currentSearch = { sector, ciudad, cats, sources };
+
+  showPage('results');
+  document.querySelector('#nav-dashboard').classList.add('active');
+
+  // Reset UI resultados
+  document.getElementById('results-done').style.display = 'none';
+  document.getElementById('page-results').querySelector('.page-title').innerHTML = 'Scraping <span>en curso</span>';
+  document.getElementById('results-sub').textContent = 'Buscando leads en las fuentes seleccionadas…';
+  document.getElementById('log-terminal').innerHTML = '';
+  setProgress(0, 'Inicializando…');
+
+  await runScrapingDemo(sector, ciudad, cats, sources);
+}
+
+// Simulación — reemplazar por fetch a Edge Function en Sesión 3
+async function runScrapingDemo(sector, ciudad, cats, sources) {
+  const log = document.getElementById('log-terminal');
+
+  const addLog = (msg, type = 'info') => {
+    const ts = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const line = document.createElement('span');
+    line.className = `log-line ${type}`;
+    line.innerHTML = `<span class="ts">[${ts}]</span><span class="msg">${msg}</span>`;
+    log.appendChild(line);
+    log.appendChild(document.createElement('br'));
+    log.scrollTop = log.scrollHeight;
+  };
+
+  addLog(`▶ Iniciando LeadForge — ${sector} en ${ciudad}`, 'accent');
+  addLog(`Categorías seleccionadas: ${cats.length}`, 'info');
+  addLog(`Fuentes activas: ${sources.join(', ')}`, 'info');
+  await delay(600);
+
+  setProgress(10, 'Conectando con Google Maps API…');
+  addLog('✓ Google Maps Places API — conexión OK', 'ok');
+  await delay(800);
+
+  let leadsCount = 0;
+  for (let i = 0; i < cats.length; i++) {
+    const cat = cats[i];
+    const pct = 15 + Math.round((i / cats.length) * 55);
+    setProgress(pct, `Buscando: ${cat}…`);
+    addLog(`⚡ Scraping "${cat}" en ${ciudad}…`, 'info');
+    await delay(500 + Math.random() * 400);
+    const found = 12 + Math.floor(Math.random() * 30);
+    leadsCount += found;
+    addLog(`✓ ${found} leads encontrados en "${cat}"`, 'ok');
+  }
+
+  setProgress(75, 'Consultando directorios…');
+  addLog('⚡ Buscando en Habitissimo…', 'info');
+  await delay(700);
+  const habLeads = 8 + Math.floor(Math.random() * 20);
+  leadsCount += habLeads;
+  addLog(`✓ ${habLeads} leads en Habitissimo`, 'ok');
+
+  addLog('⚡ Buscando en Páginas Amarillas…', 'info');
+  await delay(600);
+  const paLeads = 5 + Math.floor(Math.random() * 15);
+  leadsCount += paLeads;
+  addLog(`✓ ${paLeads} leads en Páginas Amarillas`, 'ok');
+
+  setProgress(88, 'Deduplicando resultados…');
+  await delay(500);
+  const dupes = Math.floor(leadsCount * 0.12);
+  addLog(`✓ ${dupes} duplicados eliminados`, 'ok');
+  leadsCount -= dupes;
+
+  setProgress(95, 'Calculando calidad de leads…');
+  await delay(400);
+  addLog('✓ Scoring de calidad aplicado', 'ok');
+
+  setProgress(100, '¡Completado!');
+  await delay(400);
+  addLog(`✅ ${leadsCount} leads listos para descargar`, 'ok');
+
+  // Resultados
+  const alta  = Math.floor(leadsCount * 0.35);
+  const media = Math.floor(leadsCount * 0.45);
+  const baja  = leadsCount - alta - media;
+
+  document.getElementById('res-total').textContent = leadsCount;
+  document.getElementById('res-alta').textContent  = alta;
+  document.getElementById('res-media').textContent = media;
+  document.getElementById('res-baja').textContent  = baja;
+
+  document.getElementById('page-results').querySelector('.page-title').innerHTML = 'Scraping <span>completado</span>';
+  document.getElementById('results-sub').textContent = `${leadsCount} leads listos para descargar en Excel.`;
+  document.getElementById('results-done').style.display = 'block';
+
+  // Guardar en historial
+  const entry = {
+    id: Date.now(),
+    sector, ciudad,
+    cats: cats.length,
+    total: leadsCount,
+    alta, media, baja,
+    date: new Date().toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' })
+  };
+  appState.searches.unshift(entry);
+  localStorage.setItem('lf_history', JSON.stringify(appState.searches.slice(0, 50)));
+  updateStats();
+}
+
+function setProgress(pct, stage) {
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent  = pct + '%';
+  document.getElementById('progress-stage').textContent = stage;
+}
+
+// ════════════════════════════════
+// DESCARGA EXCEL (placeholder)
+// En Sesión 3 se genera desde la Edge Function
+// ════════════════════════════════
+function downloadExcel() {
+  alert('El Excel se generará desde el servidor cuando la Edge Function de Supabase esté lista (Sesión 3).\n\nPor ahora puedes generar el Excel ejecutando el scraper Python localmente con:\n\npython main.py');
+}
+
+function newSearch() {
+  showPage('dashboard');
+  document.getElementById('nav-dashboard').classList.add('active');
+}
+
+// ════════════════════════════════
+// HISTORIAL
+// ════════════════════════════════
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  const searches = appState.searches;
+
+  if (!searches.length) {
+    list.innerHTML = `<div class="empty-state"><div class="emoji">📋</div><p>Aún no tienes búsquedas guardadas.<br>Lanza tu primera búsqueda para verla aquí.</p></div>`;
+    return;
+  }
+
+  const icons = { construccion: '🏗️' };
+  list.innerHTML = searches.map(s => `
+    <div class="history-item">
+      <div class="history-icon">${icons[s.sector] || '📋'}</div>
+      <div class="history-info">
+        <div class="history-name">${s.sector} — ${s.ciudad}</div>
+        <div class="history-meta">${s.cats} categorías · ${s.date}</div>
+      </div>
+      <div class="history-leads">${s.total} leads</div>
+      <button class="btn-redownload" onclick="alert('Disponible en Sesión 3 con Edge Function')">📥 Excel</button>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════
+// STATS
+// ════════════════════════════════
+function updateStats() {
+  const searches = appState.searches;
+  const thisMonth = searches.filter(s => new Date(s.id) > new Date(Date.now() - 30*24*60*60*1000));
+  const totalLeads = searches.reduce((a, s) => a + (s.total || 0), 0);
+
+  document.getElementById('stat-searches').innerHTML = `${thisMonth.length} <span>búsquedas</span>`;
+  document.getElementById('stat-leads').innerHTML    = `${totalLeads} <span>leads</span>`;
+  document.getElementById('cuenta-searches').textContent = searches.length;
+
+  renderHistory();
+}
+
+// ════════════════════════════════
+// CUENTA
+// ════════════════════════════════
+function cancelSubscription() {
+  if (confirm('¿Seguro que quieres cancelar tu suscripción?\n\nMantendrás el acceso hasta el final del período de facturación.')) {
+    alert('Para cancelar, accede a tu panel de Stripe o escríbenos a hola@leadforge.es');
+  }
+}
+
+// ════════════════════════════════
+// UTILS
+// ════════════════════════════════
+function showAlert(el, msg) {
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>
