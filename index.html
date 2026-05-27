@@ -1195,10 +1195,10 @@
 // ══════════════════════════════════════════
 // CONFIGURACIÓN — reemplaza con tus valores
 // ══════════════════════════════════════════
-const SUPABASE_URL  = 'https://TU_PROJECT_REF.supabase.co';
-const SUPABASE_ANON = 'TU_ANON_KEY';
-// URL de la Edge Function que ejecuta el scraping (Sesión 3)
-const SCRAPER_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/leadforge-scraper`;
+const SUPABASE_URL  = 'https://erlbzbwlrrcoeiphzozm.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_hScYuPWr3THMPToUzcLUmQ_ji64-g4Z';
+// URL de la API Railway — Sesión 3
+const SCRAPER_API_URL = 'https://web-production-e1dec.up.railway.app';
 
 // ── Supabase minimal client ──────────────
 const sb = {
@@ -1264,7 +1264,8 @@ let appState = {
   user: null,
   profile: null,
   searches: JSON.parse(localStorage.getItem('lf_history') || '[]'),
-  currentSearch: null
+  currentSearch: null,
+  currentJobId: null
 };
 
 // ════════════════════════════════
@@ -1527,41 +1528,51 @@ function checkLaunchReady() {
 document.getElementById('select-ciudad').addEventListener('change', checkLaunchReady);
 
 // ════════════════════════════════
-// LANZAR SCRAPING (simulado)
-// Cuando esté lista la Edge Function
-// de Supabase, aquí se hace el fetch real
+// ════════════════════════════════
+// LANZAR SCRAPING — API Railway real
 // ════════════════════════════════
 async function launchScraping() {
   const sector = document.getElementById('select-sector').value;
   const ciudad = document.getElementById('select-ciudad').value;
   const cats   = (SECTORES[sector] || [])
     .filter(c => document.getElementById('cat-' + c.id)?.classList.contains('selected'))
-    .map(c => c.label);
+    .map(c => c.id);
 
-  const sources = ['googlemaps','habitissimo','paginasamarillas','houzz']
-    .filter(s => document.getElementById('src-' + s)?.classList.contains('selected'));
+  // Mapeo de IDs de fuentes del frontend a IDs del backend
+  const srcMap = {
+    'googlemaps':      'google_maps',
+    'habitissimo':     'habitissimo',
+    'paginasamarillas':'paginas_amarillas',
+    'houzz':           'houzz',
+    'sortlist':        'sortlist',
+    'webspropias':     'webs_propias',
+    'linkedin':        'linkedin',
+    'instagram':       'instagram',
+  };
+  const sources = Object.keys(srcMap)
+    .filter(s => document.getElementById('src-' + s)?.classList.contains('selected'))
+    .map(s => srcMap[s]);
 
   appState.currentSearch = { sector, ciudad, cats, sources };
+  appState.currentJobId  = null;
 
   showPage('results');
   document.querySelector('#nav-dashboard').classList.add('active');
 
-  // Reset UI resultados
+  // Reset UI
   document.getElementById('results-done').style.display = 'none';
   document.getElementById('page-results').querySelector('.page-title').innerHTML = 'Scraping <span>en curso</span>';
   document.getElementById('results-sub').textContent = 'Buscando leads en las fuentes seleccionadas…';
   document.getElementById('log-terminal').innerHTML = '';
-  setProgress(0, 'Inicializando…');
+  setProgress(0, 'Conectando con el servidor…');
 
-  await runScrapingDemo(sector, ciudad, cats, sources);
+  await runScrapingReal(sector, ciudad, cats, sources);
 }
 
-// Simulación — reemplazar por fetch a Edge Function en Sesión 3
-async function runScrapingDemo(sector, ciudad, cats, sources) {
-  const log = document.getElementById('log-terminal');
-
+async function runScrapingReal(sector, ciudad, cats, sources) {
   const addLog = (msg, type = 'info') => {
-    const ts = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const log = document.getElementById('log-terminal');
+    const ts  = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const line = document.createElement('span');
     line.className = `log-line ${type}`;
     line.innerHTML = `<span class="ts">[${ts}]</span><span class="msg">${msg}</span>`;
@@ -1570,80 +1581,82 @@ async function runScrapingDemo(sector, ciudad, cats, sources) {
     log.scrollTop = log.scrollHeight;
   };
 
-  addLog(`▶ Iniciando LeadForge — ${sector} en ${ciudad}`, 'accent');
-  addLog(`Categorías seleccionadas: ${cats.length}`, 'info');
-  addLog(`Fuentes activas: ${sources.join(', ')}`, 'info');
-  await delay(600);
+  try {
+    // 1 — Lanzar job
+    addLog('▶ Conectando con LeadForge API…', 'accent');
+    const launchRes = await fetch(`${SCRAPER_API_URL}/scrape`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sector, ciudad, categorias: cats, fuentes: sources })
+    });
 
-  setProgress(10, 'Conectando con Google Maps API…');
-  addLog('✓ Google Maps Places API — conexión OK', 'ok');
-  await delay(800);
+    if (!launchRes.ok) {
+      throw new Error(`Error al lanzar el scraping: ${launchRes.status}`);
+    }
 
-  let leadsCount = 0;
-  for (let i = 0; i < cats.length; i++) {
-    const cat = cats[i];
-    const pct = 15 + Math.round((i / cats.length) * 55);
-    setProgress(pct, `Buscando: ${cat}…`);
-    addLog(`⚡ Scraping "${cat}" en ${ciudad}…`, 'info');
-    await delay(500 + Math.random() * 400);
-    const found = 12 + Math.floor(Math.random() * 30);
-    leadsCount += found;
-    addLog(`✓ ${found} leads encontrados en "${cat}"`, 'ok');
+    const { job_id } = await launchRes.json();
+    appState.currentJobId = job_id;
+    addLog(`✓ Job iniciado (${job_id.slice(0, 8)}…)`, 'ok');
+
+    // 2 — Polling cada 2s
+    let lastLogCount = 0;
+    while (true) {
+      await delay(2000);
+
+      const statusRes = await fetch(`${SCRAPER_API_URL}/status/${job_id}`);
+      if (!statusRes.ok) { addLog('⚠️ Error consultando estado…', 'warn'); continue; }
+
+      const data = await statusRes.json();
+
+      // Mostrar logs nuevos
+      const newLogs = data.logs.slice(lastLogCount);
+      lastLogCount = data.logs.length;
+      for (const line of newLogs) {
+        const tipo = line.includes('✅') ? 'ok' : line.includes('❌') ? 'error' : line.includes('✓') ? 'ok' : 'info';
+        addLog(line.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/, ''), tipo);
+      }
+
+      // Actualizar progreso
+      setProgress(data.progress, data.logs.at(-1)?.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/, '') || '');
+
+      if (data.status === 'done') {
+        const r = data.result;
+        document.getElementById('res-total').textContent = r.total;
+        document.getElementById('res-alta').textContent  = r.alta;
+        document.getElementById('res-media').textContent = r.media;
+        document.getElementById('res-baja').textContent  = r.baja;
+
+        document.getElementById('page-results').querySelector('.page-title').innerHTML = 'Scraping <span>completado</span>';
+        document.getElementById('results-sub').textContent = `${r.total} leads listos para descargar en Excel.`;
+        document.getElementById('results-done').style.display = 'block';
+
+        // Guardar en historial
+        const entry = {
+          id: Date.now(),
+          job_id,
+          sector, ciudad,
+          cats: cats.length,
+          total: r.total,
+          alta: r.alta, media: r.media, baja: r.baja,
+          date: new Date().toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' })
+        };
+        appState.searches.unshift(entry);
+        localStorage.setItem('lf_history', JSON.stringify(appState.searches.slice(0, 50)));
+        updateStats();
+        break;
+      }
+
+      if (data.status === 'error') {
+        addLog(`❌ Error: ${data.error}`, 'error');
+        setProgress(0, 'Error — intenta de nuevo');
+        break;
+      }
+    }
+
+  } catch (err) {
+    addLog(`❌ ${err.message}`, 'error');
+    setProgress(0, 'Error de conexión');
   }
-
-  setProgress(75, 'Consultando directorios…');
-  addLog('⚡ Buscando en Habitissimo…', 'info');
-  await delay(700);
-  const habLeads = 8 + Math.floor(Math.random() * 20);
-  leadsCount += habLeads;
-  addLog(`✓ ${habLeads} leads en Habitissimo`, 'ok');
-
-  addLog('⚡ Buscando en Páginas Amarillas…', 'info');
-  await delay(600);
-  const paLeads = 5 + Math.floor(Math.random() * 15);
-  leadsCount += paLeads;
-  addLog(`✓ ${paLeads} leads en Páginas Amarillas`, 'ok');
-
-  setProgress(88, 'Deduplicando resultados…');
-  await delay(500);
-  const dupes = Math.floor(leadsCount * 0.12);
-  addLog(`✓ ${dupes} duplicados eliminados`, 'ok');
-  leadsCount -= dupes;
-
-  setProgress(95, 'Calculando calidad de leads…');
-  await delay(400);
-  addLog('✓ Scoring de calidad aplicado', 'ok');
-
-  setProgress(100, '¡Completado!');
-  await delay(400);
-  addLog(`✅ ${leadsCount} leads listos para descargar`, 'ok');
-
-  // Resultados
-  const alta  = Math.floor(leadsCount * 0.35);
-  const media = Math.floor(leadsCount * 0.45);
-  const baja  = leadsCount - alta - media;
-
-  document.getElementById('res-total').textContent = leadsCount;
-  document.getElementById('res-alta').textContent  = alta;
-  document.getElementById('res-media').textContent = media;
-  document.getElementById('res-baja').textContent  = baja;
-
-  document.getElementById('page-results').querySelector('.page-title').innerHTML = 'Scraping <span>completado</span>';
-  document.getElementById('results-sub').textContent = `${leadsCount} leads listos para descargar en Excel.`;
-  document.getElementById('results-done').style.display = 'block';
-
-  // Guardar en historial
-  const entry = {
-    id: Date.now(),
-    sector, ciudad,
-    cats: cats.length,
-    total: leadsCount,
-    alta, media, baja,
-    date: new Date().toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' })
-  };
-  appState.searches.unshift(entry);
-  localStorage.setItem('lf_history', JSON.stringify(appState.searches.slice(0, 50)));
-  updateStats();
 }
 
 function setProgress(pct, stage) {
@@ -1656,8 +1669,14 @@ function setProgress(pct, stage) {
 // DESCARGA EXCEL (placeholder)
 // En Sesión 3 se genera desde la Edge Function
 // ════════════════════════════════
-function downloadExcel() {
+function downloadExcel_OLD_REPLACED() {
   alert('El Excel se generará desde el servidor cuando la Edge Function de Supabase esté lista (Sesión 3).\n\nPor ahora puedes generar el Excel ejecutando el scraper Python localmente con:\n\npython main.py');
+}
+
+function downloadExcel() {
+  const jobId = appState.currentJobId;
+  if (!jobId) { alert('No hay ningún scraping completado. Lanza una búsqueda primero.'); return; }
+  window.open(`${SCRAPER_API_URL}/download/${jobId}`, '_blank');
 }
 
 function newSearch() {
