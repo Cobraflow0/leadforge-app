@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadForge — Genera leads B2B en automático</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #04080F;
+    --bg2: #0A1220;
+    --bg3: #0F1A2E;
+    --cyan: #00C8FF;
+    --cyan2: #00A3D4;
+    --text: #E8EDF5;
+    --muted: #7A8BA0;
+    --border: rgba(0,200,255,0.12);
+    --card: rgba(255,255,255,0.03);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 6%;
+    background: rgba(4,8,15,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px; font-weight: 800;
+    color: var(--text);
+    text-decoration: none;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .logo span { color: var(--cyan); }
+  .nav-cta {
+    background: var(--cyan);
+    color: #04080F;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 10px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .nav-cta:hover { background: var(--cyan2); transform: translateY(-1px); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 120px 6% 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(0,200,255,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,200,255,0.08);
+    border: 1px solid rgba(0,200,255,0.2);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 13px; font-weight: 500; color: var(--cyan);
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-badge::before { content: '⚡'; }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(40px, 7vw, 80px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--cyan);
+  }
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 20px);
+    color: var(--muted);
+    max-width: 560px;
+    margin: 0 auto 48px;
+    font-weight: 300;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+  .hero-actions {
+    display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--cyan);
+    color: #04080F;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 16px;
+    padding: 16px 36px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 0 40px rgba(0,200,255,0.25);
+  }
+  .btn-primary:hover {
+    background: var(--cyan2);
+    transform: translateY(-2px);
+    box-shadow: 0 0 60px rgba(0,200,255,0.35);
+  }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 15px; font-weight: 400;
+    padding: 16px 28px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-secondary:hover { border-color: rgba(0,200,255,0.3); color: var(--text); }
+
+  /* STATS BAR */
+  .stats {
+    display: flex; justify-content: center; gap: 60px; flex-wrap: wrap;
+    padding: 60px 6%;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px; font-weight: 800;
+    color: var(--cyan);
+    display: block;
+  }
+  .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* SECTION */
+  section { padding: 100px 6%; }
+  .section-tag {
+    font-size: 12px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 16px;
+  }
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 800; line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 20px;
+  }
+  h2 em { font-style: normal; color: var(--cyan); }
+  .section-sub { color: var(--muted); font-size: 17px; max-width: 500px; line-height: 1.7; }
+
+  /* HOW IT WORKS */
+  .how { background: var(--bg2); }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2px;
+    margin-top: 60px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .step {
+    background: var(--card);
+    padding: 40px 32px;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .step:hover { background: rgba(0,200,255,0.04); }
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 48px; font-weight: 800;
+    color: rgba(0,200,255,0.12);
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+  .step h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px; font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .step p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+  /* FUENTES GRID */
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-top: 60px;
+  }
+  .source-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 20px;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .source-card:hover { border-color: rgba(0,200,255,0.3); transform: translateY(-2px); }
+  .source-icon { font-size: 24px; margin-bottom: 12px; }
+  .source-card h4 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .source-card p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* EXCEL PREVIEW */
+  .excel-preview {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-top: 60px;
+  }
+  .excel-header {
+    background: rgba(0,200,255,0.06);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .excel-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .excel-title { font-size: 13px; color: var(--muted); margin-left: auto; }
+  .excel-table { width: 100%; border-collapse: collapse; font-size: 13px; overflow: hidden; }
+  .excel-table th {
+    background: rgba(0,200,255,0.05);
+    padding: 10px 16px;
+    text-align: left; font-weight: 500; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .excel-table td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+  .excel-table tr:last-child td { border-bottom: none; }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 100px;
+    font-size: 11px; font-weight: 500;
+  }
+  .badge-alta { background: rgba(0,229,160,0.12); color: #00E5A0; }
+  .badge-media { background: rgba(255,217,61,0.12); color: #FFD93D; }
+
+  /* PRICING */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 60px;
+    max-width: 700px;
+    margin-left: auto; margin-right: auto;
+  }
+  .price-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 36px;
+    position: relative;
+    transition: transform 0.15s;
+  }
+  .price-card.featured {
+    border-color: var(--cyan);
+    box-shadow: 0 0 60px rgba(0,200,255,0.1);
+  }
+  .price-card:hover { transform: translateY(-4px); }
+  .price-tag {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--cyan); color: #04080F;
+    font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+    padding: 4px 16px; border-radius: 100px; white-space: nowrap;
+  }
+  .price-name {
+    font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .price-amount {
+    font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800;
+    color: var(--cyan); line-height: 1; margin-bottom: 4px;
+  }
+  .price-amount span { font-size: 20px; color: var(--muted); font-weight: 400; }
+  .price-period { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+  .price-features { list-style: none; margin-bottom: 36px; }
+  .price-features li {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; color: var(--muted);
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .price-features li::before { content: '✓'; color: var(--cyan); font-weight: 700; flex-shrink: 0; }
+  .btn-cta {
+    display: block; width: 100%; text-align: center;
+    background: var(--cyan);
+    color: #04080F;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px;
+    padding: 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-cta:hover { background: var(--cyan2); transform: translateY(-1px); }
+
+  /* FAQ */
+  .faq { background: var(--bg2); }
+  .faq-list { max-width: 680px; margin: 60px auto 0; }
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+    padding: 24px 0;
+  }
+  .faq-q {
+    font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 600;
+    cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .faq-q::after { content: '+'; color: var(--cyan); font-size: 22px; font-weight: 300; }
+  .faq-a {
+    color: var(--muted); font-size: 14px; line-height: 1.8;
+    margin-top: 16px; display: none;
+  }
+  .faq-item.open .faq-q::after { content: '−'; }
+  .faq-item.open .faq-a { display: block; }
+
+  /* FOOTER CTA */
+  .footer-cta {
+    text-align: center;
+    padding: 120px 6%;
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+    position: relative; overflow: hidden;
+  }
+  .footer-cta::before {
+    content: '';
+    position: absolute; bottom: -100px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,200,255,0.06) 0%, transparent 70%);
+  }
+  .footer-cta h2 { font-size: clamp(32px, 5vw, 56px); margin-bottom: 20px; }
+  .footer-cta p { color: var(--muted); font-size: 17px; margin-bottom: 48px; }
+
+  footer {
+    text-align: center;
+    padding: 32px 6%;
+    border-top: 1px solid var(--border);
+    font-size: 13px; color: var(--muted);
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--cyan); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .stats { gap: 32px; }
+    .hero-actions { flex-direction: column; align-items: center; }
+    nav .nav-cta { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="logo">⚡ Lead<span>Forge</span></a>
+  <a href="https://buy.stripe.com/28E9AT7Z5aDu1Ll0TabV604" class="nav-cta">Empezar ahora →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">Generación automática de leads B2B</div>
+  <h1>Consigue <em>500 leads</em><br>en 10 minutos,<br>no en 10 semanas.</h1>
+  <p class="hero-sub">LeadForge busca contactos de negocios en Google Maps, directorios y redes sociales. Tú recibes un Excel listo para tu equipo de ventas.</p>
+  <div class="hero-actions">
+    <a href="https://buy.stripe.com/28E9AT7Z5aDu1Ll0TabV604" class="btn-primary">
+      Empezar por 99€/mes →
+    </a>
+    <a href="#como-funciona" class="btn-secondary">Ver cómo funciona</a>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <span class="stat-num">500+</span>
+    <div class="stat-label">Leads por búsqueda</div>
+  </div>
+  <div class="stat">
+    <span class="stat-num">8</span>
+    <div class="stat-label">Fuentes de datos</div>
+  </div>
+  <div class="stat">
+    <span class="stat-num">10 min</span>
+    <div class="stat-label">Por búsqueda completa</div>
+  </div>
+  <div class="stat">
+    <span class="stat-num">99€</span>
+    <div class="stat-label">Al mes, sin permanencia</div>
+  </div>
+</div>
+
+<!-- COMO FUNCIONA -->
+<section class="how" id="como-funciona">
+  <div class="section-tag">Cómo funciona</div>
+  <h2>Tres pasos para tener<br><em>leads listos para vender</em></h2>
+  <p class="section-sub">Sin configuración técnica. Sin scrapers manuales. Sin horas buscando en Google.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3>Selecciona sector y ciudad</h3>
+      <p>Elige entre construcción, marketing, tecnología, legal y más. Filtra por ciudad española.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3>LeadForge busca en automático</h3>
+      <p>Escanea Google Maps, Habitissimo, Páginas Amarillas, Houzz, LinkedIn y más fuentes a la vez.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3>Descarga tu Excel de leads</h3>
+      <p>Recibe nombre, teléfono, email, web, dirección y valoración. Puntuados por calidad, listos para llamar.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FUENTES -->
+<section>
+  <div class="section-tag">Fuentes de datos</div>
+  <h2>Busca donde <em>están tus clientes</em></h2>
+  <p class="section-sub">8 fuentes en paralelo para que no se te escape ningún lead relevante.</p>
+  <div class="sources-grid">
+    <div class="source-card">
+      <div class="source-icon">🗺️</div>
+      <h4>Google Maps</h4>
+      <p>Nombre, teléfono, web, dirección y valoraciones.</p>
+    </div>
+    <div class="source-card">
+      <div class="source-icon">🏠</div>
+      <h4>Habitissimo</h4>
+      <p>Directorio de empresas de reformas y construcción.</p>
+    </div>
+    <div class="source-card">
+      <div class="source-icon">📒</div>
+      <h4>Páginas Amarillas</h4>
+      <p>Directorio general de empresas españolas.</p>
+    </div>
+    <div class="source-card">
+      <div class="source-icon">🏡</div>
+      <h4>Houzz</h4>
+      <p>Arquitectos, interioristas y decoradores.</p>
+    </div>
+    <div class="source-card">
+      <div class="source-icon">📊</div>
+      <h4>Sortlist</h4>
+      <p>Agencias de marketing y servicios digitales.</p>
+    </div>
+    <div class="source-card">
+      <div class="source-icon">🌐</div>
+      <h4>Webs propias</h4>
+      <p>Extrae emails directamente de cada web.</p>
+    </div>
+    <div class="source-card">
+      <div class="source-icon">💼</div>
+      <h4>LinkedIn</h4>
+      <p>Empresas y contactos profesionales.</p>
+    </div>
+    <div class="source-card">
+      <div class="source-icon">📸</div>
+      <h4>Instagram</h4>
+      <p>Negocios locales con presencia en redes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- EXCEL PREVIEW -->
+<section style="background: var(--bg2); padding-top: 0;">
+  <div style="padding: 100px 0 0; max-width: 900px; margin: 0 auto;">
+    <div class="section-tag" style="padding: 0 6%;">El resultado</div>
+    <h2 style="padding: 0 6%;">Un Excel profesional <em>listo para usar</em></h2>
+    <div class="excel-preview" style="margin: 40px 6% 0;">
+      <div class="excel-header">
+        <div class="excel-dot" style="background:#FF4D6A;"></div>
+        <div class="excel-dot" style="background:#FFD93D;"></div>
+        <div class="excel-dot" style="background:#00E5A0;"></div>
+        <span class="excel-title">leadforge_construccion_Madrid_20260528.xlsx</span>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="excel-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Teléfono</th>
+              <th>Email</th>
+              <th>Valoración</th>
+              <th>Fuente</th>
+              <th>Calidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Reformas García SL</td>
+              <td>+34 912 345 678</td>
+              <td>info@reformasgarcia.com</td>
+              <td>⭐ 4.8</td>
+              <td>Google Maps</td>
+              <td><span class="badge badge-alta">Alta</span></td>
+            </tr>
+            <tr>
+              <td>Estudio Arquitectura MB</td>
+              <td>+34 633 456 789</td>
+              <td>contacto@estudiomb.es</td>
+              <td>⭐ 4.6</td>
+              <td>Houzz</td>
+              <td><span class="badge badge-alta">Alta</span></td>
+            </tr>
+            <tr>
+              <td>Interiorismo Moderna</td>
+              <td>+34 654 321 987</td>
+              <td>—</td>
+              <td>⭐ 4.3</td>
+              <td>Habitissimo</td>
+              <td><span class="badge badge-media">Media</span></td>
+            </tr>
+            <tr>
+              <td>Constructora Aldea</td>
+              <td>+34 916 789 012</td>
+              <td>obras@aldea.es</td>
+              <td>⭐ 4.9</td>
+              <td>Google Maps</td>
+              <td><span class="badge badge-alta">Alta</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="precios">
+  <div style="text-align: center;">
+    <div class="section-tag">Precio</div>
+    <h2>Simple. Sin sorpresas.</h2>
+    <p class="section-sub" style="margin: 0 auto;">Un solo plan con todo incluido. Sin permanencia. Cancela cuando quieras.</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="price-card featured">
+      <div class="price-tag">⚡ Todo incluido</div>
+      <div class="price-name">LeadForge Pro</div>
+      <div class="price-amount">99<span>€</span></div>
+      <div class="price-period">por mes · sin permanencia</div>
+      <ul class="price-features">
+        <li>Búsquedas ilimitadas</li>
+        <li>8 fuentes de datos en paralelo</li>
+        <li>Hasta 500 leads por búsqueda</li>
+        <li>Excel profesional con scoring</li>
+        <li>Emails extraídos automáticamente</li>
+        <li>Todos los sectores B2B</li>
+        <li>Soporte por email</li>
+      </ul>
+      <a href="https://buy.stripe.com/28E9AT7Z5aDu1Ll0TabV604" class="btn-cta">
+        Empezar ahora →
+      </a>
+    </div>
+  </div>
+  <p style="text-align: center; color: var(--muted); font-size: 13px; margin-top: 24px;">
+    Pago seguro con Stripe · Tarjeta o transferencia · Cancela en 2 clics
+  </p>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div style="text-align: center;">
+    <div class="section-tag">FAQ</div>
+    <h2>Preguntas frecuentes</h2>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggle(this)">¿Para qué sectores funciona LeadForge?</div>
+      <div class="faq-a">Actualmente cubre construcción e interiorismo, marketing y publicidad, legal y asesoría, y tecnología. Añadimos nuevos sectores cada mes.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggle(this)">¿Cuántos leads puedo esperar por búsqueda?</div>
+      <div class="faq-a">Depende del sector y la ciudad, pero en Madrid con todas las fuentes activas obtienes entre 150 y 500 leads por búsqueda. Google Maps suele aportar los de mayor calidad.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggle(this)">¿Qué datos incluye cada lead?</div>
+      <div class="faq-a">Nombre de la empresa, teléfono, email (cuando está disponible), web, dirección, ciudad, valoración, número de reseñas, fuente y puntuación de calidad.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggle(this)">¿Puedo cancelar en cualquier momento?</div>
+      <div class="faq-a">Sí. Sin permanencia ni penalizaciones. Cancelas desde tu panel de Stripe en menos de 2 minutos.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggle(this)">¿Es legal hacer scraping de estos datos?</div>
+      <div class="faq-a">LeadForge recopila datos públicamente disponibles en internet, igual que cualquier persona haría manualmente. Para el tratamiento de datos en tu empresa, consulta con tu asesor legal según el RGPD.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER CTA -->
+<section class="footer-cta">
+  <h2>Tu próximo cliente<br><em>ya está en internet.</em></h2>
+  <p>Solo necesitas encontrarlo antes que tu competencia.</p>
+  <a href="https://buy.stripe.com/28E9AT7Z5aDu1Ll0TabV604" class="btn-primary" style="display: inline-flex;">
+    Empezar por 99€/mes →
+  </a>
+</section>
+
+<footer>
+  <p>© 2026 LeadForge · <a href="mailto:hola@leadforge.es">hola@leadforge.es</a> · Hecho en Madrid 🇪🇸</p>
+</footer>
+
+<script>
+function toggle(el) {
+  el.parentElement.classList.toggle('open');
+}
+</script>
+
+</body>
+</html>
