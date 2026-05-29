@@ -35,7 +35,6 @@
     overflow-x: hidden;
   }
 
-  /* ── GRID BG ── */
   body::before {
     content: '';
     position: fixed;
@@ -48,7 +47,6 @@
     z-index: 0;
   }
 
-  /* ── ORBS ── */
   .orb {
     position: fixed;
     border-radius: 50%;
@@ -59,27 +57,13 @@
   .orb-1 { width: 500px; height: 500px; background: rgba(0,102,255,0.08); top: -150px; right: -100px; }
   .orb-2 { width: 400px; height: 400px; background: rgba(0,200,255,0.06); bottom: -100px; left: -100px; }
 
-  /* ── SCREENS ── */
-  .screen {
-    display: none;
-    position: relative;
-    z-index: 1;
-    min-height: 100vh;
-  }
+  .screen { display: none; position: relative; z-index: 1; min-height: 100vh; }
   .screen.active { display: flex; }
 
-  /* ══════════════════════════════════
-     AUTH SCREENS (login / set-password)
-  ══════════════════════════════════ */
-  .auth-screen {
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
+  .auth-screen { align-items: center; justify-content: center; padding: 24px; }
 
   .auth-card {
-    width: 100%;
-    max-width: 420px;
+    width: 100%; max-width: 420px;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
@@ -94,12 +78,7 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  .auth-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 32px;
-  }
+  .auth-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
   .auth-logo .bolt {
     font-size: 22px;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -107,236 +86,93 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  .auth-logo .name {
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-  }
+  .auth-logo .name { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
   .auth-logo .name span { color: var(--accent); }
 
-  .auth-title {
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    margin-bottom: 6px;
-  }
-  .auth-sub {
-    font-size: 14px;
-    color: var(--text2);
-    margin-bottom: 28px;
-    line-height: 1.5;
-  }
+  .auth-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .auth-sub { font-size: 14px; color: var(--text2); margin-bottom: 28px; line-height: 1.5; }
 
   .field { margin-bottom: 16px; }
-  .field label {
-    display: block;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text2);
-    margin-bottom: 7px;
-    letter-spacing: 0.3px;
-  }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 7px; letter-spacing: 0.3px; }
   .field input {
-    width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 11px 14px;
-    font-size: 14px;
-    font-family: 'Space Grotesk', sans-serif;
-    color: var(--text);
-    transition: border-color 0.2s, box-shadow 0.2s;
-    outline: none;
+    width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 8px; padding: 11px 14px; font-size: 14px;
+    font-family: 'Space Grotesk', sans-serif; color: var(--text);
+    transition: border-color 0.2s, box-shadow 0.2s; outline: none;
   }
-  .field input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0,200,255,0.1);
-  }
+  .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,200,255,0.1); }
   .field input::placeholder { color: var(--text3); }
 
   .btn-primary {
-    width: 100%;
-    padding: 13px;
+    width: 100%; padding: 13px;
     background: linear-gradient(135deg, var(--accent2), var(--accent));
-    border: none;
-    border-radius: 8px;
-    color: #080C12;
-    font-size: 14px;
-    font-weight: 700;
-    font-family: 'Space Grotesk', sans-serif;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.15s;
-    letter-spacing: 0.3px;
-    margin-top: 4px;
+    border: none; border-radius: 8px; color: #080C12;
+    font-size: 14px; font-weight: 700; font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer; transition: opacity 0.2s, transform 0.15s; letter-spacing: 0.3px; margin-top: 4px;
   }
   .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
   .btn-primary:active { transform: translateY(0); }
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-  .auth-footer {
-    margin-top: 20px;
-    text-align: center;
-    font-size: 13px;
-    color: var(--text2);
-  }
+  .auth-footer { margin-top: 20px; text-align: center; font-size: 13px; color: var(--text2); }
   .auth-footer a { color: var(--accent); text-decoration: none; }
   .auth-footer a:hover { text-decoration: underline; }
 
-  .alert {
-    padding: 11px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    margin-bottom: 16px;
-    display: none;
-  }
+  .alert { padding: 11px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; }
   .alert.error { background: rgba(255,77,106,0.1); border: 1px solid rgba(255,77,106,0.3); color: #FF4D6A; }
   .alert.success { background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.3); color: var(--green); }
   .alert.show { display: block; }
 
-  /* ══════════════════════════════════
-     APP SHELL (sidebar + main)
-  ══════════════════════════════════ */
-  .app-screen {
-    flex-direction: row;
-    align-items: stretch;
-  }
+  .app-screen { flex-direction: row; align-items: stretch; }
 
-  /* ── SIDEBAR ── */
   .sidebar {
-    width: 240px;
-    min-height: 100vh;
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    padding: 28px 0;
-    flex-shrink: 0;
-    position: sticky;
-    top: 0;
-    height: 100vh;
+    width: 240px; min-height: 100vh; background: var(--bg2);
+    border-right: 1px solid var(--border); display: flex; flex-direction: column;
+    padding: 28px 0; flex-shrink: 0; position: sticky; top: 0; height: 100vh;
   }
 
-  .sidebar-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0 24px 28px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 20px;
-  }
+  .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 24px 28px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
   .sidebar-logo .bolt {
     font-size: 20px;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
-  .sidebar-logo .name {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-  }
+  .sidebar-logo .name { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
   .sidebar-logo .name span { color: var(--accent); }
 
-  .nav-section {
-    padding: 0 12px;
-    flex: 1;
-  }
-  .nav-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--text3);
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    padding: 0 12px;
-    margin-bottom: 6px;
-    margin-top: 16px;
-  }
+  .nav-section { padding: 0 12px; flex: 1; }
+  .nav-label { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 1.2px; text-transform: uppercase; padding: 0 12px; margin-bottom: 6px; margin-top: 16px; }
   .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text2);
-    transition: all 0.15s;
-    border: 1px solid transparent;
-    margin-bottom: 2px;
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;
+    color: var(--text2); transition: all 0.15s; border: 1px solid transparent; margin-bottom: 2px;
   }
   .nav-item:hover { background: rgba(0,200,255,0.05); color: var(--text); }
-  .nav-item.active {
-    background: rgba(0,200,255,0.08);
-    color: var(--accent);
-    border-color: var(--border);
-  }
+  .nav-item.active { background: rgba(0,200,255,0.08); color: var(--accent); border-color: var(--border); }
   .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
 
-  .sidebar-bottom {
-    padding: 20px 12px 0;
-    border-top: 1px solid var(--border);
-    margin-top: auto;
-  }
+  .sidebar-bottom { padding: 20px 12px 0; border-top: 1px solid var(--border); margin-top: auto; }
   .user-badge {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px;
   }
   .user-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    width: 32px; height: 32px; border-radius: 50%;
     background: linear-gradient(135deg, var(--accent2), var(--accent));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 700;
-    color: #080C12;
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #080C12; flex-shrink: 0;
   }
   .user-info { flex: 1; min-width: 0; }
-  .user-email {
-    font-size: 12px;
-    color: var(--text2);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .user-plan {
-    font-size: 11px;
-    color: var(--accent);
-    font-weight: 600;
-    font-family: 'JetBrains Mono', monospace;
-  }
+  .user-email { font-size: 12px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-plan { font-size: 11px; color: var(--accent); font-weight: 600; font-family: 'JetBrains Mono', monospace; }
   .btn-logout {
-    width: 100%;
-    padding: 9px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text2);
-    font-size: 13px;
-    font-family: 'Space Grotesk', sans-serif;
-    cursor: pointer;
-    transition: all 0.15s;
+    width: 100%; padding: 9px; background: transparent; border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text2); font-size: 13px; font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer; transition: all 0.15s;
   }
   .btn-logout:hover { border-color: var(--red); color: var(--red); }
 
-  /* ── MAIN CONTENT ── */
-  .main {
-    flex: 1;
-    padding: 40px 48px;
-    overflow-y: auto;
-    min-height: 100vh;
-  }
+  .main { flex: 1; padding: 40px 48px; overflow-y: auto; min-height: 100vh; }
 
   .page { display: none; }
   .page.active { display: block; animation: fadeIn 0.3s ease both; }
@@ -347,256 +183,92 @@
   }
 
   .page-header { margin-bottom: 36px; }
-  .page-title {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.8px;
-    margin-bottom: 6px;
-  }
+  .page-title { font-size: 28px; font-weight: 700; letter-spacing: -0.8px; margin-bottom: 6px; }
   .page-title span { color: var(--accent); }
   .page-sub { font-size: 15px; color: var(--text2); }
 
-  /* ── CARDS ── */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    backdrop-filter: blur(10px);
-  }
-  .card-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text2);
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    margin-bottom: 16px;
-  }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; backdrop-filter: blur(10px); }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text2); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 16px; }
 
-  /* ══════════════════════════════════
-     DASHBOARD PAGE
-  ══════════════════════════════════ */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 32px;
-  }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
   .stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px 22px;
-    position: relative;
-    overflow: hidden;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px 22px; position: relative; overflow: hidden;
   }
   .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
     background: linear-gradient(90deg, var(--accent2), var(--accent));
   }
   .stat-label { font-size: 12px; color: var(--text2); font-weight: 500; margin-bottom: 8px; letter-spacing: 0.3px; }
   .stat-value { font-size: 28px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--text); letter-spacing: -1px; }
   .stat-value span { font-size: 13px; color: var(--text2); font-family: 'Space Grotesk', sans-serif; font-weight: 400; margin-left: 4px; }
 
-  /* ── SCRAPER FORM ── */
-  .scraper-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 20px;
-  }
+  .scraper-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
 
-  .form-field { }
-  .form-label {
-    display: block;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text2);
-    margin-bottom: 8px;
-    letter-spacing: 0.3px;
-  }
+  .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 8px; letter-spacing: 0.3px; }
   .form-select {
-    width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 11px 14px;
-    font-size: 14px;
-    font-family: 'Space Grotesk', sans-serif;
-    color: var(--text);
-    cursor: pointer;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 8px; padding: 11px 14px; font-size: 14px; font-family: 'Space Grotesk', sans-serif;
+    color: var(--text); cursor: pointer; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A8BA0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 36px;
+    background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
   }
-  .form-select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0,200,255,0.1);
-  }
+  .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,200,255,0.1); }
   .form-select option { background: #0D1420; }
 
-  /* ── CATEGORIES ── */
-  .categories-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-top: 8px;
-  }
+  .categories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; }
   .cat-pill {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    color: var(--text2);
-    transition: all 0.15s;
-    user-select: none;
+    display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--text2);
+    transition: all 0.15s; user-select: none;
   }
   .cat-pill:hover { border-color: var(--border2); color: var(--text); }
-  .cat-pill.selected {
-    background: rgba(0,200,255,0.08);
-    border-color: var(--accent);
-    color: var(--text);
-  }
+  .cat-pill.selected { background: rgba(0,200,255,0.08); border-color: var(--accent); color: var(--text); }
   .cat-pill .cat-check {
-    width: 16px; height: 16px;
-    border-radius: 4px;
-    border: 1.5px solid var(--text3);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.15s;
-    font-size: 10px;
+    width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--text3);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: all 0.15s; font-size: 10px;
   }
-  .cat-pill.selected .cat-check {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #080C12;
-  }
+  .cat-pill.selected .cat-check { background: var(--accent); border-color: var(--accent); color: #080C12; }
 
-  .select-all-btn {
-    background: none;
-    border: none;
-    color: var(--accent);
-    font-size: 12px;
-    font-family: 'Space Grotesk', sans-serif;
-    cursor: pointer;
-    padding: 0;
-    margin-left: auto;
-    display: block;
-    margin-bottom: 8px;
-  }
+  .select-all-btn { background: none; border: none; color: var(--accent); font-size: 12px; font-family: 'Space Grotesk', sans-serif; cursor: pointer; padding: 0; margin-left: auto; display: block; margin-bottom: 8px; }
   .select-all-btn:hover { text-decoration: underline; }
 
-  /* ── SOURCES ── */
-  .sources-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-  }
+  .sources-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
   .source-pill {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 8px 14px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 13px;
-    color: var(--text2);
-    transition: all 0.15s;
-    user-select: none;
+    display: flex; align-items: center; gap: 7px; padding: 8px 14px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 20px; cursor: pointer; font-size: 13px; color: var(--text2);
+    transition: all 0.15s; user-select: none;
   }
-  .source-pill.selected {
-    background: rgba(0,200,255,0.08);
-    border-color: var(--accent);
-    color: var(--text);
-  }
-  .source-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--text3);
-    transition: background 0.15s;
-  }
+  .source-pill.selected { background: rgba(0,200,255,0.08); border-color: var(--accent); color: var(--text); }
+  .source-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); transition: background 0.15s; }
   .source-pill.selected .source-dot { background: var(--accent); }
 
-  /* ── LAUNCH BTN ── */
   .btn-launch {
-    width: 100%;
-    padding: 16px;
+    width: 100%; padding: 16px;
     background: linear-gradient(135deg, var(--accent2), var(--accent));
-    border: none;
-    border-radius: 10px;
-    color: #080C12;
-    font-size: 15px;
-    font-weight: 700;
-    font-family: 'Space Grotesk', sans-serif;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.15s;
-    letter-spacing: 0.3px;
-    margin-top: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+    border: none; border-radius: 10px; color: #080C12;
+    font-size: 15px; font-weight: 700; font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer; transition: opacity 0.2s, transform 0.15s; letter-spacing: 0.3px; margin-top: 24px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
   }
   .btn-launch:hover { opacity: 0.9; transform: translateY(-1px); }
   .btn-launch:active { transform: translateY(0); }
   .btn-launch:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-  /* ══════════════════════════════════
-     RESULTS PAGE
-  ══════════════════════════════════ */
-  .progress-wrap {
-    margin-bottom: 28px;
-  }
-  .progress-bar-bg {
-    width: 100%;
-    height: 6px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 10px;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent2), var(--accent));
-    border-radius: 10px;
-    transition: width 0.4s ease;
-    width: 0%;
-  }
-  .progress-meta {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    color: var(--text2);
-    font-family: 'JetBrains Mono', monospace;
-  }
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.06); border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 10px; transition: width 0.4s ease; width: 0%; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--text2); font-family: 'JetBrains Mono', monospace; }
   .progress-pct { color: var(--accent); font-weight: 600; }
 
   .log-terminal {
-    background: #060A10;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12.5px;
-    line-height: 1.8;
-    max-height: 280px;
-    overflow-y: auto;
-    margin-bottom: 24px;
+    background: #060A10; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.8;
+    max-height: 280px; overflow-y: auto; margin-bottom: 24px;
   }
   .log-line { display: block; }
   .log-line .ts { color: var(--text3); margin-right: 10px; }
@@ -605,27 +277,9 @@
   .log-line.accent .msg { color: var(--accent); }
   .log-line.warn .msg { color: var(--yellow); }
 
-  .results-summary {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 24px;
-  }
-  .result-stat {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    text-align: center;
-  }
-  .result-stat .n {
-    font-size: 30px;
-    font-weight: 700;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: -1px;
-    display: block;
-    margin-bottom: 4px;
-  }
+  .results-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  .result-stat { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+  .result-stat .n { font-size: 30px; font-weight: 700; font-family: 'JetBrains Mono', monospace; letter-spacing: -1px; display: block; margin-bottom: 4px; }
   .result-stat .lbl { font-size: 12px; color: var(--text2); }
   .result-stat.alta .n { color: var(--green); }
   .result-stat.media .n { color: var(--yellow); }
@@ -633,217 +287,79 @@
   .result-stat.total .n { color: var(--accent); }
 
   .btn-download {
-    width: 100%;
-    padding: 16px;
+    width: 100%; padding: 16px;
     background: linear-gradient(135deg, #00C853, var(--green));
-    border: none;
-    border-radius: 10px;
-    color: #060A10;
-    font-size: 15px;
-    font-weight: 700;
-    font-family: 'Space Grotesk', sans-serif;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    letter-spacing: 0.3px;
+    border: none; border-radius: 10px; color: #060A10;
+    font-size: 15px; font-weight: 700; font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 10px; letter-spacing: 0.3px;
   }
   .btn-download:hover { opacity: 0.9; transform: translateY(-1px); }
 
   .btn-new {
-    width: 100%;
-    padding: 13px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--text2);
-    font-size: 14px;
-    font-weight: 500;
-    font-family: 'Space Grotesk', sans-serif;
-    cursor: pointer;
-    transition: all 0.15s;
-    margin-top: 10px;
+    width: 100%; padding: 13px; background: transparent; border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text2); font-size: 14px; font-weight: 500;
+    font-family: 'Space Grotesk', sans-serif; cursor: pointer; transition: all 0.15s; margin-top: 10px;
   }
   .btn-new:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* ══════════════════════════════════
-     HISTORIAL PAGE
-  ══════════════════════════════════ */
   .history-list { display: flex; flex-direction: column; gap: 10px; }
   .history-item {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 18px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    transition: border-color 0.15s;
+    display: flex; align-items: center; gap: 16px; padding: 16px 18px;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); transition: border-color 0.15s;
   }
   .history-item:hover { border-color: var(--border2); }
-  .history-icon {
-    width: 40px; height: 40px;
-    border-radius: 10px;
-    background: rgba(0,200,255,0.08);
-    border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
+  .history-icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(0,200,255,0.08); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
   .history-info { flex: 1; min-width: 0; }
   .history-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .history-meta { font-size: 12px; color: var(--text2); }
-  .history-leads {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--accent);
-    flex-shrink: 0;
-  }
+  .history-leads { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--accent); flex-shrink: 0; }
   .btn-redownload {
-    padding: 7px 14px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text2);
-    font-size: 12px;
-    font-family: 'Space Grotesk', sans-serif;
-    cursor: pointer;
-    transition: all 0.15s;
-    flex-shrink: 0;
+    padding: 7px 14px; background: transparent; border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text2); font-size: 12px; font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer; transition: all 0.15s; flex-shrink: 0;
   }
   .btn-redownload:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-redownload:disabled { opacity: 0.35; cursor: not-allowed; border-color: var(--border); color: var(--text3); }
 
-  /* ══════════════════════════════════
-     CUENTA PAGE
-  ══════════════════════════════════ */
-  .cuenta-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 20px;
-  }
+  .cuenta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
 
-  .plan-card {
-    background: var(--card);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius-lg);
-    padding: 28px;
-    position: relative;
-    overflow: hidden;
-  }
-  .plan-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--accent2), var(--accent));
-  }
-  .plan-name {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    font-family: 'JetBrains Mono', monospace;
-    margin-bottom: 8px;
-  }
-  .plan-price {
-    font-size: 40px;
-    font-weight: 700;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: -2px;
-    margin-bottom: 4px;
-  }
+  .plan-card { background: var(--card); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 28px; position: relative; overflow: hidden; }
+  .plan-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent2), var(--accent)); }
+  .plan-name { font-size: 12px; font-weight: 600; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; }
+  .plan-price { font-size: 40px; font-weight: 700; font-family: 'JetBrains Mono', monospace; letter-spacing: -2px; margin-bottom: 4px; }
   .plan-price span { font-size: 16px; color: var(--text2); font-weight: 400; }
   .plan-renewal { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
   .plan-features { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-  .plan-features li {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 13px; color: var(--text2);
-  }
+  .plan-features li { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
   .plan-features li::before { content: '✓'; color: var(--green); font-weight: 700; }
 
-  .info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
-  }
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
   .info-row:last-child { border-bottom: none; }
   .info-row .key { color: var(--text2); }
   .info-row .val { font-weight: 500; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
 
-  .danger-zone {
-    background: rgba(255,77,106,0.04);
-    border: 1px solid rgba(255,77,106,0.2);
-    border-radius: var(--radius);
-    padding: 20px 24px;
-    margin-top: 8px;
-  }
+  .danger-zone { background: rgba(255,77,106,0.04); border: 1px solid rgba(255,77,106,0.2); border-radius: var(--radius); padding: 20px 24px; margin-top: 8px; }
   .danger-title { font-size: 14px; font-weight: 600; color: var(--red); margin-bottom: 6px; }
   .danger-sub { font-size: 13px; color: var(--text2); margin-bottom: 16px; }
-  .btn-danger {
-    padding: 10px 20px;
-    background: transparent;
-    border: 1px solid var(--red);
-    border-radius: 8px;
-    color: var(--red);
-    font-size: 13px;
-    font-weight: 600;
-    font-family: 'Space Grotesk', sans-serif;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
+  .btn-danger { padding: 10px 20px; background: transparent; border: 1px solid var(--red); border-radius: 8px; color: var(--red); font-size: 13px; font-weight: 600; font-family: 'Space Grotesk', sans-serif; cursor: pointer; transition: all 0.15s; }
   .btn-danger:hover { background: rgba(255,77,106,0.1); }
 
-  /* ── TAG ── */
-  .tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 3px 8px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 0.5px;
-  }
+  .tag { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; }
   .tag.active { background: rgba(0,229,160,0.1); color: var(--green); border: 1px solid rgba(0,229,160,0.3); }
   .tag.trial  { background: rgba(255,217,61,0.1); color: var(--yellow); border: 1px solid rgba(255,217,61,0.3); }
 
-  /* ── DIVIDER ── */
   .divider { height: 1px; background: var(--border); margin: 28px 0; }
+  .section-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; letter-spacing: -0.3px; }
 
-  /* ── SECTION TITLE ── */
-  .section-title {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 16px;
-    letter-spacing: -0.3px;
-  }
-
-  /* ── SCROLLBAR ── */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(0,200,255,0.2); border-radius: 10px; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(0,200,255,0.35); }
 
-  /* ── SPINNER ── */
-  .spinner {
-    width: 16px; height: 16px;
-    border: 2px solid rgba(8,12,18,0.3);
-    border-top-color: #080C12;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    display: none;
-  }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(8,12,18,0.3); border-top-color: #080C12; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── MOBILE ── */
   @media (max-width: 900px) {
     .sidebar { display: none; }
     .main { padding: 24px 20px; }
@@ -854,12 +370,7 @@
     .cuenta-grid { grid-template-columns: 1fr; }
   }
 
-  /* ── EMPTY STATE ── */
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text2);
-  }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text2); }
   .empty-state .emoji { font-size: 40px; margin-bottom: 14px; }
   .empty-state p { font-size: 14px; }
 </style>
@@ -869,9 +380,7 @@
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
 
-<!-- ══════════════════════════════
-     SCREEN: LOGIN
-══════════════════════════════ -->
+<!-- LOGIN -->
 <div class="screen auth-screen" id="screen-login">
   <div class="auth-card">
     <div class="auth-logo">
@@ -899,9 +408,7 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════
-     SCREEN: SET PASSWORD
-══════════════════════════════ -->
+<!-- SET PASSWORD -->
 <div class="screen auth-screen" id="screen-setpass">
   <div class="auth-card">
     <div class="auth-logo">
@@ -927,12 +434,9 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════
-     SCREEN: APP
-══════════════════════════════ -->
+<!-- APP -->
 <div class="screen app-screen" id="screen-app">
 
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-logo">
       <span class="bolt">⚡</span>
@@ -963,17 +467,15 @@
     </div>
   </aside>
 
-  <!-- MAIN -->
   <main class="main">
 
-    <!-- ── PAGE: DASHBOARD ── -->
+    <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="page-header">
         <h1 class="page-title">Nueva <span>búsqueda</span></h1>
         <p class="page-sub">Configura los parámetros y lanza el scraping de leads.</p>
       </div>
 
-      <!-- Stats -->
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-label">Búsquedas este mes</div>
@@ -989,7 +491,6 @@
         </div>
       </div>
 
-      <!-- Form -->
       <div class="card">
         <div class="card-title">Configurar búsqueda</div>
 
@@ -1020,7 +521,6 @@
           </div>
         </div>
 
-        <!-- Categories -->
         <div class="form-field" id="cats-wrap" style="display:none">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
             <label class="form-label" style="margin:0">Categorías</label>
@@ -1031,32 +531,31 @@
 
         <div class="divider"></div>
 
-        <!-- Sources -->
         <div class="form-field">
           <label class="form-label">Fuentes de datos</label>
           <div class="sources-row">
-            <div class="source-pill selected" id="src-googlemaps" onclick="toggleSource('googlemaps')" title="API oficial — datos completos">
+            <div class="source-pill selected" id="src-googlemaps" onclick="toggleSource('googlemaps')">
               <span class="source-dot"></span> Google Maps
             </div>
-            <div class="source-pill selected" id="src-habitissimo" onclick="toggleSource('habitissimo')" title="Directorio especializado">
+            <div class="source-pill selected" id="src-habitissimo" onclick="toggleSource('habitissimo')">
               <span class="source-dot"></span> Habitissimo
             </div>
-            <div class="source-pill selected" id="src-paginasamarillas" onclick="toggleSource('paginasamarillas')" title="Directorio general">
+            <div class="source-pill selected" id="src-paginasamarillas" onclick="toggleSource('paginasamarillas')">
               <span class="source-dot"></span> Páginas Amarillas
             </div>
-            <div class="source-pill selected" id="src-houzz" onclick="toggleSource('houzz')" title="Directorio interiorismo">
+            <div class="source-pill selected" id="src-houzz" onclick="toggleSource('houzz')">
               <span class="source-dot"></span> Houzz
             </div>
-            <div class="source-pill selected" id="src-sortlist" onclick="toggleSource('sortlist')" title="Directorio de agencias y estudios">
+            <div class="source-pill selected" id="src-sortlist" onclick="toggleSource('sortlist')">
               <span class="source-dot"></span> Sortlist
             </div>
-            <div class="source-pill selected" id="src-webs" onclick="toggleSource('webs')" title="Extrae email, tel y redes de la web propia del negocio">
+            <div class="source-pill selected" id="src-webs" onclick="toggleSource('webs')">
               <span class="source-dot"></span> Webs propias
             </div>
-            <div class="source-pill" id="src-linkedin" onclick="toggleSource('linkedin')" title="Vía Google dork — limitado pero estable">
+            <div class="source-pill" id="src-linkedin" onclick="toggleSource('linkedin')">
               <span class="source-dot"></span> LinkedIn <span style="font-size:10px;opacity:0.6">beta</span>
             </div>
-            <div class="source-pill" id="src-instagram" onclick="toggleSource('instagram')" title="Vía Google dork — limitado pero estable">
+            <div class="source-pill" id="src-instagram" onclick="toggleSource('instagram')">
               <span class="source-dot"></span> Instagram <span style="font-size:10px;opacity:0.6">beta</span>
             </div>
           </div>
@@ -1073,7 +572,7 @@
       </div>
     </div>
 
-    <!-- ── PAGE: RESULTS ── -->
+    <!-- RESULTS -->
     <div class="page" id="page-results">
       <div class="page-header">
         <h1 class="page-title">Scraping <span>en curso</span></h1>
@@ -1095,22 +594,10 @@
 
       <div id="results-done" style="display:none">
         <div class="results-summary">
-          <div class="result-stat total">
-            <span class="n" id="res-total">0</span>
-            <span class="lbl">Total leads</span>
-          </div>
-          <div class="result-stat alta">
-            <span class="n" id="res-alta">0</span>
-            <span class="lbl">🟢 Calidad alta</span>
-          </div>
-          <div class="result-stat media">
-            <span class="n" id="res-media">0</span>
-            <span class="lbl">🟡 Calidad media</span>
-          </div>
-          <div class="result-stat baja">
-            <span class="n" id="res-baja">0</span>
-            <span class="lbl">🔴 Calidad baja</span>
-          </div>
+          <div class="result-stat total"><span class="n" id="res-total">0</span><span class="lbl">Total leads</span></div>
+          <div class="result-stat alta"><span class="n" id="res-alta">0</span><span class="lbl">🟢 Calidad alta</span></div>
+          <div class="result-stat media"><span class="n" id="res-media">0</span><span class="lbl">🟡 Calidad media</span></div>
+          <div class="result-stat baja"><span class="n" id="res-baja">0</span><span class="lbl">🔴 Calidad baja</span></div>
         </div>
         <button class="btn-download" onclick="downloadExcel()">
           <span>📥</span> Descargar Excel de leads
@@ -1119,7 +606,7 @@
       </div>
     </div>
 
-    <!-- ── PAGE: HISTORIAL ── -->
+    <!-- HISTORIAL -->
     <div class="page" id="page-historial">
       <div class="page-header">
         <h1 class="page-title">Historial de <span>búsquedas</span></h1>
@@ -1133,7 +620,7 @@
       </div>
     </div>
 
-    <!-- ── PAGE: CUENTA ── -->
+    <!-- CUENTA -->
     <div class="page" id="page-cuenta">
       <div class="page-header">
         <h1 class="page-title">Mi <span>cuenta</span></h1>
@@ -1141,7 +628,6 @@
       </div>
 
       <div class="cuenta-grid">
-        <!-- Plan card -->
         <div class="plan-card">
           <div class="plan-name">Plan Pro</div>
           <div class="plan-price">99€ <span>/mes</span></div>
@@ -1156,25 +642,12 @@
           </ul>
         </div>
 
-        <!-- Info card -->
         <div class="card">
           <div class="card-title">Información de cuenta</div>
-          <div class="info-row">
-            <span class="key">Email</span>
-            <span class="val" id="cuenta-email">—</span>
-          </div>
-          <div class="info-row">
-            <span class="key">Estado</span>
-            <span class="val"><span class="tag active" id="cuenta-estado">Activo</span></span>
-          </div>
-          <div class="info-row">
-            <span class="key">Búsquedas realizadas</span>
-            <span class="val" id="cuenta-searches">0</span>
-          </div>
-          <div class="info-row">
-            <span class="key">Miembro desde</span>
-            <span class="val" id="cuenta-desde">—</span>
-          </div>
+          <div class="info-row"><span class="key">Email</span><span class="val" id="cuenta-email">—</span></div>
+          <div class="info-row"><span class="key">Estado</span><span class="val"><span class="tag active" id="cuenta-estado">Activo</span></span></div>
+          <div class="info-row"><span class="key">Búsquedas realizadas</span><span class="val" id="cuenta-searches">0</span></div>
+          <div class="info-row"><span class="key">Miembro desde</span><span class="val" id="cuenta-desde">—</span></div>
         </div>
       </div>
 
@@ -1188,19 +661,11 @@
   </main>
 </div>
 
-<!-- ══════════════════════════════
-     SUPABASE + LÓGICA
-══════════════════════════════ -->
 <script>
-// ══════════════════════════════════════════
-// CONFIGURACIÓN — reemplaza con tus valores
-// ══════════════════════════════════════════
 const SUPABASE_URL  = 'https://erlbzbwlrrcoeiphzozm.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_hScYuPWr3THMPToUzcLUmQ_ji64-g4Z';
-// URL de la API Railway — Sesión 3
 const SCRAPER_API_URL = 'https://web-production-e1dec.up.railway.app';
 
-// ── Supabase minimal client ──────────────
 const sb = {
   async req(path, opts = {}) {
     const r = await fetch(SUPABASE_URL + path, {
@@ -1227,10 +692,7 @@ const sb = {
     return d;
   },
   async updatePassword(password) {
-    const r = await this.req('/auth/v1/user', {
-      method: 'PUT',
-      body: JSON.stringify({ password })
-    });
+    const r = await this.req('/auth/v1/user', { method: 'PUT', body: JSON.stringify({ password }) });
     return r.json();
   },
   async getUser() {
@@ -1257,9 +719,6 @@ const sb = {
   }
 };
 
-// ════════════════════════════════
-// ESTADO GLOBAL
-// ════════════════════════════════
 let appState = {
   user: null,
   profile: null,
@@ -1268,9 +727,6 @@ let appState = {
   currentJobId: null
 };
 
-// ════════════════════════════════
-// CATEGORÍAS POR SECTOR
-// ════════════════════════════════
 const SECTORES = {
   construccion: [
     { id: 'reformistas',   emoji: '🔨', label: 'Reformistas' },
@@ -1285,11 +741,7 @@ const SECTORES = {
   ]
 };
 
-// ════════════════════════════════
-// INIT
-// ════════════════════════════════
 window.addEventListener('DOMContentLoaded', async () => {
-  // Detectar token mágico en URL
   const hash = window.location.hash;
   if (hash.includes('access_token') && hash.includes('type=recovery')) {
     const params = new URLSearchParams(hash.slice(1));
@@ -1300,7 +752,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Intentar sesión guardada
   const session = sb.loadSession();
   if (session && session.access_token) {
     sb._token = session.access_token;
@@ -1314,18 +765,12 @@ window.addEventListener('DOMContentLoaded', async () => {
   showScreen('login');
 });
 
-// ════════════════════════════════
-// NAVEGACIÓN DE SCREENS
-// ════════════════════════════════
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const el = document.getElementById('screen-' + name);
   if (el) el.classList.add('active');
 }
 
-// ════════════════════════════════
-// LOGIN
-// ════════════════════════════════
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass  = document.getElementById('login-pass').value;
@@ -1338,13 +783,6 @@ async function doLogin() {
   if (!email || !pass) { showAlert(err, 'Rellena todos los campos.'); return; }
 
   btn.disabled = true; lbl.style.display = 'none'; spin.style.display = 'block';
-
-  // MODO DEMO — eliminar cuando Supabase esté configurado
-  if (SUPABASE_URL.includes('TU_PROJECT')) {
-    await delay(1000);
-    await loadApp({ id: 'demo', email: email, created_at: new Date().toISOString() }, { plan: 'pro' });
-    return;
-  }
 
   const data = await sb.signIn(email, pass);
   btn.disabled = false; lbl.style.display = 'inline'; spin.style.display = 'none';
@@ -1361,9 +799,6 @@ document.getElementById('login-pass').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
 });
 
-// ════════════════════════════════
-// SET PASSWORD
-// ════════════════════════════════
 async function doSetPassword() {
   const pass1 = document.getElementById('new-pass').value;
   const pass2 = document.getElementById('confirm-pass').value;
@@ -1379,14 +814,6 @@ async function doSetPassword() {
 
   btn.disabled = true; lbl.style.display = 'none'; spin.style.display = 'block';
 
-  if (SUPABASE_URL.includes('TU_PROJECT')) {
-    await delay(1000);
-    showAlert(ok, '¡Cuenta activada! Entrando al panel…');
-    await delay(1200);
-    await loadApp({ id: 'demo', email: 'demo@leadforge.es', created_at: new Date().toISOString() }, { plan: 'pro' });
-    return;
-  }
-
   const data = await sb.updatePassword(pass1);
   btn.disabled = false; lbl.style.display = 'inline'; spin.style.display = 'none';
 
@@ -1401,19 +828,13 @@ async function doSetPassword() {
   }
 }
 
-// ════════════════════════════════
-// CARGAR APP
-// ════════════════════════════════
 async function loadApp(user, profileOverride) {
   appState.user = user;
 
   let profile = profileOverride;
-  if (!profile && !SUPABASE_URL.includes('TU_PROJECT')) {
-    profile = await sb.getProfile(user.id);
-  }
+  profile = await sb.getProfile(user.id);
   appState.profile = profile || { plan: 'pro' };
 
-  // Poblar UI
   const email    = user.email || '';
   const initial  = email.charAt(0).toUpperCase();
   const planStr  = (appState.profile.plan || 'pro').toUpperCase();
@@ -1428,26 +849,18 @@ async function loadApp(user, profileOverride) {
   document.getElementById('cuenta-desde').textContent   = since;
   document.getElementById('renewal-date').textContent   = renewal;
 
-  // Stats locales
   updateStats();
   renderHistory();
-
   showScreen('app');
   showPage('dashboard');
 }
 
-// ════════════════════════════════
-// LOGOUT
-// ════════════════════════════════
 function doLogout() {
   sb.signOut();
   appState = { user: null, profile: null, searches: appState.searches, currentSearch: null };
   showScreen('login');
 }
 
-// ════════════════════════════════
-// NAVEGACIÓN DE PÁGINAS
-// ════════════════════════════════
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1457,9 +870,6 @@ function showPage(name) {
   if (nav)  nav.classList.add('active');
 }
 
-// ════════════════════════════════
-// FORMULARIO — SECTOR / CATS
-// ════════════════════════════════
 function updateCategories() {
   const sector = document.getElementById('select-sector').value;
   const wrap   = document.getElementById('cats-wrap');
@@ -1467,11 +877,7 @@ function updateCategories() {
   const btn    = document.getElementById('btn-launch');
 
   grid.innerHTML = '';
-  if (!sector || !SECTORES[sector]) {
-    wrap.style.display = 'none';
-    btn.disabled = true;
-    return;
-  }
+  if (!sector || !SECTORES[sector]) { wrap.style.display = 'none'; btn.disabled = true; return; }
 
   wrap.style.display = 'block';
   SECTORES[sector].forEach(cat => {
@@ -1489,8 +895,7 @@ function updateCategories() {
 function toggleCat(id) {
   const el = document.getElementById('cat-' + id);
   el.classList.toggle('selected');
-  const check = el.querySelector('.cat-check');
-  check.textContent = el.classList.contains('selected') ? '✓' : '';
+  el.querySelector('.cat-check').textContent = el.classList.contains('selected') ? '✓' : '';
   checkLaunchReady();
 }
 
@@ -1502,13 +907,8 @@ function toggleAllCats() {
   cats.forEach(c => {
     const el = document.getElementById('cat-' + c.id);
     if (!el) return;
-    if (allSelected) {
-      el.classList.remove('selected');
-      el.querySelector('.cat-check').textContent = '';
-    } else {
-      el.classList.add('selected');
-      el.querySelector('.cat-check').textContent = '✓';
-    }
+    if (allSelected) { el.classList.remove('selected'); el.querySelector('.cat-check').textContent = ''; }
+    else { el.classList.add('selected'); el.querySelector('.cat-check').textContent = '✓'; }
   });
   checkLaunchReady();
 }
@@ -1518,19 +918,15 @@ function toggleSource(id) {
 }
 
 function checkLaunchReady() {
-  const sector  = document.getElementById('select-sector').value;
-  const ciudad  = document.getElementById('select-ciudad').value;
-  const cats    = SECTORES[sector] || [];
-  const hasCat  = cats.some(c => document.getElementById('cat-' + c.id)?.classList.contains('selected'));
+  const sector = document.getElementById('select-sector').value;
+  const ciudad = document.getElementById('select-ciudad').value;
+  const cats   = SECTORES[sector] || [];
+  const hasCat = cats.some(c => document.getElementById('cat-' + c.id)?.classList.contains('selected'));
   document.getElementById('btn-launch').disabled = !(sector && ciudad && hasCat);
 }
 
 document.getElementById('select-ciudad').addEventListener('change', checkLaunchReady);
 
-// ════════════════════════════════
-// ════════════════════════════════
-// LANZAR SCRAPING — API Railway real
-// ════════════════════════════════
 async function launchScraping() {
   const sector = document.getElementById('select-sector').value;
   const ciudad = document.getElementById('select-ciudad').value;
@@ -1538,16 +934,15 @@ async function launchScraping() {
     .filter(c => document.getElementById('cat-' + c.id)?.classList.contains('selected'))
     .map(c => c.id);
 
-  // Mapeo de IDs de fuentes del frontend a IDs del backend
   const srcMap = {
-    'googlemaps':      'google_maps',
-    'habitissimo':     'habitissimo',
-    'paginasamarillas':'paginas_amarillas',
-    'houzz':           'houzz',
-    'sortlist':        'sortlist',
-    'webspropias':     'webs_propias',
-    'linkedin':        'linkedin',
-    'instagram':       'instagram',
+    'googlemaps':       'google_maps',
+    'habitissimo':      'habitissimo',
+    'paginasamarillas': 'paginas_amarillas',
+    'houzz':            'houzz',
+    'sortlist':         'sortlist',
+    'webs':             'webs_propias',
+    'linkedin':         'linkedin',
+    'instagram':        'instagram',
   };
   const sources = Object.keys(srcMap)
     .filter(s => document.getElementById('src-' + s)?.classList.contains('selected'))
@@ -1559,7 +954,6 @@ async function launchScraping() {
   showPage('results');
   document.querySelector('#nav-dashboard').classList.add('active');
 
-  // Reset UI
   document.getElementById('results-done').style.display = 'none';
   document.getElementById('page-results').querySelector('.page-title').innerHTML = 'Scraping <span>en curso</span>';
   document.getElementById('results-sub').textContent = 'Buscando leads en las fuentes seleccionadas…';
@@ -1582,7 +976,6 @@ async function runScrapingReal(sector, ciudad, cats, sources) {
   };
 
   try {
-    // 1 — Lanzar job
     addLog('▶ Conectando con LeadForge API…', 'accent');
     const launchRes = await fetch(`${SCRAPER_API_URL}/scrape`, {
       method: 'POST',
@@ -1590,15 +983,12 @@ async function runScrapingReal(sector, ciudad, cats, sources) {
       body: JSON.stringify({ sector, ciudad, categorias: cats, fuentes: sources })
     });
 
-    if (!launchRes.ok) {
-      throw new Error(`Error al lanzar el scraping: ${launchRes.status}`);
-    }
+    if (!launchRes.ok) throw new Error(`Error al lanzar el scraping: ${launchRes.status}`);
 
     const { job_id } = await launchRes.json();
     appState.currentJobId = job_id;
     addLog(`✓ Job iniciado (${job_id.slice(0, 8)}…)`, 'ok');
 
-    // 2 — Polling cada 2s
     let lastLogCount = 0;
     while (true) {
       await delay(2000);
@@ -1608,7 +998,6 @@ async function runScrapingReal(sector, ciudad, cats, sources) {
 
       const data = await statusRes.json();
 
-      // Mostrar logs nuevos
       const newLogs = data.logs.slice(lastLogCount);
       lastLogCount = data.logs.length;
       for (const line of newLogs) {
@@ -1616,7 +1005,6 @@ async function runScrapingReal(sector, ciudad, cats, sources) {
         addLog(line.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/, ''), tipo);
       }
 
-      // Actualizar progreso
       setProgress(data.progress, data.logs.at(-1)?.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/, '') || '');
 
       if (data.status === 'done') {
@@ -1630,7 +1018,6 @@ async function runScrapingReal(sector, ciudad, cats, sources) {
         document.getElementById('results-sub').textContent = `${r.total} leads listos para descargar en Excel.`;
         document.getElementById('results-done').style.display = 'block';
 
-        // Guardar en historial
         const entry = {
           id: Date.now(),
           job_id,
@@ -1665,17 +1052,19 @@ function setProgress(pct, stage) {
   document.getElementById('progress-stage').textContent = stage;
 }
 
-// ════════════════════════════════
-// DESCARGA EXCEL (placeholder)
-// En Sesión 3 se genera desde la Edge Function
-// ════════════════════════════════
-function downloadExcel_OLD_REPLACED() {
-  alert('El Excel se generará desde el servidor cuando la Edge Function de Supabase esté lista (Sesión 3).\n\nPor ahora puedes generar el Excel ejecutando el scraper Python localmente con:\n\npython main.py');
-}
-
+// ── Descarga desde la página de resultados (job actual)
 function downloadExcel() {
   const jobId = appState.currentJobId;
   if (!jobId) { alert('No hay ningún scraping completado. Lanza una búsqueda primero.'); return; }
+  window.open(`${SCRAPER_API_URL}/download/${jobId}`, '_blank');
+}
+
+// ── Descarga desde el historial (job_id guardado en cada entrada)
+function downloadHistoryExcel(jobId) {
+  if (!jobId) {
+    alert('Este resultado no tiene un job_id guardado. Solo los scrapings realizados a partir de ahora tendrán descarga disponible.');
+    return;
+  }
   window.open(`${SCRAPER_API_URL}/download/${jobId}`, '_blank');
 }
 
@@ -1684,11 +1073,9 @@ function newSearch() {
   document.getElementById('nav-dashboard').classList.add('active');
 }
 
-// ════════════════════════════════
-// HISTORIAL
-// ════════════════════════════════
+// ── HISTORIAL — renderiza con descarga real por job_id
 function renderHistory() {
-  const list = document.getElementById('history-list');
+  const list    = document.getElementById('history-list');
   const searches = appState.searches;
 
   if (!searches.length) {
@@ -1696,25 +1083,29 @@ function renderHistory() {
     return;
   }
 
-  const icons = { construccion: '🏗️' };
-  list.innerHTML = searches.map(s => `
-    <div class="history-item">
-      <div class="history-icon">${icons[s.sector] || '📋'}</div>
-      <div class="history-info">
-        <div class="history-name">${s.sector} — ${s.ciudad}</div>
-        <div class="history-meta">${s.cats} categorías · ${s.date}</div>
+  const icons = { construccion: '🏗️', marketing: '📣', legal: '⚖️', tecnologia: '💻' };
+  list.innerHTML = searches.map(s => {
+    const hasJob = !!s.job_id;
+    return `
+      <div class="history-item">
+        <div class="history-icon">${icons[s.sector] || '📋'}</div>
+        <div class="history-info">
+          <div class="history-name">${s.sector} — ${s.ciudad}</div>
+          <div class="history-meta">${s.cats} categorías · ${s.date}</div>
+        </div>
+        <div class="history-leads">${s.total} leads</div>
+        <button
+          class="btn-redownload"
+          onclick="downloadHistoryExcel('${s.job_id || ''}')"
+          ${!hasJob ? 'disabled title="Sin job_id — scraping antiguo"' : ''}
+        >📥 Excel</button>
       </div>
-      <div class="history-leads">${s.total} leads</div>
-      <button class="btn-redownload" onclick="alert('Disponible en Sesión 3 con Edge Function')">📥 Excel</button>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
-// ════════════════════════════════
-// STATS
-// ════════════════════════════════
 function updateStats() {
-  const searches = appState.searches;
+  const searches  = appState.searches;
   const thisMonth = searches.filter(s => new Date(s.id) > new Date(Date.now() - 30*24*60*60*1000));
   const totalLeads = searches.reduce((a, s) => a + (s.total || 0), 0);
 
@@ -1725,22 +1116,13 @@ function updateStats() {
   renderHistory();
 }
 
-// ════════════════════════════════
-// CUENTA
-// ════════════════════════════════
 function cancelSubscription() {
   if (confirm('¿Seguro que quieres cancelar tu suscripción?\n\nMantendrás el acceso hasta el final del período de facturación.')) {
     alert('Para cancelar, accede a tu panel de Stripe o escríbenos a hola@leadforge.es');
   }
 }
 
-// ════════════════════════════════
-// UTILS
-// ════════════════════════════════
-function showAlert(el, msg) {
-  el.textContent = msg;
-  el.classList.add('show');
-}
+function showAlert(el, msg) { el.textContent = msg; el.classList.add('show'); }
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 </script>
 </body>
