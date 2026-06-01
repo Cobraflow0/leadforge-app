@@ -527,9 +527,13 @@
               <select class="form-select" id="select-sector" onchange="updateCategories()">
                 <option value="">— Selecciona sector —</option>
                 <option value="construccion">🏗️ Construcción e Interiorismo</option>
-                <option value="restauracion" disabled>🍽️ Restauración (próximamente)</option>
-                <option value="salud" disabled>🏥 Salud y Bienestar (próximamente)</option>
-                <option value="retail" disabled>🛍️ Retail (próximamente)</option>
+                <option value="salud">🏥 Salud y Bienestar</option>
+                <option value="restauracion">🍽️ Restauración y Hostelería</option>
+                <option value="retail">🛍️ Retail y Comercio</option>
+                <option value="legal">⚖️ Legal y Asesoría</option>
+                <option value="marketing">📣 Marketing y Publicidad</option>
+                <option value="tecnologia">💻 Tecnología e IT</option>
+                <option value="pymes">🏢 Pymes y Negocios Locales</option>
               </select>
             </div>
             <div class="form-field">
@@ -808,7 +812,66 @@ const SECTORES = {
     { id: 'coliving',      emoji: '🏢', label: 'Co-living / Co-working' },
     { id: 'gimnasios',     emoji: '💪', label: 'Gimnasios / Fitness' },
     { id: 'hosteleria',    emoji: '🍽️', label: 'Hoteles / Bares / Restaurantes' },
-  ]
+  ],
+  salud: [
+    { id: 'clinicas',      emoji: '🏥', label: 'Clínicas médicas' },
+    { id: 'dentistas',     emoji: '🦷', label: 'Dentistas' },
+    { id: 'fisioterapia',  emoji: '💆', label: 'Fisioterapia' },
+    { id: 'psicologia',    emoji: '🧠', label: 'Psicología' },
+    { id: 'veterinaria',   emoji: '🐾', label: 'Veterinaria' },
+    { id: 'opticas',       emoji: '👓', label: 'Ópticas' },
+    { id: 'farmacias',     emoji: '💊', label: 'Farmacias' },
+    { id: 'estetica',      emoji: '💅', label: 'Estética y Belleza' },
+  ],
+  restauracion: [
+    { id: 'restaurantes',  emoji: '🍽️', label: 'Restaurantes' },
+    { id: 'bares',         emoji: '🍺', label: 'Bares y Cafeterías' },
+    { id: 'hoteles',       emoji: '🏨', label: 'Hoteles' },
+    { id: 'catering',      emoji: '🍱', label: 'Catering' },
+    { id: 'pastelerias',   emoji: '🍰', label: 'Pastelerías y Panaderías' },
+    { id: 'comida_rapida', emoji: '🍔', label: 'Comida rápida' },
+  ],
+  retail: [
+    { id: 'moda',          emoji: '👗', label: 'Moda y Ropa' },
+    { id: 'electronica',   emoji: '📱', label: 'Electrónica' },
+    { id: 'alimentacion',  emoji: '🛒', label: 'Alimentación' },
+    { id: 'deportes',      emoji: '⚽', label: 'Deportes' },
+    { id: 'hogar',         emoji: '🏠', label: 'Hogar y Muebles' },
+    { id: 'joyeria',       emoji: '💍', label: 'Joyería y Accesorios' },
+    { id: 'libreria',      emoji: '📚', label: 'Librerías y Papelerías' },
+  ],
+  legal: [
+    { id: 'abogados',      emoji: '⚖️', label: 'Abogados' },
+    { id: 'gestorias',     emoji: '📋', label: 'Gestorías' },
+    { id: 'notarias',      emoji: '📜', label: 'Notarías' },
+    { id: 'asesores_fiscal', emoji: '💰', label: 'Asesores fiscales' },
+    { id: 'rrhh',          emoji: '👥', label: 'Consultoras RRHH' },
+    { id: 'contables',     emoji: '🧾', label: 'Contables y Auditores' },
+  ],
+  marketing: [
+    { id: 'agencias_seo',  emoji: '🔍', label: 'Agencias SEO' },
+    { id: 'agencias_pub',  emoji: '📢', label: 'Agencias de Publicidad' },
+    { id: 'diseno_web',    emoji: '🖥️', label: 'Diseño Web' },
+    { id: 'redes_sociales', emoji: '📱', label: 'Redes Sociales' },
+    { id: 'branding',      emoji: '🎨', label: 'Branding' },
+    { id: 'email_mkt',     emoji: '✉️', label: 'Email Marketing' },
+  ],
+  tecnologia: [
+    { id: 'desarrollo_sw', emoji: '💻', label: 'Desarrollo Software' },
+    { id: 'ciberseguridad', emoji: '🔒', label: 'Ciberseguridad' },
+    { id: 'it_consulting', emoji: '🖥️', label: 'Consultoría IT' },
+    { id: 'saas',          emoji: '☁️', label: 'SaaS y Apps' },
+    { id: 'ecommerce',     emoji: '🛒', label: 'Ecommerce' },
+    { id: 'agencias_ia',   emoji: '🤖', label: 'Agencias IA' },
+  ],
+  pymes: [
+    { id: 'pymes_general', emoji: '🏢', label: 'Pymes generales' },
+    { id: 'autonomos',     emoji: '👤', label: 'Autónomos y freelance' },
+    { id: 'startups',      emoji: '🚀', label: 'Startups' },
+    { id: 'franquicias',   emoji: '🏪', label: 'Franquicias' },
+    { id: 'coworkings',    emoji: '🤝', label: 'Coworkings' },
+    { id: 'asociaciones',  emoji: '🤲', label: 'Asociaciones y ONGs' },
+  ],
 };
 
 window.addEventListener('DOMContentLoaded', async () => {
