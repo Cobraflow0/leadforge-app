@@ -366,6 +366,23 @@
 
   .campaign-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
 
+  /* ── MODO BÚSQUEDA ── */
+  .mode-btn {
+    padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif; cursor: pointer; transition: all 0.15s;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border); color: var(--text2);
+  }
+  .mode-btn.active { background: rgba(0,200,255,0.08); border-color: var(--accent); color: var(--accent); }
+  .mode-btn:hover:not(.active) { border-color: var(--border2); color: var(--text); }
+  .form-input-free {
+    width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 8px; padding: 11px 14px; font-size: 14px;
+    font-family: 'Space Grotesk', sans-serif; color: var(--text);
+    outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-input-free:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,200,255,0.1); }
+  .form-input-free::placeholder { color: var(--text3); }
+
   @media (max-width: 900px) {
     .sidebar { display: none; }
     .main { padding: 24px 20px; }
@@ -496,39 +513,69 @@
       <div class="card">
         <div class="card-title">Configurar búsqueda</div>
 
-        <div class="scraper-grid">
-          <div class="form-field">
-            <label class="form-label">Sector</label>
-            <select class="form-select" id="select-sector" onchange="updateCategories()">
-              <option value="">— Selecciona sector —</option>
-              <option value="construccion">🏗️ Construcción e Interiorismo</option>
-              <option value="restauracion" disabled>🍽️ Restauración (próximamente)</option>
-              <option value="salud" disabled>🏥 Salud y Bienestar (próximamente)</option>
-              <option value="retail" disabled>🛍️ Retail (próximamente)</option>
-            </select>
+        <!-- MODO TOGGLE -->
+        <div style="display:flex;gap:8px;margin-bottom:20px;">
+          <button class="mode-btn active" id="mode-sector" onclick="setMode('sector')">📋 Por sector</button>
+          <button class="mode-btn" id="mode-libre" onclick="setMode('libre')">🔍 Búsqueda libre</button>
+        </div>
+
+        <!-- MODO SECTOR -->
+        <div id="wrap-sector">
+          <div class="scraper-grid">
+            <div class="form-field">
+              <label class="form-label">Sector</label>
+              <select class="form-select" id="select-sector" onchange="updateCategories()">
+                <option value="">— Selecciona sector —</option>
+                <option value="construccion">🏗️ Construcción e Interiorismo</option>
+                <option value="restauracion" disabled>🍽️ Restauración (próximamente)</option>
+                <option value="salud" disabled>🏥 Salud y Bienestar (próximamente)</option>
+                <option value="retail" disabled>🛍️ Retail (próximamente)</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Ciudad</label>
+              <select class="form-select" id="select-ciudad">
+                <option value="">— Selecciona ciudad —</option>
+                <option value="Madrid">📍 Madrid</option>
+                <option value="Barcelona">📍 Barcelona</option>
+                <option value="Valencia">📍 Valencia</option>
+                <option value="Sevilla">📍 Sevilla</option>
+                <option value="Málaga">📍 Málaga</option>
+                <option value="Marbella">📍 Marbella</option>
+                <option value="Bilbao">📍 Bilbao</option>
+                <option value="Zaragoza">📍 Zaragoza</option>
+              </select>
+            </div>
           </div>
-          <div class="form-field">
-            <label class="form-label">Ciudad</label>
-            <select class="form-select" id="select-ciudad">
-              <option value="">— Selecciona ciudad —</option>
-              <option value="Madrid">📍 Madrid</option>
-              <option value="Barcelona">📍 Barcelona</option>
-              <option value="Valencia">📍 Valencia</option>
-              <option value="Sevilla">📍 Sevilla</option>
-              <option value="Málaga">📍 Málaga</option>
-              <option value="Marbella">📍 Marbella</option>
-              <option value="Bilbao">📍 Bilbao</option>
-              <option value="Zaragoza">📍 Zaragoza</option>
-            </select>
+
+          <div class="form-field" id="cats-wrap" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <label class="form-label" style="margin:0">Categorías</label>
+              <button class="select-all-btn" onclick="toggleAllCats()">Seleccionar todas</button>
+            </div>
+            <div class="categories-grid" id="cats-grid"></div>
           </div>
         </div>
 
-        <div class="form-field" id="cats-wrap" style="display:none">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <label class="form-label" style="margin:0">Categorías</label>
-            <button class="select-all-btn" onclick="toggleAllCats()">Seleccionar todas</button>
+        <!-- MODO LIBRE -->
+        <div id="wrap-libre" style="display:none">
+          <div class="scraper-grid">
+            <div class="form-field">
+              <label class="form-label">¿Qué tipo de empresa buscas?</label>
+              <input type="text" class="form-input-free" id="input-libre"
+                placeholder="Ej: clínicas dentales, academias inglés, talleres mecánicos…"
+                oninput="checkLaunchReady()">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Ciudad</label>
+              <input type="text" class="form-input-free" id="input-ciudad-libre"
+                placeholder="Ej: Madrid, Barcelona, Sevilla…"
+                oninput="checkLaunchReady()">
+            </div>
           </div>
-          <div class="categories-grid" id="cats-grid"></div>
+          <div style="margin-top:8px;font-size:12px;color:var(--text3)">
+            💡 Modo universal — busca cualquier tipo de negocio en cualquier ciudad de España.
+          </div>
         </div>
 
         <div class="divider"></div>
@@ -924,23 +971,35 @@ function toggleSource(id) {
   document.getElementById('src-' + id).classList.toggle('selected');
 }
 
+let currentMode = 'sector';
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('mode-sector').classList.toggle('active', mode === 'sector');
+  document.getElementById('mode-libre').classList.toggle('active', mode === 'libre');
+  document.getElementById('wrap-sector').style.display = mode === 'sector' ? 'block' : 'none';
+  document.getElementById('wrap-libre').style.display  = mode === 'libre'  ? 'block' : 'none';
+  document.getElementById('btn-launch').disabled = true;
+  checkLaunchReady();
+}
+
 function checkLaunchReady() {
-  const sector = document.getElementById('select-sector').value;
-  const ciudad = document.getElementById('select-ciudad').value;
-  const cats   = SECTORES[sector] || [];
-  const hasCat = cats.some(c => document.getElementById('cat-' + c.id)?.classList.contains('selected'));
-  document.getElementById('btn-launch').disabled = !(sector && ciudad && hasCat);
+  if (currentMode === 'libre') {
+    const termino = document.getElementById('input-libre')?.value.trim();
+    const ciudad  = document.getElementById('input-ciudad-libre')?.value.trim();
+    document.getElementById('btn-launch').disabled = !(termino && ciudad);
+  } else {
+    const sector = document.getElementById('select-sector').value;
+    const ciudad = document.getElementById('select-ciudad').value;
+    const cats   = SECTORES[sector] || [];
+    const hasCat = cats.some(c => document.getElementById('cat-' + c.id)?.classList.contains('selected'));
+    document.getElementById('btn-launch').disabled = !(sector && ciudad && hasCat);
+  }
 }
 
 document.getElementById('select-ciudad').addEventListener('change', checkLaunchReady);
 
 async function launchScraping() {
-  const sector = document.getElementById('select-sector').value;
-  const ciudad = document.getElementById('select-ciudad').value;
-  const cats   = (SECTORES[sector] || [])
-    .filter(c => document.getElementById('cat-' + c.id)?.classList.contains('selected'))
-    .map(c => c.id);
-
   const srcMap = {
     'googlemaps':       'google_maps',
     'habitissimo':      'habitissimo',
@@ -955,19 +1014,39 @@ async function launchScraping() {
     .filter(s => document.getElementById('src-' + s)?.classList.contains('selected'))
     .map(s => srcMap[s]);
 
-  appState.currentSearch = { sector, ciudad, cats, sources };
-  appState.currentJobId  = null;
-
-  showPage('results');
-  document.getElementById('nav-dashboard').classList.add('active');
-  document.getElementById('results-done').style.display = 'none';
-  document.getElementById('campaign-result').style.display = 'none';
-  document.getElementById('page-results').querySelector('.page-title').innerHTML = 'Scraping <span>en curso</span>';
-  document.getElementById('results-sub').textContent = 'Buscando leads en las fuentes seleccionadas…';
-  document.getElementById('log-terminal').innerHTML = '';
-  setProgress(0, 'Conectando con el servidor…');
-
-  await runScrapingReal(sector, ciudad, cats, sources);
+  if (currentMode === 'libre') {
+    const termino = document.getElementById('input-libre').value.trim();
+    const ciudad  = document.getElementById('input-ciudad-libre').value.trim();
+    const fuentesLibre = sources.filter(s => ['google_maps','paginas_amarillas','linkedin','instagram','webs_propias'].includes(s));
+    appState.currentSearch = { sector: termino, ciudad, cats: [termino], sources: fuentesLibre };
+    appState.currentJobId  = null;
+    showPage('results');
+    document.getElementById('nav-dashboard').classList.add('active');
+    document.getElementById('results-done').style.display = 'none';
+    document.getElementById('campaign-result').style.display = 'none';
+    document.getElementById('page-results').querySelector('.page-title').innerHTML = 'Scraping <span>en curso</span>';
+    document.getElementById('results-sub').textContent = 'Buscando "' + termino + '" en ' + ciudad + '\u2026';
+    document.getElementById('log-terminal').innerHTML = '';
+    setProgress(0, 'Conectando con el servidor\u2026');
+    await runScrapingReal('libre', ciudad, [termino], fuentesLibre);
+  } else {
+    const sector = document.getElementById('select-sector').value;
+    const ciudad = document.getElementById('select-ciudad').value;
+    const cats   = (SECTORES[sector] || [])
+      .filter(c => document.getElementById('cat-' + c.id)?.classList.contains('selected'))
+      .map(c => c.id);
+    appState.currentSearch = { sector, ciudad, cats, sources };
+    appState.currentJobId  = null;
+    showPage('results');
+    document.getElementById('nav-dashboard').classList.add('active');
+    document.getElementById('results-done').style.display = 'none';
+    document.getElementById('campaign-result').style.display = 'none';
+    document.getElementById('page-results').querySelector('.page-title').innerHTML = 'Scraping <span>en curso</span>';
+    document.getElementById('results-sub').textContent = 'Buscando leads en las fuentes seleccionadas\u2026';
+    document.getElementById('log-terminal').innerHTML = '';
+    setProgress(0, 'Conectando con el servidor\u2026');
+    await runScrapingReal(sector, ciudad, cats, sources);
+  }
 }
 
 async function runScrapingReal(sector, ciudad, cats, sources) {
@@ -1023,8 +1102,9 @@ async function runScrapingReal(sector, ciudad, cats, sources) {
         document.getElementById('results-done').style.display = 'block';
 
         const entry = {
-          id: Date.now(), job_id, sector, ciudad,
-          cats: cats.length, total: r.total,
+          id: Date.now(), job_id,
+          sector: appState.currentSearch?.sector || sector,
+          ciudad, cats: cats.length, total: r.total,
           alta: r.alta, media: r.media, baja: r.baja,
           date: new Date().toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' })
         };
