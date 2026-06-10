@@ -381,6 +381,34 @@
   .form-input-free:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,200,255,0.1); }
   .form-input-free::placeholder { color: var(--text3); }
 
+  /* ── CITY DROPDOWN PERSONALIZADO ── */
+  .city-dropdown { position: relative; width: 100%; }
+  .city-selected {
+    width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 8px; padding: 11px 14px; font-size: 14px; color: var(--text);
+    cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+    transition: border-color 0.2s, box-shadow 0.2s; user-select: none;
+  }
+  .city-selected:hover { border-color: var(--border2); }
+  .city-dropdown.open .city-selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,200,255,0.1); }
+  .city-list {
+    display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px;
+    max-height: 280px; overflow-y: auto; z-index: 100;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4); padding: 6px;
+  }
+  .city-dropdown.open .city-list { display: block; }
+  .city-group-label {
+    font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 1px;
+    text-transform: uppercase; padding: 10px 10px 6px; margin-top: 4px;
+  }
+  .city-option {
+    padding: 9px 12px; font-size: 13px; color: var(--text2); border-radius: 6px;
+    cursor: pointer; transition: all 0.12s;
+  }
+  .city-option:hover { background: rgba(0,200,255,0.08); color: var(--text); }
+  .city-option.selected { background: rgba(0,200,255,0.12); color: var(--accent); font-weight: 600; }
+
   @media (max-width: 900px) {
     .sidebar { display: none; }
     .main { padding: 24px 20px; }
@@ -535,65 +563,68 @@
             </div>
             <div class="form-field">
               <label class="form-label">Ciudad</label>
-              <select class="form-select" id="select-ciudad">
-                <option value="">— Selecciona ciudad —</option>
-                <optgroup label="Principales">
-                  <option value="Madrid">📍 Madrid</option>
-                  <option value="Barcelona">📍 Barcelona</option>
-                  <option value="Valencia">📍 Valencia</option>
-                  <option value="Sevilla">📍 Sevilla</option>
-                  <option value="Zaragoza">📍 Zaragoza</option>
-                  <option value="Málaga">📍 Málaga</option>
-                  <option value="Murcia">📍 Murcia</option>
-                  <option value="Palma">📍 Palma de Mallorca</option>
-                  <option value="Las Palmas">📍 Las Palmas de Gran Canaria</option>
-                  <option value="Bilbao">📍 Bilbao</option>
-                </optgroup>
-                <optgroup label="Capitales de provincia">
-                  <option value="Álava">📍 Álava (Vitoria)</option>
-                  <option value="Albacete">📍 Albacete</option>
-                  <option value="Alicante">📍 Alicante</option>
-                  <option value="Almería">📍 Almería</option>
-                  <option value="Asturias">📍 Asturias (Oviedo)</option>
-                  <option value="Ávila">📍 Ávila</option>
-                  <option value="Badajoz">📍 Badajoz</option>
-                  <option value="Burgos">📍 Burgos</option>
-                  <option value="Cáceres">📍 Cáceres</option>
-                  <option value="Cádiz">📍 Cádiz</option>
-                  <option value="Cantabria">📍 Cantabria (Santander)</option>
-                  <option value="Castellón">📍 Castellón</option>
-                  <option value="Ciudad Real">📍 Ciudad Real</option>
-                  <option value="Córdoba">📍 Córdoba</option>
-                  <option value="Cuenca">📍 Cuenca</option>
-                  <option value="Girona">📍 Girona</option>
-                  <option value="Granada">📍 Granada</option>
-                  <option value="Guadalajara">📍 Guadalajara</option>
-                  <option value="Guipúzcoa">📍 Guipúzcoa (San Sebastián)</option>
-                  <option value="Huelva">📍 Huelva</option>
-                  <option value="Huesca">📍 Huesca</option>
-                  <option value="Jaén">📍 Jaén</option>
-                  <option value="La Coruña">📍 La Coruña</option>
-                  <option value="La Rioja">📍 La Rioja (Logroño)</option>
-                  <option value="León">📍 León</option>
-                  <option value="Lleida">📍 Lleida</option>
-                  <option value="Lugo">📍 Lugo</option>
-                  <option value="Marbella">📍 Marbella</option>
-                  <option value="Navarra">📍 Navarra (Pamplona)</option>
-                  <option value="Orense">📍 Orense</option>
-                  <option value="Palencia">📍 Palencia</option>
-                  <option value="Pontevedra">📍 Pontevedra</option>
-                  <option value="Salamanca">📍 Salamanca</option>
-                  <option value="Santa Cruz de Tenerife">📍 Santa Cruz de Tenerife</option>
-                  <option value="Segovia">📍 Segovia</option>
-                  <option value="Soria">📍 Soria</option>
-                  <option value="Tarragona">📍 Tarragona</option>
-                  <option value="Teruel">📍 Teruel</option>
-                  <option value="Toledo">📍 Toledo</option>
-                  <option value="Valladolid">📍 Valladolid</option>
-                  <option value="Vizcaya">📍 Vizcaya (Bilbao)</option>
-                  <option value="Zamora">📍 Zamora</option>
-                </optgroup>
-              </select>
+              <div class="city-dropdown" id="city-dropdown">
+                <div class="city-selected" id="city-selected" onclick="toggleCityDropdown()">
+                  <span id="city-selected-text" style="color:var(--text3)">— Selecciona ciudad —</span>
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#7A8BA0" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <div class="city-list" id="city-list">
+                  <div class="city-group-label">⭐ Principales</div>
+                  <div class="city-option" onclick="selectCity('Madrid')">📍 Madrid</div>
+                  <div class="city-option" onclick="selectCity('Barcelona')">📍 Barcelona</div>
+                  <div class="city-option" onclick="selectCity('Valencia')">📍 Valencia</div>
+                  <div class="city-option" onclick="selectCity('Sevilla')">📍 Sevilla</div>
+                  <div class="city-option" onclick="selectCity('Zaragoza')">📍 Zaragoza</div>
+                  <div class="city-option" onclick="selectCity('Málaga')">📍 Málaga</div>
+                  <div class="city-option" onclick="selectCity('Murcia')">📍 Murcia</div>
+                  <div class="city-option" onclick="selectCity('Palma')">📍 Palma de Mallorca</div>
+                  <div class="city-option" onclick="selectCity('Las Palmas')">📍 Las Palmas de Gran Canaria</div>
+                  <div class="city-option" onclick="selectCity('Bilbao')">📍 Bilbao</div>
+                  <div class="city-group-label">🗺️ Capitales de provincia</div>
+                  <div class="city-option" onclick="selectCity('Álava')">📍 Álava (Vitoria)</div>
+                  <div class="city-option" onclick="selectCity('Albacete')">📍 Albacete</div>
+                  <div class="city-option" onclick="selectCity('Alicante')">📍 Alicante</div>
+                  <div class="city-option" onclick="selectCity('Almería')">📍 Almería</div>
+                  <div class="city-option" onclick="selectCity('Asturias')">📍 Asturias (Oviedo)</div>
+                  <div class="city-option" onclick="selectCity('Ávila')">📍 Ávila</div>
+                  <div class="city-option" onclick="selectCity('Badajoz')">📍 Badajoz</div>
+                  <div class="city-option" onclick="selectCity('Burgos')">📍 Burgos</div>
+                  <div class="city-option" onclick="selectCity('Cáceres')">📍 Cáceres</div>
+                  <div class="city-option" onclick="selectCity('Cádiz')">📍 Cádiz</div>
+                  <div class="city-option" onclick="selectCity('Cantabria')">📍 Cantabria (Santander)</div>
+                  <div class="city-option" onclick="selectCity('Castellón')">📍 Castellón</div>
+                  <div class="city-option" onclick="selectCity('Ciudad Real')">📍 Ciudad Real</div>
+                  <div class="city-option" onclick="selectCity('Córdoba')">📍 Córdoba</div>
+                  <div class="city-option" onclick="selectCity('Cuenca')">📍 Cuenca</div>
+                  <div class="city-option" onclick="selectCity('Girona')">📍 Girona</div>
+                  <div class="city-option" onclick="selectCity('Granada')">📍 Granada</div>
+                  <div class="city-option" onclick="selectCity('Guadalajara')">📍 Guadalajara</div>
+                  <div class="city-option" onclick="selectCity('Guipúzcoa')">📍 Guipúzcoa (San Sebastián)</div>
+                  <div class="city-option" onclick="selectCity('Huelva')">📍 Huelva</div>
+                  <div class="city-option" onclick="selectCity('Huesca')">📍 Huesca</div>
+                  <div class="city-option" onclick="selectCity('Jaén')">📍 Jaén</div>
+                  <div class="city-option" onclick="selectCity('La Coruña')">📍 La Coruña</div>
+                  <div class="city-option" onclick="selectCity('La Rioja')">📍 La Rioja (Logroño)</div>
+                  <div class="city-option" onclick="selectCity('León')">📍 León</div>
+                  <div class="city-option" onclick="selectCity('Lleida')">📍 Lleida</div>
+                  <div class="city-option" onclick="selectCity('Lugo')">📍 Lugo</div>
+                  <div class="city-option" onclick="selectCity('Marbella')">📍 Marbella</div>
+                  <div class="city-option" onclick="selectCity('Navarra')">📍 Navarra (Pamplona)</div>
+                  <div class="city-option" onclick="selectCity('Orense')">📍 Orense</div>
+                  <div class="city-option" onclick="selectCity('Palencia')">📍 Palencia</div>
+                  <div class="city-option" onclick="selectCity('Pontevedra')">📍 Pontevedra</div>
+                  <div class="city-option" onclick="selectCity('Salamanca')">📍 Salamanca</div>
+                  <div class="city-option" onclick="selectCity('Santa Cruz de Tenerife')">📍 Santa Cruz de Tenerife</div>
+                  <div class="city-option" onclick="selectCity('Segovia')">📍 Segovia</div>
+                  <div class="city-option" onclick="selectCity('Soria')">📍 Soria</div>
+                  <div class="city-option" onclick="selectCity('Tarragona')">📍 Tarragona</div>
+                  <div class="city-option" onclick="selectCity('Teruel')">📍 Teruel</div>
+                  <div class="city-option" onclick="selectCity('Toledo')">📍 Toledo</div>
+                  <div class="city-option" onclick="selectCity('Valladolid')">📍 Valladolid</div>
+                  <div class="city-option" onclick="selectCity('Zamora')">📍 Zamora</div>
+                </div>
+              </div>
+              <input type="hidden" id="select-ciudad" value="">
             </div>
           </div>
 
@@ -1104,7 +1135,7 @@ function checkLaunchReady() {
   }
 }
 
-document.getElementById('select-ciudad').addEventListener('change', checkLaunchReady);
+// city dropdown handles checkLaunchReady via selectCity()
 
 async function launchScraping() {
   const srcMap = {
@@ -1294,6 +1325,27 @@ function cancelSubscription() {
     alert('Para cancelar, accede a tu panel de Stripe o escríbenos a hola@leadforge.es');
   }
 }
+
+function toggleCityDropdown() {
+  const dd = document.getElementById('city-dropdown');
+  dd.classList.toggle('open');
+}
+
+function selectCity(value) {
+  document.getElementById('select-ciudad').value = value;
+  const display = document.querySelector(`[onclick="selectCity('${value}')"]`)?.textContent || value;
+  document.getElementById('city-selected-text').textContent = display;
+  document.getElementById('city-selected-text').style.color = 'var(--text)';
+  document.querySelectorAll('.city-option').forEach(o => o.classList.remove('selected'));
+  document.querySelector(`[onclick="selectCity('${value}')"]`)?.classList.add('selected');
+  document.getElementById('city-dropdown').classList.remove('open');
+  checkLaunchReady();
+}
+
+document.addEventListener('click', function(e) {
+  const dd = document.getElementById('city-dropdown');
+  if (dd && !dd.contains(e.target)) dd.classList.remove('open');
+});
 
 function showAlert(el, msg) { el.textContent = msg; el.classList.add('show'); }
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
