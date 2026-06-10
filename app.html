@@ -381,6 +381,37 @@
   .form-input-free:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,200,255,0.1); }
   .form-input-free::placeholder { color: var(--text3); }
 
+  .btn-preview {
+    width: 100%; padding: 11px; margin-top: 10px;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text2); font-size: 13px; font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-preview:hover { border-color: var(--accent); color: var(--accent); }
+
+  .preview-overlay {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+    align-items: center; justify-content: center; padding: 24px;
+  }
+  .preview-overlay.open { display: flex; }
+  .preview-box {
+    width: 100%; max-width: 620px; max-height: 85vh;
+    background: #fff; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6); display: flex; flex-direction: column;
+  }
+  .preview-header {
+    background: #f4f6f9; padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #e2e8f0; flex-shrink: 0;
+  }
+  .preview-header span { font-size: 13px; color: #4a5568; font-family: Arial, sans-serif; }
+  .preview-close {
+    background: none; border: none; font-size: 18px; cursor: pointer;
+    color: #4a5568; line-height: 1; padding: 4px;
+  }
+  .preview-iframe { flex: 1; border: none; overflow-y: auto; }
+
   .email-limit-btn {
     flex: 1; padding: 9px; text-align: center; border-radius: 8px;
     font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s;
@@ -823,6 +854,18 @@
       <span id="camp-label">Enviar campaña →</span>
       <div class="campaign-spinner" id="camp-spinner"></div>
     </button>
+    <button class="btn-preview" onclick="previewEmail()">👁️ Ver preview del email</button>
+  </div>
+</div>
+
+<!-- MODAL PREVIEW EMAIL -->
+<div class="preview-overlay" id="preview-overlay">
+  <div class="preview-box">
+    <div class="preview-header">
+      <span id="preview-subject">Vista previa del email</span>
+      <button class="preview-close" onclick="closePreview()">✕</button>
+    </div>
+    <iframe class="preview-iframe" id="preview-iframe" style="height:500px;width:100%;"></iframe>
   </div>
 </div>
 
@@ -1370,6 +1413,51 @@ document.addEventListener('click', function(e) {
   const dd = document.getElementById('city-dropdown');
   if (dd && !dd.contains(e.target)) dd.classList.remove('open');
 });
+
+function previewEmail() {
+  const name    = document.getElementById('camp-name').value.trim() || 'Tu nombre';
+  const company = document.getElementById('camp-company').value.trim() || 'Tu empresa';
+  const product = document.getElementById('camp-product').value.trim() || 'tu producto o servicio';
+  const email   = document.getElementById('camp-email').value.trim() || 'tu@empresa.com';
+  const leadName = 'Empresa Ejemplo';
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:40px 20px;">
+<tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+  <tr><td style="padding:36px 40px 28px;">
+    <p style="margin:0 0 20px;font-size:16px;color:#1a1a2e;">Hola <strong>${leadName}</strong>,</p>
+    <p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">
+      Soy <strong>${name}</strong> de <strong>${company}</strong>.
+      Me pongo en contacto porque trabajamos en <strong>${product}</strong> y creo que podría encajaros.
+    </p>
+    <p style="margin:0 0 28px;font-size:15px;color:#4a5568;">¿Tenéis 10 minutos esta semana para una llamada rápida?</p>
+    <table cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
+      <tr><td style="background:#0066FF;border-radius:7px;">
+        <a href="mailto:${email}" style="display:inline-block;padding:12px 28px;color:#fff;text-decoration:none;font-weight:700;font-size:14px;">Responder →</a>
+      </td></tr>
+    </table>
+    <p style="margin:0;font-size:14px;color:#4a5568;">Un saludo,<br><strong>${name}</strong><br><span style="color:#7a8ba0;font-size:12px;">${company} · ${email}</span></p>
+  </td></tr>
+  <tr><td style="background:#f8fafc;padding:16px 40px;border-top:1px solid #e2e8f0;">
+    <p style="margin:0;font-size:11px;color:#a0aec0;text-align:center;">Has recibido este email porque tu empresa aparece en directorios públicos de internet.</p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+
+  document.getElementById('preview-subject').textContent = `Asunto: ¿Trabajamos juntos? — ${company}`;
+  document.getElementById('preview-iframe').srcdoc = html;
+  document.getElementById('preview-overlay').classList.add('open');
+}
+
+function closePreview() {
+  document.getElementById('preview-overlay').classList.remove('open');
+}
 
 function showAlert(el, msg) { el.textContent = msg; el.classList.add('show'); }
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
