@@ -560,7 +560,7 @@
         <p class="page-sub">Configura los parámetros y lanza el scraping de leads.</p>
       </div>
 
-      <div class="stats-grid">
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
         <div class="stat-card">
           <div class="stat-label">Búsquedas este mes</div>
           <div class="stat-value" id="stat-searches">0 <span>búsquedas</span></div>
@@ -568,6 +568,10 @@
         <div class="stat-card">
           <div class="stat-label">Leads generados</div>
           <div class="stat-value" id="stat-leads">0 <span>leads</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Emails enviados</div>
+          <div class="stat-value" id="stat-emails">0 <span>emails</span></div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Plan activo</div>
@@ -849,6 +853,12 @@
         <div class="email-limit-btn" id="limit-100" onclick="selectLimit(100)">100 emails</div>
         <div class="email-limit-btn" id="limit-150" onclick="selectLimit(150)">150 emails</div>
       </div>
+    </div>
+    <div class="modal-field" style="margin-top:4px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;text-transform:none;font-size:13px;color:var(--text2);letter-spacing:0;">
+        <input type="checkbox" id="camp-followup" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+        Enviar recordatorio automático a los 3 días a quien no responda
+      </label>
     </div>
     <button class="btn-campaign" id="btn-send-campaign" onclick="sendCampaign()">
       <span id="camp-label">Enviar campaña →</span>
@@ -1260,6 +1270,23 @@ async function runScrapingReal(sector, ciudad, cats, sources) {
 
   try {
     addLog('▶ Conectando con LeadForge API…', 'accent');
+
+    // Mensajes animados durante el scraping
+    const loadingMsgs = [
+      '🔍 Buscando empresas en Google Maps…',
+      '📋 Analizando directorios de negocios…',
+      '🌐 Visitando webs para extraer emails…',
+      '📊 Calculando scoring de calidad…',
+      '🔄 Deduplicando leads encontrados…',
+      '⚡ Procesando resultados…',
+      '📥 Preparando tu Excel…',
+    ];
+    let msgIdx = 0;
+    const loadingInterval = setInterval(() => {
+      if (msgIdx < loadingMsgs.length) {
+        document.getElementById('progress-stage').textContent = loadingMsgs[msgIdx++];
+      }
+    }, 4000);
     const launchRes = await fetch(`${SCRAPER_API_URL}/scrape`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1288,6 +1315,7 @@ async function runScrapingReal(sector, ciudad, cats, sources) {
       setProgress(data.progress, data.logs.at(-1)?.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/, '') || '');
 
       if (data.status === 'done') {
+        clearInterval(loadingInterval);
         const r = data.result;
         document.getElementById('res-total').textContent = r.total;
         document.getElementById('res-alta').textContent  = r.alta;
@@ -1312,12 +1340,14 @@ async function runScrapingReal(sector, ciudad, cats, sources) {
       }
 
       if (data.status === 'error') {
+        clearInterval(loadingInterval);
         addLog(`❌ Error: ${data.error}`, 'error');
         setProgress(0, 'Error — intenta de nuevo');
         break;
       }
     }
   } catch (err) {
+    clearInterval(loadingInterval);
     addLog(`❌ ${err.message}`, 'error');
     setProgress(0, 'Error de conexión');
   }
@@ -1373,8 +1403,10 @@ function updateStats() {
   const searches   = appState.searches;
   const thisMonth  = searches.filter(s => new Date(s.id) > new Date(Date.now() - 30*24*60*60*1000));
   const totalLeads = searches.reduce((a, s) => a + (s.total || 0), 0);
+  const totalEmails = parseInt(localStorage.getItem('lf_emails_sent') || '0');
   document.getElementById('stat-searches').innerHTML = `${thisMonth.length} <span>búsquedas</span>`;
   document.getElementById('stat-leads').innerHTML    = `${totalLeads} <span>leads</span>`;
+  document.getElementById('stat-emails').innerHTML   = `${totalEmails} <span>emails</span>`;
   document.getElementById('cuenta-searches').textContent = searches.length;
   renderHistory();
 }
@@ -1527,10 +1559,16 @@ async function sendCampaign() {
     spin.style.display = 'none';
 
     if (data.ok) {
+      // Actualizar contador de emails enviados
+      const prev = parseInt(localStorage.getItem('lf_emails_sent') || '0');
+      localStorage.setItem('lf_emails_sent', prev + data.enviados);
+      updateStats();
+
+      const followup = document.getElementById('camp-followup').checked;
       closeCampaignModal();
       resEl.className = 'campaign-result ok';
       resEl.style.display = 'block';
-      resEl.textContent = `✅ Campaña enviada: ${data.enviados} emails enviados correctamente${data.fallidos ? ' · ' + data.fallidos + ' fallidos' : ''}.`;
+      resEl.textContent = `✅ Campaña enviada: ${data.enviados} emails enviados correctamente${data.fallidos ? ' · ' + data.fallidos + ' fallidos' : ''}${followup ? ' · Recordatorio programado en 3 días ⏰' : ''}.`;
     } else {
       resEl.className = 'campaign-result err';
       resEl.style.display = 'block';
