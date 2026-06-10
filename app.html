@@ -1353,6 +1353,14 @@ function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 function openCampaignModal() {
   if (!appState.currentJobId) return;
   document.getElementById('campaign-result').style.display = 'none';
+
+  // Cargar datos guardados
+  const saved = JSON.parse(localStorage.getItem('lf_campaign_data') || '{}');
+  if (saved.name)    document.getElementById('camp-name').value    = saved.name;
+  if (saved.company) document.getElementById('camp-company').value = saved.company;
+  if (saved.product) document.getElementById('camp-product').value = saved.product;
+  if (saved.email)   document.getElementById('camp-email').value   = saved.email;
+
   document.getElementById('modal-campaign').classList.add('open');
 }
 
@@ -1379,6 +1387,9 @@ async function sendCampaign() {
     alert('Introduce un email válido.');
     return;
   }
+
+  // Guardar datos para la próxima vez
+  localStorage.setItem('lf_campaign_data', JSON.stringify({ name, company, product, email }));
 
   const btn   = document.getElementById('btn-send-campaign');
   const lbl   = document.getElementById('camp-label');
