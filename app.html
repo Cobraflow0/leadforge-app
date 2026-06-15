@@ -547,7 +547,46 @@
           <div class="info-row"><span class="key">Miembro desde</span><span class="val" id="cuenta-desde">—</span></div>
         </div>
       </div>
-      <div class="danger-zone">
+      <!-- EMAIL DE ENVÍO -->
+      <div class="card" style="margin-top:20px;">
+        <div class="card-title">✉️ Email de envío de campañas</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.6;">
+          Configura el email desde el que se enviarán tus campañas a los leads.<br>
+          LeadForge te mandará un enlace de verificación — solo tienes que hacer clic en él.
+        </p>
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+          <div style="flex:1;min-width:220px;">
+            <label class="form-label" style="font-size:11px;color:var(--text2);font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;display:block;">Tu email de envío</label>
+            <input type="email" id="sender-email-input" placeholder="tu@empresa.com"
+              style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:11px 14px;font-size:14px;font-family:'Space Grotesk',sans-serif;color:var(--text);outline:none;transition:border-color 0.2s,box-shadow 0.2s;"
+              onfocus="this.style.borderColor='var(--accent)';this.style.boxShadow='0 0 0 3px rgba(0,200,255,0.1)'"
+              onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+          </div>
+          <div style="flex:1;min-width:220px;">
+            <label class="form-label" style="font-size:11px;color:var(--text2);font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;display:block;">Tu nombre / empresa</label>
+            <input type="text" id="sender-name-input" placeholder="Ej: Salvador — Neopanels"
+              style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:11px 14px;font-size:14px;font-family:'Space Grotesk',sans-serif;color:var(--text);outline:none;transition:border-color 0.2s,box-shadow 0.2s;"
+              onfocus="this.style.borderColor='var(--accent)';this.style.boxShadow='0 0 0 3px rgba(0,200,255,0.1)'"
+              onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center;">
+          <button onclick="verifySender()" id="btn-verify-sender"
+            style="padding:11px 22px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:8px;color:#080C12;font-size:13px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:opacity 0.2s;display:flex;align-items:center;gap:8px;">
+            <span id="verify-label">📨 Verificar email</span>
+            <div id="verify-spinner" style="display:none;width:14px;height:14px;border:2px solid rgba(8,12,18,0.3);border-top-color:#080C12;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
+          </button>
+          <button onclick="checkSenderStatus()" id="btn-check-sender"
+            style="padding:11px 20px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:13px;font-weight:600;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all 0.15s;"
+            onmouseover="this.style.borderColor='var(--accent);this.style.color='var(--accent)'"
+            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
+            🔄 Comprobar estado
+          </button>
+        </div>
+        <div id="sender-status-msg" style="display:none;margin-top:14px;padding:12px 16px;border-radius:8px;font-size:13px;line-height:1.5;"></div>
+      </div>
+
+      <div class="danger-zone" style="margin-top:20px;">
         <div class="danger-title">Cancelar suscripción</div>
         <div class="danger-sub">Al cancelar mantendrás el acceso hasta el final del período de facturación actual.</div>
         <button class="btn-danger" onclick="cancelSubscription()">Cancelar suscripción</button>
@@ -564,10 +603,15 @@
     <h2 class="modal-title">✉️ Enviar campaña</h2>
     <p class="modal-sub">LeadForge enviará un email personalizado a los top leads con email de este scraping.</p>
     <div class="modal-info">📊 <span id="modal-leads-info">Top 50 leads con mejor puntuación que tengan email.</span></div>
+    <div id="camp-sender-status" style="display:none;padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:14px;"></div>
     <div class="modal-field"><label>Tu nombre</label><input type="text" id="camp-name" placeholder="Ej: Carlos García"></div>
     <div class="modal-field"><label>Tu empresa</label><input type="text" id="camp-company" placeholder="Ej: Neopanels"></div>
     <div class="modal-field"><label>Tu producto o servicio</label><textarea id="camp-product" rows="2" placeholder="Ej: instalación de revestimientos para obras y reformas"></textarea></div>
-    <div class="modal-field"><label>Tu email de contacto</label><input type="email" id="camp-email" placeholder="tu@empresa.com"></div>
+    <div class="modal-field">
+      <label>Email de envío <span id="camp-email-badge" style="font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:700;margin-left:6px;"></span></label>
+      <input type="email" id="camp-email" placeholder="tu@empresa.com">
+      <div style="font-size:11px;color:var(--text3);margin-top:5px;">Debe estar verificado en <span onclick="closeCampaignModal();showPage('cuenta')" style="color:var(--accent);cursor:pointer;text-decoration:underline;">Mi cuenta → Email de envío</span></div>
+    </div>
     <div class="modal-field">
       <label>Número de emails a enviar</label>
       <div style="display:flex;gap:10px;margin-top:4px;">
@@ -696,6 +740,11 @@ async function loadApp(user){
   document.getElementById('cuenta-desde').textContent=since;
   document.getElementById('renewal-date').textContent=renewal;
   updateStats();renderHistory();renderCRM();showScreen('app');showPage('dashboard');
+  // Cargar email de envío guardado en Mi cuenta
+  const savedSender = localStorage.getItem('lf_sender_email');
+  const savedSenderName = localStorage.getItem('lf_sender_name');
+  if(savedSender) document.getElementById('sender-email-input').value = savedSender;
+  if(savedSenderName) document.getElementById('sender-name-input').value = savedSenderName;
 }
 
 function doLogout(){sb.signOut();appState={user:null,profile:null,searches:appState.searches,currentSearch:null,currentJobId:null,currentLeads:[]};showScreen('login');}
@@ -867,6 +916,66 @@ function updateStats(){
 
 function cancelSubscription(){if(confirm('¿Seguro que quieres cancelar?\n\nMantendrás el acceso hasta el final del período de facturación.')){alert('Para cancelar, accede a tu panel de Stripe o escríbenos a hola@leadforge.es');}}
 
+// ══ SENDER VERIFICATION ══
+function _senderMsg(msg, type) {
+  const el = document.getElementById('sender-status-msg');
+  el.style.display = 'block';
+  if (type === 'ok')      { el.style.background='rgba(0,229,160,0.08)'; el.style.border='1px solid rgba(0,229,160,0.25)'; el.style.color='var(--green)'; }
+  else if (type === 'warn'){ el.style.background='rgba(255,217,61,0.08)'; el.style.border='1px solid rgba(255,217,61,0.25)'; el.style.color='var(--yellow)'; }
+  else                    { el.style.background='rgba(255,77,106,0.08)'; el.style.border='1px solid rgba(255,77,106,0.25)'; el.style.color='var(--red)'; }
+  el.textContent = msg;
+}
+
+async function verifySender() {
+  const email = document.getElementById('sender-email-input').value.trim();
+  const name  = document.getElementById('sender-name-input').value.trim();
+  if (!email || !email.includes('@')) { _senderMsg('Introduce un email válido.', 'err'); return; }
+  const btn = document.getElementById('btn-verify-sender');
+  document.getElementById('verify-label').style.display = 'none';
+  document.getElementById('verify-spinner').style.display = 'block';
+  btn.disabled = true;
+  try {
+    const r = await fetch(`${SCRAPER_API_URL}/verify-sender`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, name: name || email.split('@')[0] })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      const type = d.status === 'verified' ? 'ok' : 'warn';
+      _senderMsg(d.message, type);
+      localStorage.setItem('lf_sender_email', email);
+      if (name) localStorage.setItem('lf_sender_name', name);
+    } else {
+      _senderMsg(d.error || 'Error al verificar el email.', 'err');
+    }
+  } catch(e) {
+    _senderMsg('Error de conexión con la API.', 'err');
+  }
+  document.getElementById('verify-label').style.display = 'inline';
+  document.getElementById('verify-spinner').style.display = 'none';
+  btn.disabled = false;
+}
+
+async function checkSenderStatus() {
+  const email = document.getElementById('sender-email-input').value.trim()
+             || localStorage.getItem('lf_sender_email') || '';
+  if (!email) { _senderMsg('Introduce tu email primero.', 'err'); return; }
+  if (email) document.getElementById('sender-email-input').value = email;
+  try {
+    const r = await fetch(`${SCRAPER_API_URL}/check-sender`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      const type = d.status === 'verified' ? 'ok' : d.status === 'pending' ? 'warn' : 'err';
+      _senderMsg(d.message, type);
+    }
+  } catch(e) {
+    _senderMsg('Error de conexión.', 'err');
+  }
+}
+
 let selectedLimit=50;
 function selectLimit(n){selectedLimit=n;document.querySelectorAll('.email-limit-btn').forEach(b=>b.classList.remove('selected'));document.getElementById('limit-'+n).classList.add('selected');}
 
@@ -898,15 +1007,56 @@ function closePreview(){document.getElementById('preview-overlay').classList.rem
 function showAlert(el,msg){el.textContent=msg;el.classList.add('show');}
 function delay(ms){return new Promise(r=>setTimeout(r,ms));}
 
-function openCampaignModal(){
+function openCampaignModal() {
   if(!appState.currentJobId)return;
   document.getElementById('campaign-result').style.display='none';
+  document.getElementById('camp-sender-status').style.display='none';
   const saved=JSON.parse(localStorage.getItem('lf_campaign_data')||'{}');
   if(saved.name)document.getElementById('camp-name').value=saved.name;
   if(saved.company)document.getElementById('camp-company').value=saved.company;
   if(saved.product)document.getElementById('camp-product').value=saved.product;
-  if(saved.email)document.getElementById('camp-email').value=saved.email;
+
+  // Cargar email verificado guardado
+  const senderEmail = localStorage.getItem('lf_sender_email') || saved.email || '';
+  if(senderEmail) {
+    document.getElementById('camp-email').value = senderEmail;
+    // Comprobar estado en background
+    _checkCampEmailStatus(senderEmail);
+  } else if(saved.email) {
+    document.getElementById('camp-email').value=saved.email;
+  }
+
   document.getElementById('modal-campaign').classList.add('open');
+}
+
+async function _checkCampEmailStatus(email) {
+  if(!email) return;
+  const badge = document.getElementById('camp-email-badge');
+  badge.textContent = '⏳';
+  try {
+    const r = await fetch(`${SCRAPER_API_URL}/check-sender`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email})
+    });
+    const d = await r.json();
+    if(d.ok) {
+      if(d.status==='verified') {
+        badge.textContent='✅ verificado';badge.style.color='var(--green)';
+      } else if(d.status==='pending') {
+        badge.textContent='⏳ pendiente';badge.style.color='var(--yellow)';
+        const st=document.getElementById('camp-sender-status');
+        st.style.display='block';st.style.background='rgba(255,217,61,0.08)';
+        st.style.border='1px solid rgba(255,217,61,0.25)';st.style.color='var(--yellow)';
+        st.textContent='⚠️ Tu email está pendiente de verificación. Revisa tu bandeja de entrada y haz clic en el enlace que te enviamos.';
+      } else {
+        badge.textContent='❌ no verificado';badge.style.color='var(--red)';
+        const st=document.getElementById('camp-sender-status');
+        st.style.display='block';st.style.background='rgba(255,77,106,0.08)';
+        st.style.border='1px solid rgba(255,77,106,0.25)';st.style.color='var(--red)';
+        st.textContent='❌ Email no verificado. Ve a Mi cuenta → Email de envío para verificarlo antes de enviar.';
+      }
+    }
+  } catch(e) { badge.textContent=''; }
 }
 function closeCampaignModal(){document.getElementById('modal-campaign').classList.remove('open');}
 document.getElementById('modal-campaign').addEventListener('click',function(e){if(e.target===this)closeCampaignModal();});
