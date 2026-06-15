@@ -259,11 +259,30 @@
   .btn-import-crm { width:100%; padding:14px; background:rgba(0,200,255,0.06); border:1px solid var(--border2); border-radius:10px; color:var(--accent); font-size:14px; font-weight:600; font-family:'Space Grotesk',sans-serif; cursor:pointer; transition:all 0.2s; margin-top:10px; display:flex; align-items:center; justify-content:center; gap:8px; }
   .btn-import-crm:hover { background:rgba(0,200,255,0.12); }
 
+  /* CAMPAÑAS */
+  .camp-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:20px 24px; margin-bottom:14px; transition:border-color 0.15s; }
+  .camp-card:hover { border-color:var(--border2); }
+  .camp-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; flex-wrap:wrap; gap:8px; }
+  .camp-title { font-size:15px; font-weight:600; margin-bottom:3px; }
+  .camp-date { font-size:12px; color:var(--text3); }
+  .camp-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .camp-stat { text-align:center; }
+  .camp-stat .n { font-size:22px; font-weight:700; font-family:'JetBrains Mono',monospace; display:block; margin-bottom:2px; }
+  .camp-stat .l { font-size:11px; color:var(--text2); }
+  .camp-stat.enviados .n { color:var(--accent); }
+  .camp-stat.abiertos .n { color:var(--green); }
+  .camp-stat.clics .n    { color:var(--yellow); }
+  .camp-stat.rebotes .n  { color:var(--red); }
+  .camp-loading { font-size:12px; color:var(--text3); font-family:'JetBrains Mono',monospace; }
+  .pct-bar-bg { width:100%; height:4px; background:rgba(255,255,255,0.06); border-radius:10px; margin-top:6px; overflow:hidden; }
+  .pct-bar-fill { height:100%; border-radius:10px; transition:width 0.6s ease; }
+
   @media(max-width:900px) {
     .sidebar{display:none} .main{padding:24px 20px}
     .stats-grid{grid-template-columns:1fr 1fr} .scraper-grid{grid-template-columns:1fr}
     .categories-grid{grid-template-columns:repeat(2,1fr)} .results-summary{grid-template-columns:repeat(2,1fr)}
     .cuenta-grid{grid-template-columns:1fr} .crm-stats{grid-template-columns:repeat(3,1fr)}
+    .camp-stats{grid-template-columns:repeat(2,1fr)}
   }
 </style>
 </head>
@@ -307,6 +326,7 @@
       <div class="nav-label">Principal</div>
       <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')"><span class="icon">⚡</span> Nueva búsqueda</div>
       <div class="nav-item" id="nav-historial" onclick="showPage('historial')"><span class="icon">📋</span> Historial</div>
+      <div class="nav-item" id="nav-campanas" onclick="showPage('campanas')"><span class="icon">📨</span> Mis campañas</div>
       <div class="nav-item" id="nav-crm" onclick="showPage('crm')"><span class="icon">🎯</span> Mis leads</div>
       <div class="nav-label">Configuración</div>
       <div class="nav-item" id="nav-cuenta" onclick="showPage('cuenta')"><span class="icon">👤</span> Mi cuenta</div>
@@ -481,6 +501,17 @@
       </div>
       <div class="history-list" id="history-list">
         <div class="empty-state"><div class="emoji">📋</div><p>Aún no tienes búsquedas guardadas.<br>Lanza tu primera búsqueda para verla aquí.</p></div>
+      </div>
+    </div>
+
+    <!-- CAMPAÑAS -->
+    <div class="page" id="page-campanas">
+      <div class="page-header">
+        <h1 class="page-title">Mis <span>campañas</span></h1>
+        <p class="page-sub">Estadísticas de apertura y clics de tus campañas de email.</p>
+      </div>
+      <div id="campanas-list">
+        <div class="empty-state"><div class="emoji">📨</div><p>Aún no has enviado ninguna campaña.<br>Lanza una búsqueda y envía tu primera campaña.</p></div>
       </div>
     </div>
 
@@ -757,6 +788,7 @@ function showPage(name){
   if(page)page.classList.add('active');
   if(nav)nav.classList.add('active');
   if(name==='crm')renderCRM();
+  if(name==='campanas')renderCampanas();
 }
 
 function updateCategories(){
@@ -1079,12 +1111,91 @@ async function sendCampaign(){
     if(data.ok){
       const prev=parseInt(localStorage.getItem('lf_emails_sent')||'0');
       localStorage.setItem('lf_emails_sent',prev+data.enviados);updateStats();
+
+      // Guardar campaña para estadísticas
+      const campañas = JSON.parse(localStorage.getItem('lf_campanas')||'[]');
+      campañas.unshift({
+        id: Date.now(),
+        tag: `lf_${jobId.slice(0,8)}`,
+        job_id: jobId,
+        sector: appState.currentSearch?.sector || '',
+        ciudad: appState.currentSearch?.ciudad || '',
+        enviados: data.enviados,
+        company: company,
+        date: new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),
+      });
+      localStorage.setItem('lf_campanas', JSON.stringify(campañas.slice(0,50)));
       const followup=document.getElementById('camp-followup').checked;
       if(followup&&jobId){fetch(`${SCRAPER_API_URL}/send-followup`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_email:email,max_emails:selectedLimit,delay_days:3})});}
       closeCampaignModal();resEl.className='campaign-result ok';resEl.style.display='block';
       resEl.textContent=`✅ Campaña enviada: ${data.enviados} emails${data.filtrados?' · '+data.filtrados+' filtrados':''}${data.fallidos?' · '+data.fallidos+' fallidos':''}${followup?' · Recordatorio en 3 días ⏰':''}.`;
     } else {resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ ${data.error||'No se pudo enviar la campaña.'}`;}
   } catch(err){btn.disabled=false;lbl.style.display='inline';spin.style.display='none';alert('Error de conexión con la API.');}
+}
+
+// ══ CAMPAÑAS ══
+async function renderCampanas() {
+  const campañas = JSON.parse(localStorage.getItem('lf_campanas')||'[]');
+  const list = document.getElementById('campanas-list');
+  if(!campañas.length) {
+    list.innerHTML=`<div class="empty-state"><div class="emoji">📨</div><p>Aún no has enviado ninguna campaña.<br>Lanza una búsqueda y envía tu primera campaña.</p></div>`;
+    return;
+  }
+  // Renderizar cards sin stats primero
+  list.innerHTML = campañas.map(c=>`
+    <div class="camp-card" id="camp-${c.id}">
+      <div class="camp-header">
+        <div>
+          <div class="camp-title">📨 ${c.company || 'Campaña'} — ${c.sector||''} ${c.ciudad?'· '+c.ciudad:''}</div>
+          <div class="camp-date">${c.date} · ${c.enviados} emails enviados</div>
+        </div>
+        <span class="camp-loading" id="camp-loading-${c.id}">Cargando stats…</span>
+      </div>
+      <div class="camp-stats" id="camp-stats-${c.id}" style="display:none">
+        <div class="camp-stat enviados">
+          <span class="n" id="cs-env-${c.id}">${c.enviados}</span><span class="l">Enviados</span>
+        </div>
+        <div class="camp-stat abiertos">
+          <span class="n" id="cs-open-${c.id}">—</span><span class="l">Abiertos</span>
+          <div class="pct-bar-bg"><div class="pct-bar-fill" id="cs-open-bar-${c.id}" style="width:0%;background:var(--green)"></div></div>
+        </div>
+        <div class="camp-stat clics">
+          <span class="n" id="cs-click-${c.id}">—</span><span class="l">Clics</span>
+          <div class="pct-bar-bg"><div class="pct-bar-fill" id="cs-click-bar-${c.id}" style="width:0%;background:var(--yellow)"></div></div>
+        </div>
+        <div class="camp-stat rebotes">
+          <span class="n" id="cs-reb-${c.id}">—</span><span class="l">Rebotes</span>
+        </div>
+      </div>
+    </div>`).join('');
+
+  // Cargar stats de cada campaña en paralelo
+  campañas.forEach(async c => {
+    try {
+      const r = await fetch(`${SCRAPER_API_URL}/campaign-stats`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({tag: c.tag})
+      });
+      const d = await r.json();
+      const loadEl = document.getElementById(`camp-loading-${c.id}`);
+      const statsEl = document.getElementById(`camp-stats-${c.id}`);
+      if(!loadEl || !statsEl) return;
+      if(d.ok) {
+        loadEl.style.display='none';
+        statsEl.style.display='grid';
+        document.getElementById(`cs-open-${c.id}`).textContent  = `${d.abiertos} (${d.pct_open}%)`;
+        document.getElementById(`cs-click-${c.id}`).textContent = `${d.clics} (${d.pct_click}%)`;
+        document.getElementById(`cs-reb-${c.id}`).textContent   = d.rebotes;
+        document.getElementById(`cs-open-bar-${c.id}`).style.width  = Math.min(d.pct_open,100)+'%';
+        document.getElementById(`cs-click-bar-${c.id}`).style.width = Math.min(d.pct_click,100)+'%';
+      } else {
+        loadEl.textContent = 'Stats no disponibles aún';
+      }
+    } catch(e) {
+      const loadEl = document.getElementById(`camp-loading-${c.id}`);
+      if(loadEl) loadEl.textContent = 'Error al cargar stats';
+    }
+  });
 }
 
 // ══ CRM ══
