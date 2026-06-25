@@ -410,7 +410,6 @@
                   <div class="city-option" onclick="selectCity('Jaén')">📍 Jaén</div>
                   <div class="city-option" onclick="selectCity('León')">📍 León</div>
                   <div class="city-option" onclick="selectCity('Marbella')">📍 Marbella</div>
-                  <div class="city-option" onclick="selectCity('Murcia')">📍 Murcia</div>
                   <div class="city-option" onclick="selectCity('Pamplona')">📍 Pamplona</div>
                   <div class="city-option" onclick="selectCity('Salamanca')">📍 Salamanca</div>
                   <div class="city-option" onclick="selectCity('San Sebastián')">📍 San Sebastián</div>
@@ -545,7 +544,7 @@
         <button class="crm-filter-btn"        id="crm-f-descartado"    onclick="setCRMFilter('descartado')">Descartados</button>
       </div>
       <div class="card" style="padding:0;overflow:hidden;">
-        <div id="crm-table-wrap"></div>
+        <div id="crm-table-wrap"><div class="crm-empty"><div class="emoji">⏳</div><p>Cargando leads…</p></div></div>
       </div>
     </div>
 
@@ -608,9 +607,7 @@
             <div id="verify-spinner" style="display:none;width:14px;height:14px;border:2px solid rgba(8,12,18,0.3);border-top-color:#080C12;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
           </button>
           <button onclick="checkSenderStatus()" id="btn-check-sender"
-            style="padding:11px 20px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:13px;font-weight:600;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all 0.15s;"
-            onmouseover="this.style.borderColor='var(--accent);this.style.color='var(--accent)'"
-            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
+            style="padding:11px 20px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:13px;font-weight:600;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all 0.15s;">
             🔄 Comprobar estado
           </button>
         </div>
@@ -639,9 +636,9 @@
     <div class="modal-field"><label>Tu empresa</label><input type="text" id="camp-company" placeholder="Ej: Neopanels"></div>
     <div class="modal-field"><label>Tu producto o servicio</label><textarea id="camp-product" rows="2" placeholder="Ej: instalación de revestimientos para obras y reformas"></textarea></div>
     <div class="modal-field">
-      <label>Email de envío <span id="camp-email-badge" style="font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:700;margin-left:6px;"></span></label>
+      <label>Email de respuesta <span id="camp-email-badge" style="font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:700;margin-left:6px;"></span></label>
       <input type="email" id="camp-email" placeholder="tu@empresa.com">
-      <div style="font-size:11px;color:var(--text3);margin-top:5px;">Debe estar verificado en <span onclick="closeCampaignModal();showPage('cuenta')" style="color:var(--accent);cursor:pointer;text-decoration:underline;">Mi cuenta → Email de envío</span></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:5px;">Las respuestas de los leads irán a este email.</div>
     </div>
     <div class="modal-field">
       <label>Número de emails a enviar</label>
@@ -698,8 +695,51 @@ const sb = {
   loadSession(){const s=localStorage.getItem('lf_session');if(s){const d=JSON.parse(s);this._token=d.access_token;return d;}return null;}
 };
 
+// ══ CRM — Supabase ══
+const CRM = {
+  async load() {
+    const r = await sb.req('/rest/v1/crm_leads?select=*&order=created_at.desc');
+    if(!r.ok) return [];
+    return r.json();
+  },
+  async insert(lead) {
+    const r = await sb.req('/rest/v1/crm_leads', {
+      method:'POST',
+      headers:{'Prefer':'return=representation'},
+      body: JSON.stringify(lead)
+    });
+    return r.ok;
+  },
+  async insertMany(leads) {
+    const r = await sb.req('/rest/v1/crm_leads', {
+      method:'POST',
+      headers:{'Prefer':'return=minimal'},
+      body: JSON.stringify(leads)
+    });
+    return r.ok;
+  },
+  async updateStatus(id, status) {
+    await sb.req(`/rest/v1/crm_leads?id=eq.${id}`, {
+      method:'PATCH',
+      body: JSON.stringify({status})
+    });
+  },
+  async updateNota(id, nota) {
+    await sb.req(`/rest/v1/crm_leads?id=eq.${id}`, {
+      method:'PATCH',
+      body: JSON.stringify({nota})
+    });
+  },
+  async delete(id) {
+    await sb.req(`/rest/v1/crm_leads?id=eq.${id}`, {method:'DELETE'});
+  },
+  async deleteAll(userId) {
+    await sb.req(`/rest/v1/crm_leads?user_id=eq.${userId}`, {method:'DELETE'});
+  }
+};
+
 let appState = {user:null,profile:null,searches:JSON.parse(localStorage.getItem('lf_history')||'[]'),currentSearch:null,currentJobId:null,currentLeads:[]};
-let crmLeads = JSON.parse(localStorage.getItem('lf_crm')||'[]');
+let crmLeads = [];
 let crmFilter = 'todos';
 
 const SECTORES = {
@@ -770,15 +810,21 @@ async function loadApp(user){
   document.getElementById('cuenta-email').textContent=email;
   document.getElementById('cuenta-desde').textContent=since;
   document.getElementById('renewal-date').textContent=renewal;
-  updateStats();renderHistory();renderCRM();showScreen('app');showPage('dashboard');
-  // Cargar email de envío guardado en Mi cuenta
+  updateStats();renderHistory();showScreen('app');showPage('dashboard');
   const savedSender = localStorage.getItem('lf_sender_email');
   const savedSenderName = localStorage.getItem('lf_sender_name');
   if(savedSender) document.getElementById('sender-email-input').value = savedSender;
   if(savedSenderName) document.getElementById('sender-name-input').value = savedSenderName;
+  // Cargar CRM desde Supabase en background
+  loadCRM();
 }
 
-function doLogout(){sb.signOut();appState={user:null,profile:null,searches:appState.searches,currentSearch:null,currentJobId:null,currentLeads:[]};showScreen('login');}
+async function loadCRM() {
+  crmLeads = await CRM.load();
+  renderCRM();
+}
+
+function doLogout(){sb.signOut();crmLeads=[];appState={user:null,profile:null,searches:appState.searches,currentSearch:null,currentJobId:null,currentLeads:[]};showScreen('login');}
 
 function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -787,7 +833,7 @@ function showPage(name){
   const nav=document.getElementById('nav-'+name);
   if(page)page.classList.add('active');
   if(nav)nav.classList.add('active');
-  if(name==='crm')renderCRM();
+  if(name==='crm'){loadCRM();}
   if(name==='campanas')renderCampanas();
 }
 
@@ -1047,49 +1093,12 @@ function openCampaignModal() {
   if(saved.name)document.getElementById('camp-name').value=saved.name;
   if(saved.company)document.getElementById('camp-company').value=saved.company;
   if(saved.product)document.getElementById('camp-product').value=saved.product;
-
-  // Cargar email verificado guardado
   const senderEmail = localStorage.getItem('lf_sender_email') || saved.email || '';
-  if(senderEmail) {
-    document.getElementById('camp-email').value = senderEmail;
-    // Comprobar estado en background
-    _checkCampEmailStatus(senderEmail);
-  } else if(saved.email) {
-    document.getElementById('camp-email').value=saved.email;
-  }
-
+  if(senderEmail) document.getElementById('camp-email').value = senderEmail;
+  else if(saved.email) document.getElementById('camp-email').value=saved.email;
   document.getElementById('modal-campaign').classList.add('open');
 }
 
-async function _checkCampEmailStatus(email) {
-  if(!email) return;
-  const badge = document.getElementById('camp-email-badge');
-  badge.textContent = '⏳';
-  try {
-    const r = await fetch(`${SCRAPER_API_URL}/check-sender`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email})
-    });
-    const d = await r.json();
-    if(d.ok) {
-      if(d.status==='verified') {
-        badge.textContent='✅ verificado';badge.style.color='var(--green)';
-      } else if(d.status==='pending') {
-        badge.textContent='⏳ pendiente';badge.style.color='var(--yellow)';
-        const st=document.getElementById('camp-sender-status');
-        st.style.display='block';st.style.background='rgba(255,217,61,0.08)';
-        st.style.border='1px solid rgba(255,217,61,0.25)';st.style.color='var(--yellow)';
-        st.textContent='⚠️ Tu email está pendiente de verificación. Revisa tu bandeja de entrada y haz clic en el enlace que te enviamos.';
-      } else {
-        badge.textContent='❌ no verificado';badge.style.color='var(--red)';
-        const st=document.getElementById('camp-sender-status');
-        st.style.display='block';st.style.background='rgba(255,77,106,0.08)';
-        st.style.border='1px solid rgba(255,77,106,0.25)';st.style.color='var(--red)';
-        st.textContent='❌ Email no verificado. Ve a Mi cuenta → Email de envío para verificarlo antes de enviar.';
-      }
-    }
-  } catch(e) { badge.textContent=''; }
-}
 function closeCampaignModal(){document.getElementById('modal-campaign').classList.remove('open');}
 document.getElementById('modal-campaign').addEventListener('click',function(e){if(e.target===this)closeCampaignModal();});
 
@@ -1111,19 +1120,8 @@ async function sendCampaign(){
     if(data.ok){
       const prev=parseInt(localStorage.getItem('lf_emails_sent')||'0');
       localStorage.setItem('lf_emails_sent',prev+data.enviados);updateStats();
-
-      // Guardar campaña para estadísticas
       const campañas = JSON.parse(localStorage.getItem('lf_campanas')||'[]');
-      campañas.unshift({
-        id: Date.now(),
-        tag: `lf_${jobId.slice(0,8)}`,
-        job_id: jobId,
-        sector: appState.currentSearch?.sector || '',
-        ciudad: appState.currentSearch?.ciudad || '',
-        enviados: data.enviados,
-        company: company,
-        date: new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),
-      });
+      campañas.unshift({id:Date.now(),tag:`lf_${jobId.slice(0,8)}`,job_id:jobId,sector:appState.currentSearch?.sector||'',ciudad:appState.currentSearch?.ciudad||'',enviados:data.enviados,company:company,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})});
       localStorage.setItem('lf_campanas', JSON.stringify(campañas.slice(0,50)));
       const followup=document.getElementById('camp-followup').checked;
       if(followup&&jobId){fetch(`${SCRAPER_API_URL}/send-followup`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_email:email,max_emails:selectedLimit,delay_days:3})});}
@@ -1141,7 +1139,6 @@ async function renderCampanas() {
     list.innerHTML=`<div class="empty-state"><div class="emoji">📨</div><p>Aún no has enviado ninguna campaña.<br>Lanza una búsqueda y envía tu primera campaña.</p></div>`;
     return;
   }
-  // Renderizar cards sin stats primero
   list.innerHTML = campañas.map(c=>`
     <div class="camp-card" id="camp-${c.id}">
       <div class="camp-header">
@@ -1152,69 +1149,57 @@ async function renderCampanas() {
         <span class="camp-loading" id="camp-loading-${c.id}">Cargando stats…</span>
       </div>
       <div class="camp-stats" id="camp-stats-${c.id}" style="display:none">
-        <div class="camp-stat enviados">
-          <span class="n" id="cs-env-${c.id}">${c.enviados}</span><span class="l">Enviados</span>
-        </div>
-        <div class="camp-stat abiertos">
-          <span class="n" id="cs-open-${c.id}">—</span><span class="l">Abiertos</span>
-          <div class="pct-bar-bg"><div class="pct-bar-fill" id="cs-open-bar-${c.id}" style="width:0%;background:var(--green)"></div></div>
-        </div>
-        <div class="camp-stat clics">
-          <span class="n" id="cs-click-${c.id}">—</span><span class="l">Clics</span>
-          <div class="pct-bar-bg"><div class="pct-bar-fill" id="cs-click-bar-${c.id}" style="width:0%;background:var(--yellow)"></div></div>
-        </div>
-        <div class="camp-stat rebotes">
-          <span class="n" id="cs-reb-${c.id}">—</span><span class="l">Rebotes</span>
-        </div>
+        <div class="camp-stat enviados"><span class="n" id="cs-env-${c.id}">${c.enviados}</span><span class="l">Enviados</span></div>
+        <div class="camp-stat abiertos"><span class="n" id="cs-open-${c.id}">—</span><span class="l">Abiertos</span><div class="pct-bar-bg"><div class="pct-bar-fill" id="cs-open-bar-${c.id}" style="width:0%;background:var(--green)"></div></div></div>
+        <div class="camp-stat clics"><span class="n" id="cs-click-${c.id}">—</span><span class="l">Clics</span><div class="pct-bar-bg"><div class="pct-bar-fill" id="cs-click-bar-${c.id}" style="width:0%;background:var(--yellow)"></div></div></div>
+        <div class="camp-stat rebotes"><span class="n" id="cs-reb-${c.id}">—</span><span class="l">Rebotes</span></div>
       </div>
     </div>`).join('');
 
-  // Cargar stats de cada campaña en paralelo
   campañas.forEach(async c => {
     try {
-      const r = await fetch(`${SCRAPER_API_URL}/campaign-stats`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({tag: c.tag})
-      });
+      const r = await fetch(`${SCRAPER_API_URL}/campaign-stats`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tag:c.tag})});
       const d = await r.json();
       const loadEl = document.getElementById(`camp-loading-${c.id}`);
       const statsEl = document.getElementById(`camp-stats-${c.id}`);
-      if(!loadEl || !statsEl) return;
-      if(d.ok) {
-        loadEl.style.display='none';
-        statsEl.style.display='grid';
-        document.getElementById(`cs-open-${c.id}`).textContent  = `${d.abiertos} (${d.pct_open}%)`;
-        document.getElementById(`cs-click-${c.id}`).textContent = `${d.clics} (${d.pct_click}%)`;
-        document.getElementById(`cs-reb-${c.id}`).textContent   = d.rebotes;
-        document.getElementById(`cs-open-bar-${c.id}`).style.width  = Math.min(d.pct_open,100)+'%';
-        document.getElementById(`cs-click-bar-${c.id}`).style.width = Math.min(d.pct_click,100)+'%';
-      } else {
-        loadEl.textContent = 'Stats no disponibles aún';
-      }
-    } catch(e) {
-      const loadEl = document.getElementById(`camp-loading-${c.id}`);
-      if(loadEl) loadEl.textContent = 'Error al cargar stats';
-    }
+      if(!loadEl||!statsEl) return;
+      if(d.ok){
+        loadEl.style.display='none';statsEl.style.display='grid';
+        document.getElementById(`cs-open-${c.id}`).textContent=`${d.abiertos} (${d.pct_open}%)`;
+        document.getElementById(`cs-click-${c.id}`).textContent=`${d.clics} (${d.pct_click}%)`;
+        document.getElementById(`cs-reb-${c.id}`).textContent=d.rebotes;
+        document.getElementById(`cs-open-bar-${c.id}`).style.width=Math.min(d.pct_open,100)+'%';
+        document.getElementById(`cs-click-bar-${c.id}`).style.width=Math.min(d.pct_click,100)+'%';
+      } else { loadEl.textContent='Stats no disponibles aún'; }
+    } catch(e) { const loadEl=document.getElementById(`camp-loading-${c.id}`);if(loadEl)loadEl.textContent='Error al cargar stats'; }
   });
 }
 
-// ══ CRM ══
+// ══ CRM — funciones ══
 const STATUS_ORDER=['sin-contactar','contactado','interesado','cerrado','descartado'];
 const STATUS_LABELS={'sin-contactar':'⬜ Sin contactar','contactado':'🔵 Contactado','interesado':'🟡 Interesado','cerrado':'🟢 Cerrado','descartado':'🔴 Descartado'};
 
-function saveCRM(){localStorage.setItem('lf_crm',JSON.stringify(crmLeads));}
-
-function importLeadsToCRM(){
+async function importLeadsToCRM(){
   const leads=appState.currentLeads;
   if(!leads||!leads.length){alert('No hay leads en el scraping actual. Lanza una búsqueda primero.');return;}
-  let importados=0;const existingNames=new Set(crmLeads.map(l=>(l.nombre||'').toLowerCase()));
+  const existingNames=new Set(crmLeads.map(l=>(l.nombre||'').toLowerCase()));
+  const userId=appState.user?.id;
+  const nuevos=[];
   leads.forEach(lead=>{
     const nombre=(lead.nombre||'').toLowerCase();
     if(!nombre||existingNames.has(nombre))return;
-    crmLeads.push({id:Date.now()+Math.random(),nombre:lead.nombre||'',email:lead.email||'',telefono:lead.telefono||'',web:lead.web||'',ciudad:lead.ciudad||'',fuente:lead.fuente||'',calidad:lead.calidad||'',score:lead.score||0,status:'sin-contactar',nota:'',fecha:new Date().toLocaleDateString('es-ES')});
-    existingNames.add(nombre);importados++;
+    nuevos.push({id:Date.now()+Math.floor(Math.random()*1000000),user_id:userId,nombre:lead.nombre||'',email:lead.email||'',telefono:lead.telefono||'',web:lead.web||'',ciudad:lead.ciudad||'',fuente:lead.fuente||'',calidad:lead.calidad||'',score:lead.score||0,status:'sin-contactar',nota:'',fecha:new Date().toLocaleDateString('es-ES')});
+    existingNames.add(nombre);
   });
-  saveCRM();alert(`✅ ${importados} leads importados al CRM.`);showPage('crm');
+  if(!nuevos.length){alert('Todos los leads ya están en el CRM.');return;}
+  const ok = await CRM.insertMany(nuevos);
+  if(ok){
+    alert(`✅ ${nuevos.length} leads importados al CRM.`);
+    await loadCRM();
+    showPage('crm');
+  } else {
+    alert('Error al importar leads. Inténtalo de nuevo.');
+  }
 }
 
 function setCRMFilter(f){
@@ -1224,19 +1209,34 @@ function setCRMFilter(f){
   renderCRM();
 }
 
-function updateCRMStatus(id,newStatus){
+async function updateCRMStatus(id, newStatus){
+  // Actualizar local inmediatamente para UX fluida
   const lead=crmLeads.find(l=>l.id===id);
-  if(lead){lead.status=newStatus;saveCRM();renderCRM();}
+  if(lead) lead.status=newStatus;
+  renderCRM();
+  // Persistir en Supabase
+  await CRM.updateStatus(id, newStatus);
 }
 
-function updateCRMNote(id,nota){
+async function updateCRMNote(id, nota){
   const lead=crmLeads.find(l=>l.id===id);
-  if(lead){lead.nota=nota;saveCRM();}
+  if(lead) lead.nota=nota;
+  await CRM.updateNota(id, nota);
 }
 
-function deleteCRMLead(id){crmLeads=crmLeads.filter(l=>l.id!==id);saveCRM();renderCRM();}
+async function deleteCRMLead(id){
+  crmLeads=crmLeads.filter(l=>l.id!==id);
+  renderCRM();
+  await CRM.delete(id);
+}
 
-function clearCRM(){if(!confirm('¿Vaciar todo el CRM? Esta acción no se puede deshacer.'))return;crmLeads=[];saveCRM();renderCRM();}
+async function clearCRM(){
+  if(!confirm('¿Vaciar todo el CRM? Esta acción no se puede deshacer.'))return;
+  const userId=appState.user?.id;
+  crmLeads=[];
+  renderCRM();
+  await CRM.deleteAll(userId);
+}
 
 function renderCRM(){
   const counts={total:crmLeads.length,contactado:0,interesado:0,cerrado:0,descartado:0};
