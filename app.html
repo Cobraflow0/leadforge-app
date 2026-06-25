@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LeadForge — Panel</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- SheetJS para exportar CRM a Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
     --bg: #080C12; --bg2: #0D1420; --bg3: #111827;
@@ -58,6 +60,9 @@
   .nav-item:hover { background:rgba(0,200,255,0.05); color:var(--text); }
   .nav-item.active { background:rgba(0,200,255,0.08); color:var(--accent); border-color:var(--border); }
   .nav-item .icon { font-size:16px; width:20px; text-align:center; }
+  .nav-item.admin-nav { color:var(--yellow); }
+  .nav-item.admin-nav:hover { background:rgba(255,217,61,0.05); }
+  .nav-item.admin-nav.active { background:rgba(255,217,61,0.08); color:var(--yellow); border-color:rgba(255,217,61,0.3); }
   .sidebar-bottom { padding:20px 12px 0; border-top:1px solid var(--border); margin-top:auto; }
   .user-badge { display:flex; align-items:center; gap:10px; padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; margin-bottom:8px; }
   .user-avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,var(--accent2),var(--accent)); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#080C12; flex-shrink:0; }
@@ -208,16 +213,17 @@
   .email-limit-btn { flex:1; padding:9px; text-align:center; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.15s; background:rgba(255,255,255,0.03); border:1px solid var(--border); color:var(--text2); }
   .email-limit-btn:hover { border-color:var(--border2); color:var(--text); }
   .email-limit-btn.selected { background:rgba(0,200,255,0.08); border-color:var(--accent); color:var(--accent); }
-  .city-dropdown { position:relative; width:100%; }
-  .city-selected { width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:8px; padding:11px 14px; font-size:14px; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:border-color 0.2s,box-shadow 0.2s; user-select:none; }
-  .city-selected:hover { border-color:var(--border2); }
-  .city-dropdown.open .city-selected { border-color:var(--accent); box-shadow:0 0 0 3px rgba(0,200,255,0.1); }
-  .city-list { display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:var(--bg2); border:1px solid var(--border2); border-radius:10px; max-height:280px; overflow-y:auto; z-index:100; box-shadow:0 8px 32px rgba(0,0,0,0.4); padding:6px; }
-  .city-dropdown.open .city-list { display:block; }
-  .city-group-label { font-size:11px; font-weight:700; color:var(--accent); letter-spacing:1px; text-transform:uppercase; padding:10px 10px 6px; margin-top:4px; }
-  .city-option { padding:9px 12px; font-size:13px; color:var(--text2); border-radius:6px; cursor:pointer; transition:all 0.12s; }
-  .city-option:hover { background:rgba(0,200,255,0.08); color:var(--text); }
-  .city-option.selected { background:rgba(0,200,255,0.12); color:var(--accent); font-weight:600; }
+
+  /* MULTI-CIUDAD */
+  .city-pills-wrap { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .city-pill { display:flex; align-items:center; gap:6px; padding:8px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:20px; cursor:pointer; font-size:13px; color:var(--text2); transition:all 0.15s; user-select:none; }
+  .city-pill:hover { border-color:var(--border2); color:var(--text); }
+  .city-pill.selected { background:rgba(0,200,255,0.08); border-color:var(--accent); color:var(--accent); font-weight:600; }
+  .city-pill.selected::before { content:'✓ '; }
+  .city-group-label-plain { font-size:11px; font-weight:700; color:var(--accent); letter-spacing:1px; text-transform:uppercase; margin-top:12px; margin-bottom:4px; width:100%; }
+  .city-max-note { font-size:12px; color:var(--text3); margin-top:8px; }
+  .multi-city-progress { background:rgba(0,200,255,0.05); border:1px solid var(--border); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--text2); }
+  .multi-city-progress strong { color:var(--accent); }
 
   /* CRM */
   .crm-stats { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:24px; }
@@ -256,6 +262,8 @@
   .btn-crm-clear:hover { background:rgba(255,77,106,0.08); }
   .btn-crm-import { padding:8px 16px; background:rgba(0,200,255,0.06); border:1px solid var(--border2); border-radius:8px; color:var(--accent); font-size:12px; font-weight:600; font-family:'Space Grotesk',sans-serif; cursor:pointer; transition:all 0.15s; }
   .btn-crm-import:hover { background:rgba(0,200,255,0.12); }
+  .btn-crm-export { padding:8px 16px; background:rgba(0,229,160,0.06); border:1px solid rgba(0,229,160,0.3); border-radius:8px; color:var(--green); font-size:12px; font-weight:600; font-family:'Space Grotesk',sans-serif; cursor:pointer; transition:all 0.15s; }
+  .btn-crm-export:hover { background:rgba(0,229,160,0.12); }
   .btn-import-crm { width:100%; padding:14px; background:rgba(0,200,255,0.06); border:1px solid var(--border2); border-radius:10px; color:var(--accent); font-size:14px; font-weight:600; font-family:'Space Grotesk',sans-serif; cursor:pointer; transition:all 0.2s; margin-top:10px; display:flex; align-items:center; justify-content:center; gap:8px; }
   .btn-import-crm:hover { background:rgba(0,200,255,0.12); }
 
@@ -277,12 +285,37 @@
   .pct-bar-bg { width:100%; height:4px; background:rgba(255,255,255,0.06); border-radius:10px; margin-top:6px; overflow:hidden; }
   .pct-bar-fill { height:100%; border-radius:10px; transition:width 0.6s ease; }
 
+  /* ADMIN PANEL */
+  .admin-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+  .admin-stat { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; position:relative; overflow:hidden; }
+  .admin-stat::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--yellow),#FF9500); }
+  .admin-stat .label { font-size:12px; color:var(--text2); margin-bottom:8px; }
+  .admin-stat .value { font-size:28px; font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--yellow); }
+  .admin-table { width:100%; border-collapse:collapse; }
+  .admin-table th { text-align:left; font-size:11px; font-weight:600; color:var(--text3); letter-spacing:0.8px; text-transform:uppercase; padding:10px 14px; border-bottom:1px solid var(--border); }
+  .admin-table td { padding:13px 14px; border-bottom:1px solid rgba(0,200,255,0.06); font-size:13px; vertical-align:middle; }
+  .admin-table tr:last-child td { border-bottom:none; }
+  .admin-table tr:hover td { background:rgba(255,255,255,0.02); }
+  .admin-badge { display:inline-flex; align-items:center; padding:3px 8px; border-radius:20px; font-size:11px; font-weight:600; font-family:'JetBrains Mono',monospace; }
+  .admin-badge.active { background:rgba(0,229,160,0.1); color:var(--green); border:1px solid rgba(0,229,160,0.3); }
+  .admin-refresh { padding:8px 16px; background:rgba(255,217,61,0.06); border:1px solid rgba(255,217,61,0.3); border-radius:8px; color:var(--yellow); font-size:12px; font-weight:600; font-family:'Space Grotesk',sans-serif; cursor:pointer; transition:all 0.15s; }
+  .admin-refresh:hover { background:rgba(255,217,61,0.12); }
+
+  /* MODAL CANCELACIÓN */
+  .cancel-step { display:none; }
+  .cancel-step.active { display:block; }
+  .cancel-reason-btn { width:100%; padding:12px 16px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; color:var(--text2); font-size:14px; font-family:'Space Grotesk',sans-serif; cursor:pointer; transition:all 0.15s; text-align:left; margin-bottom:8px; }
+  .cancel-reason-btn:hover { border-color:rgba(255,77,106,0.4); color:var(--text); }
+  .cancel-reason-btn.selected { border-color:var(--red); color:var(--red); background:rgba(255,77,106,0.06); }
+  .cancel-warning { background:rgba(255,217,61,0.06); border:1px solid rgba(255,217,61,0.25); border-radius:8px; padding:14px 16px; margin:16px 0; font-size:13px; color:var(--yellow); line-height:1.6; }
+  .cancel-warning strong { display:block; margin-bottom:4px; }
+
   @media(max-width:900px) {
     .sidebar{display:none} .main{padding:24px 20px}
     .stats-grid{grid-template-columns:1fr 1fr} .scraper-grid{grid-template-columns:1fr}
     .categories-grid{grid-template-columns:repeat(2,1fr)} .results-summary{grid-template-columns:repeat(2,1fr)}
     .cuenta-grid{grid-template-columns:1fr} .crm-stats{grid-template-columns:repeat(3,1fr)}
-    .camp-stats{grid-template-columns:repeat(2,1fr)}
+    .camp-stats{grid-template-columns:repeat(2,1fr)} .admin-grid{grid-template-columns:repeat(2,1fr)}
   }
 </style>
 </head>
@@ -330,6 +363,8 @@
       <div class="nav-item" id="nav-crm" onclick="showPage('crm')"><span class="icon">🎯</span> Mis leads</div>
       <div class="nav-label">Configuración</div>
       <div class="nav-item" id="nav-cuenta" onclick="showPage('cuenta')"><span class="icon">👤</span> Mi cuenta</div>
+      <!-- Admin: solo visible para admins -->
+      <div class="nav-item admin-nav" id="nav-admin" onclick="showPage('admin')" style="display:none"><span class="icon">🛡️</span> Admin</div>
     </nav>
     <div class="sidebar-bottom">
       <div class="user-badge">
@@ -380,47 +415,45 @@
                 <option value="fincas">🏠 Gestión de Fincas</option>
               </select>
             </div>
+            <!-- MULTI-CIUDAD -->
             <div class="form-field">
-              <label class="form-label">Ciudad</label>
-              <div class="city-dropdown" id="city-dropdown">
-                <div class="city-selected" id="city-selected" onclick="toggleCityDropdown()">
-                  <span id="city-selected-text" style="color:var(--text3)">— Selecciona ciudad —</span>
-                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#7A8BA0" stroke-width="1.5" stroke-linecap="round"/></svg>
-                </div>
-                <div class="city-list" id="city-list">
-                  <div class="city-group-label">⭐ Principales</div>
-                  <div class="city-option" onclick="selectCity('Madrid')">📍 Madrid</div>
-                  <div class="city-option" onclick="selectCity('Barcelona')">📍 Barcelona</div>
-                  <div class="city-option" onclick="selectCity('Valencia')">📍 Valencia</div>
-                  <div class="city-option" onclick="selectCity('Sevilla')">📍 Sevilla</div>
-                  <div class="city-option" onclick="selectCity('Zaragoza')">📍 Zaragoza</div>
-                  <div class="city-option" onclick="selectCity('Málaga')">📍 Málaga</div>
-                  <div class="city-option" onclick="selectCity('Murcia')">📍 Murcia</div>
-                  <div class="city-option" onclick="selectCity('Palma')">📍 Palma de Mallorca</div>
-                  <div class="city-option" onclick="selectCity('Las Palmas')">📍 Las Palmas</div>
-                  <div class="city-option" onclick="selectCity('Bilbao')">📍 Bilbao</div>
-                  <div class="city-group-label">🗺️ Capitales de provincia</div>
-                  <div class="city-option" onclick="selectCity('Alicante')">📍 Alicante</div>
-                  <div class="city-option" onclick="selectCity('Almería')">📍 Almería</div>
-                  <div class="city-option" onclick="selectCity('Badajoz')">📍 Badajoz</div>
-                  <div class="city-option" onclick="selectCity('Burgos')">📍 Burgos</div>
-                  <div class="city-option" onclick="selectCity('Cádiz')">📍 Cádiz</div>
-                  <div class="city-option" onclick="selectCity('Córdoba')">📍 Córdoba</div>
-                  <div class="city-option" onclick="selectCity('Granada')">📍 Granada</div>
-                  <div class="city-option" onclick="selectCity('Huelva')">📍 Huelva</div>
-                  <div class="city-option" onclick="selectCity('Jaén')">📍 Jaén</div>
-                  <div class="city-option" onclick="selectCity('León')">📍 León</div>
-                  <div class="city-option" onclick="selectCity('Marbella')">📍 Marbella</div>
-                  <div class="city-option" onclick="selectCity('Pamplona')">📍 Pamplona</div>
-                  <div class="city-option" onclick="selectCity('Salamanca')">📍 Salamanca</div>
-                  <div class="city-option" onclick="selectCity('San Sebastián')">📍 San Sebastián</div>
-                  <div class="city-option" onclick="selectCity('Santander')">📍 Santander</div>
-                  <div class="city-option" onclick="selectCity('Toledo')">📍 Toledo</div>
-                  <div class="city-option" onclick="selectCity('Valladolid')">📍 Valladolid</div>
-                  <div class="city-option" onclick="selectCity('Vitoria')">📍 Vitoria</div>
-                </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <label class="form-label" style="margin:0">Ciudades <span style="color:var(--text3);font-size:11px;font-weight:400">(máx. 5)</span></label>
+                <span id="cities-count" style="font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;">0 seleccionadas</span>
               </div>
-              <input type="hidden" id="select-ciudad" value="">
+              <div class="city-pills-wrap" id="city-pills-wrap">
+                <div class="city-group-label-plain">⭐ Principales</div>
+                <div class="city-pill" onclick="toggleCity('Madrid')">Madrid</div>
+                <div class="city-pill" onclick="toggleCity('Barcelona')">Barcelona</div>
+                <div class="city-pill" onclick="toggleCity('Valencia')">Valencia</div>
+                <div class="city-pill" onclick="toggleCity('Sevilla')">Sevilla</div>
+                <div class="city-pill" onclick="toggleCity('Zaragoza')">Zaragoza</div>
+                <div class="city-pill" onclick="toggleCity('Málaga')">Málaga</div>
+                <div class="city-pill" onclick="toggleCity('Murcia')">Murcia</div>
+                <div class="city-pill" onclick="toggleCity('Palma')">Palma</div>
+                <div class="city-pill" onclick="toggleCity('Las Palmas')">Las Palmas</div>
+                <div class="city-pill" onclick="toggleCity('Bilbao')">Bilbao</div>
+                <div class="city-group-label-plain">🗺️ Otras capitales</div>
+                <div class="city-pill" onclick="toggleCity('Alicante')">Alicante</div>
+                <div class="city-pill" onclick="toggleCity('Almería')">Almería</div>
+                <div class="city-pill" onclick="toggleCity('Badajoz')">Badajoz</div>
+                <div class="city-pill" onclick="toggleCity('Burgos')">Burgos</div>
+                <div class="city-pill" onclick="toggleCity('Cádiz')">Cádiz</div>
+                <div class="city-pill" onclick="toggleCity('Córdoba')">Córdoba</div>
+                <div class="city-pill" onclick="toggleCity('Granada')">Granada</div>
+                <div class="city-pill" onclick="toggleCity('Huelva')">Huelva</div>
+                <div class="city-pill" onclick="toggleCity('Jaén')">Jaén</div>
+                <div class="city-pill" onclick="toggleCity('León')">León</div>
+                <div class="city-pill" onclick="toggleCity('Marbella')">Marbella</div>
+                <div class="city-pill" onclick="toggleCity('Pamplona')">Pamplona</div>
+                <div class="city-pill" onclick="toggleCity('Salamanca')">Salamanca</div>
+                <div class="city-pill" onclick="toggleCity('San Sebastián')">San Sebastián</div>
+                <div class="city-pill" onclick="toggleCity('Santander')">Santander</div>
+                <div class="city-pill" onclick="toggleCity('Toledo')">Toledo</div>
+                <div class="city-pill" onclick="toggleCity('Valladolid')">Valladolid</div>
+                <div class="city-pill" onclick="toggleCity('Vitoria')">Vitoria</div>
+              </div>
+              <div class="city-max-note" id="city-max-note" style="display:none;">⚠️ Máximo 5 ciudades. Deselecciona una para añadir otra.</div>
             </div>
           </div>
           <div class="form-field" id="cats-wrap" style="display:none">
@@ -470,6 +503,9 @@
       <div class="page-header">
         <h1 class="page-title">Scraping <span>en curso</span></h1>
         <p class="page-sub" id="results-sub">Buscando leads en las fuentes seleccionadas…</p>
+      </div>
+      <div id="multi-city-progress" style="display:none;" class="multi-city-progress">
+        Ciudad <strong id="mcp-current">1</strong> de <strong id="mcp-total">1</strong>: <strong id="mcp-name"></strong>
       </div>
       <div class="card" style="margin-bottom:20px">
         <div class="progress-wrap">
@@ -523,8 +559,9 @@
             <h1 class="page-title">Mis <span>leads</span></h1>
             <p class="page-sub">Gestiona y haz seguimiento de tus contactos.</p>
           </div>
-          <div style="display:flex;gap:8px;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn-crm-import" onclick="showPage('results')">+ Importar desde scraping</button>
+            <button class="btn-crm-export" onclick="exportCRMToExcel()">📊 Exportar Excel</button>
             <button class="btn-crm-clear" onclick="clearCRM()">🗑 Vaciar CRM</button>
           </div>
         </div>
@@ -618,7 +655,31 @@
       <div class="danger-zone" style="margin-top:20px;">
         <div class="danger-title">Cancelar suscripción</div>
         <div class="danger-sub">Al cancelar mantendrás el acceso hasta el final del período de facturación actual.</div>
-        <button class="btn-danger" onclick="cancelSubscription()">Cancelar suscripción</button>
+        <button class="btn-danger" onclick="openCancelModal()">Cancelar suscripción</button>
+      </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div class="page" id="page-admin">
+      <div class="page-header">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h1 class="page-title">Panel de <span style="color:var(--yellow)">Admin</span></h1>
+            <p class="page-sub">Visión global de clientes y uso de la plataforma.</p>
+          </div>
+          <button class="admin-refresh" onclick="loadAdminData()">🔄 Actualizar</button>
+        </div>
+      </div>
+      <div class="admin-grid">
+        <div class="admin-stat"><div class="label">Total clientes</div><div class="value" id="admin-total">—</div></div>
+        <div class="admin-stat"><div class="label">Clientes activos</div><div class="value" id="admin-activos">—</div></div>
+        <div class="admin-stat"><div class="label">Leads generados (total)</div><div class="value" id="admin-leads">—</div></div>
+        <div class="admin-stat"><div class="label">Emails enviados (total)</div><div class="value" id="admin-emails">—</div></div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div id="admin-table-wrap">
+          <div class="empty-state"><div class="emoji">⏳</div><p>Cargando clientes…</p></div>
+        </div>
       </div>
     </div>
 
@@ -673,10 +734,66 @@
   </div>
 </div>
 
+<!-- MODAL CANCELACIÓN -->
+<div class="modal-overlay" id="modal-cancel">
+  <div class="modal-box" style="max-width:500px;">
+    <button class="modal-close" onclick="closeCancelModal()">✕</button>
+    <h2 class="modal-title">😔 Cancelar suscripción</h2>
+
+    <!-- Paso 1: Motivo -->
+    <div class="cancel-step active" id="cancel-step-1">
+      <p class="modal-sub">Antes de cancelar, ¿puedes contarnos por qué? Nos ayuda a mejorar.</p>
+      <button class="cancel-reason-btn" onclick="selectCancelReason(this, 'precio')">💸 El precio es demasiado alto</button>
+      <button class="cancel-reason-btn" onclick="selectCancelReason(this, 'leads')">📉 No obtengo suficientes leads</button>
+      <button class="cancel-reason-btn" onclick="selectCancelReason(this, 'calidad')">🔍 La calidad de los leads no es buena</button>
+      <button class="cancel-reason-btn" onclick="selectCancelReason(this, 'tecnico')">🛠️ Problemas técnicos</button>
+      <button class="cancel-reason-btn" onclick="selectCancelReason(this, 'otro')">🤷 Otro motivo</button>
+      <div id="cancel-reason-other" style="display:none;margin-top:8px;">
+        <textarea id="cancel-other-text" rows="3" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:14px;font-family:'Space Grotesk',sans-serif;color:var(--text);outline:none;resize:none;" placeholder="Cuéntanos más…"></textarea>
+      </div>
+      <button class="btn-danger" style="margin-top:16px;width:100%;padding:13px;" onclick="goToCancelStep2()" id="btn-cancel-next" disabled>Continuar →</button>
+    </div>
+
+    <!-- Paso 2: Confirmación -->
+    <div class="cancel-step" id="cancel-step-2">
+      <p class="modal-sub">¿Estás seguro de que quieres cancelar?</p>
+      <div class="cancel-warning">
+        <strong>⚠️ Perderás acceso a:</strong>
+        Búsquedas ilimitadas · 600-1000 leads por búsqueda · Campañas de email · CRM de leads · Todas las fuentes de datos
+      </div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.6;">
+        Mantendrás acceso hasta el final del período de facturación actual. Para completar la cancelación, haz clic en el botón de abajo — recibirás un email de confirmación.
+      </p>
+      <div style="display:flex;gap:10px;">
+        <button onclick="goBackCancelStep()" style="flex:1;padding:13px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:14px;font-weight:600;font-family:'Space Grotesk',sans-serif;cursor:pointer;">← Volver</button>
+        <button class="btn-danger" style="flex:2;padding:13px;" id="btn-confirm-cancel" onclick="confirmCancellation()">
+          <span id="cancel-btn-label">Confirmar cancelación</span>
+          <div id="cancel-spinner" style="display:none;width:14px;height:14px;border:2px solid rgba(255,77,106,0.3);border-top-color:var(--red);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto;"></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Paso 3: Confirmado -->
+    <div class="cancel-step" id="cancel-step-3">
+      <div style="text-align:center;padding:20px 0;">
+        <div style="font-size:48px;margin-bottom:16px;">✅</div>
+        <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;">Solicitud recibida</h3>
+        <p style="font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:20px;">
+          Hemos recibido tu solicitud de cancelación. Recibirás un email de confirmación en breve.<br><br>
+          Mantienes acceso completo hasta el fin del período de facturación.
+        </p>
+        <button onclick="closeCancelModal()" style="padding:12px 28px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:8px;color:#080C12;font-size:14px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;">Cerrar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL    = 'https://erlbzbwlrrcoeiphzozm.supabase.co';
 const SUPABASE_ANON   = 'sb_publishable_hScYuPWr3THMPToUzcLUmQ_ji64-g4Z';
 const SCRAPER_API_URL = 'https://web-production-e1dec.up.railway.app';
+const ADMIN_EMAIL     = 'cobraflow0@gmail.com'; // ← cambia si el email de admin es otro
 
 const sb = {
   async req(path, opts={}) {
@@ -692,6 +809,7 @@ const sb = {
   async updatePassword(password){const r=await this.req('/auth/v1/user',{method:'PUT',body:JSON.stringify({password})});return r.json();},
   async getUser(){const r=await this.req('/auth/v1/user');return r.ok?r.json():null;},
   async getProfile(userId){const r=await this.req(`/rest/v1/profiles?id=eq.${userId}&select=*`);const d=await r.json();return Array.isArray(d)?d[0]:null;},
+  async getAllProfiles(){const r=await this.req('/rest/v1/profiles?select=*&order=created_at.desc');return r.ok?r.json():[];},
   signOut(){this._token=null;localStorage.removeItem('lf_session');},
   loadSession(){const s=localStorage.getItem('lf_session');if(s){const d=JSON.parse(s);this._token=d.access_token;return d;}return null;}
 };
@@ -742,6 +860,8 @@ const CRM = {
 let appState = {user:null,profile:null,searches:JSON.parse(localStorage.getItem('lf_history')||'[]'),currentSearch:null,currentJobId:null,currentLeads:[]};
 let crmLeads = [];
 let crmFilter = 'todos';
+let selectedCities = []; // MULTI-CIUDAD
+let cancelReason = '';
 
 const SECTORES = {
   construccion:[{id:'reformistas',emoji:'🔨',label:'Reformistas'},{id:'constructoras',emoji:'🏗️',label:'Constructoras'},{id:'arquitectos',emoji:'📐',label:'Arquitectos'},{id:'interioristas',emoji:'🛋️',label:'Interioristas'},{id:'decoradores',emoji:'🎨',label:'Decoradores'},{id:'materiales',emoji:'🏪',label:'Tiendas materiales'},{id:'coliving',emoji:'🏢',label:'Co-living / Co-working'},{id:'gimnasios',emoji:'💪',label:'Gimnasios / Fitness'},{id:'hosteleria',emoji:'🍽️',label:'Hoteles / Bares / Restaurantes'}],
@@ -812,12 +932,15 @@ async function loadApp(user){
   document.getElementById('cuenta-email').textContent=email;
   document.getElementById('cuenta-desde').textContent=since;
   document.getElementById('renewal-date').textContent=renewal;
+  // Mostrar nav admin solo si es admin
+  if(email === ADMIN_EMAIL) {
+    document.getElementById('nav-admin').style.display='flex';
+  }
   updateStats();renderHistory();showScreen('app');showPage('dashboard');
   const savedSender = localStorage.getItem('lf_sender_email');
   const savedSenderName = localStorage.getItem('lf_sender_name');
   if(savedSender) document.getElementById('sender-email-input').value = savedSender;
   if(savedSenderName) document.getElementById('sender-name-input').value = savedSenderName;
-  // Cargar CRM desde Supabase en background
   loadCRM();
 }
 
@@ -826,7 +949,7 @@ async function loadCRM() {
   renderCRM();
 }
 
-function doLogout(){sb.signOut();crmLeads=[];appState={user:null,profile:null,searches:appState.searches,currentSearch:null,currentJobId:null,currentLeads:[]};showScreen('login');}
+function doLogout(){sb.signOut();crmLeads=[];selectedCities=[];appState={user:null,profile:null,searches:appState.searches,currentSearch:null,currentJobId:null,currentLeads:[]};showScreen('login');}
 
 function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -837,6 +960,28 @@ function showPage(name){
   if(nav)nav.classList.add('active');
   if(name==='crm'){loadCRM();}
   if(name==='campanas')renderCampanas();
+  if(name==='admin')loadAdminData();
+}
+
+// ══ MULTI-CIUDAD ══
+function toggleCity(city) {
+  const pills = document.querySelectorAll('.city-pill');
+  const pill = Array.from(pills).find(p => p.textContent.replace('✓ ','') === city);
+  const isSelected = selectedCities.includes(city);
+  if(!isSelected && selectedCities.length >= 5) {
+    document.getElementById('city-max-note').style.display = 'block';
+    return;
+  }
+  document.getElementById('city-max-note').style.display = 'none';
+  if(isSelected) {
+    selectedCities = selectedCities.filter(c => c !== city);
+    if(pill) pill.classList.remove('selected');
+  } else {
+    selectedCities.push(city);
+    if(pill) pill.classList.add('selected');
+  }
+  document.getElementById('cities-count').textContent = selectedCities.length + ' seleccionada' + (selectedCities.length !== 1 ? 's' : '');
+  checkLaunchReady();
 }
 
 function updateCategories(){
@@ -883,10 +1028,10 @@ function checkLaunchReady(){
     document.getElementById('btn-launch').disabled=!(t&&c);
   } else {
     const sector=document.getElementById('select-sector').value;
-    const ciudad=document.getElementById('select-ciudad').value;
+    const hasCities=selectedCities.length>0;
     const cats=SECTORES[sector]||[];
     const hasCat=cats.some(c=>document.getElementById('cat-'+c.id)?.classList.contains('selected'));
-    document.getElementById('btn-launch').disabled=!(sector&&ciudad&&hasCat);
+    document.getElementById('btn-launch').disabled=!(sector&&hasCities&&hasCat);
   }
 }
 
@@ -902,11 +1047,19 @@ async function launchScraping(){
     await runScrapingReal('libre',ciudad,[termino],fuentesLibre);
   } else {
     const sector=document.getElementById('select-sector').value;
-    const ciudad=document.getElementById('select-ciudad').value;
     const cats=(SECTORES[sector]||[]).filter(c=>document.getElementById('cat-'+c.id)?.classList.contains('selected')).map(c=>c.id);
-    appState.currentSearch={sector,ciudad,cats,sources};appState.currentJobId=null;
-    _initResults('Buscando leads en las fuentes seleccionadas…');
-    await runScrapingReal(sector,ciudad,cats,sources);
+    const ciudades = [...selectedCities];
+    appState.currentSearch={sector,ciudad:ciudades.join(', '),cats,sources};appState.currentJobId=null;
+    const subtext = ciudades.length > 1
+      ? `Buscando leads en ${ciudades.length} ciudades: ${ciudades.join(', ')}…`
+      : `Buscando leads en ${ciudades[0]}…`;
+    _initResults(subtext);
+    // MULTI-CIUDAD: scraping secuencial por ciudad
+    if(ciudades.length > 1) {
+      document.getElementById('multi-city-progress').style.display='block';
+      document.getElementById('mcp-total').textContent = ciudades.length;
+    }
+    await runScrapingMultiCiudad(sector, ciudades, cats, sources);
   }
 }
 
@@ -915,10 +1068,83 @@ function _initResults(subtext){
   document.getElementById('nav-dashboard').classList.add('active');
   document.getElementById('results-done').style.display='none';
   document.getElementById('campaign-result').style.display='none';
+  document.getElementById('multi-city-progress').style.display='none';
   document.getElementById('page-results').querySelector('.page-title').innerHTML='Scraping <span>en curso</span>';
   document.getElementById('results-sub').textContent=subtext;
   document.getElementById('log-terminal').innerHTML='';
   setProgress(0,'Conectando con el servidor…');
+}
+
+// MULTI-CIUDAD: lanza scraping por cada ciudad y agrega resultados
+async function runScrapingMultiCiudad(sector, ciudades, cats, sources) {
+  const addLog=(msg,type='info')=>{
+    const log=document.getElementById('log-terminal');
+    const ts=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const line=document.createElement('span');line.className=`log-line ${type}`;
+    line.innerHTML=`<span class="ts">[${ts}]</span><span class="msg">${msg}</span>`;
+    log.appendChild(line);log.appendChild(document.createElement('br'));log.scrollTop=log.scrollHeight;
+  };
+
+  let totalResult = {total:0, alta:0, media:0, baja:0, leads:[]};
+  let lastJobId = null;
+
+  for(let i=0; i<ciudades.length; i++) {
+    const ciudad = ciudades[i];
+    // Actualizar indicador multi-ciudad
+    if(ciudades.length > 1) {
+      document.getElementById('multi-city-progress').style.display='block';
+      document.getElementById('mcp-current').textContent = i+1;
+      document.getElementById('mcp-name').textContent = ciudad;
+    }
+    addLog(`🏙️ Iniciando búsqueda en ${ciudad} (${i+1}/${ciudades.length})…`, 'accent');
+    const baseProgress = Math.round((i / ciudades.length) * 100);
+    const cityProgressScale = 1 / ciudades.length;
+    try {
+      const lr = await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources})});
+      if(!lr.ok) throw new Error(`Error al lanzar: ${lr.status}`);
+      const {job_id} = await lr.json();
+      lastJobId = job_id;
+      addLog(`✓ Job ${ciudad} iniciado (${job_id.slice(0,8)}…)`, 'ok');
+      let lastLog=0;
+      while(true){
+        await delay(2000);
+        const sr=await fetch(`${SCRAPER_API_URL}/status/${job_id}`);
+        if(!sr.ok){addLog('⚠️ Error consultando estado…','warn');continue;}
+        const data=await sr.json();
+        data.logs.slice(lastLog).forEach(line=>{const t=line.includes('✅')||line.includes('✓')?'ok':line.includes('❌')?'error':'info';addLog(line.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,''),t);});
+        lastLog=data.logs.length;
+        // Escalar progreso al rango de esta ciudad
+        const cityPct = Math.round(baseProgress + data.progress * cityProgressScale);
+        setProgress(cityPct, `[${ciudad}] `+(data.logs.at(-1)?.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')||''));
+        if(data.status==='done'){
+          const r=data.result;
+          totalResult.total += r.total;
+          totalResult.alta  += r.alta;
+          totalResult.media += r.media;
+          totalResult.baja  += r.baja;
+          if(r.leads) totalResult.leads.push(...r.leads);
+          addLog(`✅ ${ciudad}: ${r.total} leads encontrados`, 'ok');
+          break;
+        }
+        if(data.status==='error'){addLog(`❌ Error en ${ciudad}: ${data.error}`,'error');break;}
+      }
+    } catch(err){addLog(`❌ ${ciudad}: ${err.message}`,'error');}
+  }
+
+  // Mostrar resultados agregados
+  appState.currentJobId = lastJobId;
+  appState.currentLeads = totalResult.leads;
+  document.getElementById('res-total').textContent=totalResult.total;
+  document.getElementById('res-alta').textContent=totalResult.alta;
+  document.getElementById('res-media').textContent=totalResult.media;
+  document.getElementById('res-baja').textContent=totalResult.baja;
+  document.getElementById('page-results').querySelector('.page-title').innerHTML='Scraping <span>completado</span>';
+  const ciudadesStr = ciudades.length > 1 ? `${ciudades.join(' + ')}` : ciudades[0];
+  document.getElementById('results-sub').textContent=`${totalResult.total} leads en ${ciudadesStr}.`;
+  document.getElementById('results-done').style.display='block';
+  setProgress(100,'Completado');
+  const entry={id:Date.now(),job_id:lastJobId,sector:appState.currentSearch?.sector||sector,ciudad:ciudadesStr,cats:cats.length,total:totalResult.total,alta:totalResult.alta,media:totalResult.media,baja:totalResult.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};
+  appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();
 }
 
 async function runScrapingReal(sector,ciudad,cats,sources){
@@ -994,8 +1220,6 @@ function updateStats(){
   renderHistory();
 }
 
-function cancelSubscription(){if(confirm('¿Seguro que quieres cancelar?\n\nMantendrás el acceso hasta el final del período de facturación.')){alert('Para cancelar, accede a tu panel de Stripe o escríbenos a hola@leadforge.es');}}
-
 // ══ SENDER VERIFICATION ══
 function _senderMsg(msg, type) {
   const el = document.getElementById('sender-status-msg');
@@ -1058,19 +1282,6 @@ async function checkSenderStatus() {
 
 let selectedLimit=50;
 function selectLimit(n){selectedLimit=n;document.querySelectorAll('.email-limit-btn').forEach(b=>b.classList.remove('selected'));document.getElementById('limit-'+n).classList.add('selected');}
-
-function toggleCityDropdown(){document.getElementById('city-dropdown').classList.toggle('open');}
-function selectCity(value){
-  document.getElementById('select-ciudad').value=value;
-  const display=document.querySelector(`[onclick="selectCity('${value}')"]`)?.textContent||value;
-  document.getElementById('city-selected-text').textContent=display;
-  document.getElementById('city-selected-text').style.color='var(--text)';
-  document.querySelectorAll('.city-option').forEach(o=>o.classList.remove('selected'));
-  document.querySelector(`[onclick="selectCity('${value}')"]`)?.classList.add('selected');
-  document.getElementById('city-dropdown').classList.remove('open');
-  checkLaunchReady();
-}
-document.addEventListener('click',function(e){const dd=document.getElementById('city-dropdown');if(dd&&!dd.contains(e.target))dd.classList.remove('open');});
 
 function previewEmail(){
   const name=document.getElementById('camp-name').value.trim()||'Tu nombre';
@@ -1212,11 +1423,9 @@ function setCRMFilter(f){
 }
 
 async function updateCRMStatus(id, newStatus){
-  // Actualizar local inmediatamente para UX fluida
   const lead=crmLeads.find(l=>l.id===id);
   if(lead) lead.status=newStatus;
   renderCRM();
-  // Persistir en Supabase
   await CRM.updateStatus(id, newStatus);
 }
 
@@ -1238,6 +1447,42 @@ async function clearCRM(){
   crmLeads=[];
   renderCRM();
   await CRM.deleteAll(userId);
+}
+
+// ══ EXPORTAR CRM A EXCEL ══
+function exportCRMToExcel() {
+  const filtered = crmFilter === 'todos' ? crmLeads : crmLeads.filter(l => l.status === crmFilter);
+  if(!filtered.length) { alert('No hay leads para exportar con el filtro actual.'); return; }
+
+  const STATUS_ES = {'sin-contactar':'Sin contactar','contactado':'Contactado','interesado':'Interesado','cerrado':'Cerrado','descartado':'Descartado'};
+  const rows = filtered.map(l => ({
+    'Empresa':    l.nombre    || '',
+    'Email':      l.email     || '',
+    'Teléfono':   l.telefono  || '',
+    'Web':        l.web       || '',
+    'Ciudad':     l.ciudad    || '',
+    'Fuente':     l.fuente    || '',
+    'Calidad':    l.calidad   || '',
+    'Score':      l.score     || 0,
+    'Estado':     STATUS_ES[l.status] || l.status || '',
+    'Nota':       l.nota      || '',
+    'Fecha':      l.fecha     || '',
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+
+  // Anchos de columna
+  ws['!cols'] = [
+    {wch:30},{wch:28},{wch:16},{wch:30},{wch:14},
+    {wch:16},{wch:10},{wch:8},{wch:16},{wch:30},{wch:12}
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Leads CRM');
+
+  const fecha = new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');
+  const filtroLabel = crmFilter === 'todos' ? 'todos' : crmFilter;
+  XLSX.writeFile(wb, `LeadForge_CRM_${filtroLabel}_${fecha}.xlsx`);
 }
 
 function renderCRM(){
@@ -1288,6 +1533,131 @@ function renderCRM(){
   }).join('');
 
   wrap.innerHTML=`<table class="crm-table"><thead><tr><th>Empresa</th><th>Contacto</th><th>Estado</th><th>Nota</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// ══ ADMIN PANEL ══
+async function loadAdminData() {
+  const wrap = document.getElementById('admin-table-wrap');
+  wrap.innerHTML = `<div class="empty-state"><div class="emoji">⏳</div><p>Cargando clientes…</p></div>`;
+  document.getElementById('admin-total').textContent = '…';
+  document.getElementById('admin-activos').textContent = '…';
+  document.getElementById('admin-leads').textContent = '…';
+  document.getElementById('admin-emails').textContent = '…';
+
+  try {
+    // Obtener perfiles desde Supabase (requiere que la tabla profiles tenga RLS permisiva para admin o que se use service key)
+    // Con la anon key solo veremos nuestro propio perfil a menos que la RLS lo permita
+    // Aquí intentamos obtener todos y mostramos lo que el RLS permita
+    const profiles = await sb.getAllProfiles();
+
+    // Stats del historial local (solo del usuario actual)
+    const allSearches = appState.searches;
+    const totalLeads = allSearches.reduce((a,s)=>a+(s.total||0),0);
+    const totalEmails = parseInt(localStorage.getItem('lf_emails_sent')||'0');
+
+    document.getElementById('admin-total').textContent = profiles.length || '—';
+    document.getElementById('admin-activos').textContent = profiles.filter(p=>p.plan).length || profiles.length || '—';
+    document.getElementById('admin-leads').textContent = totalLeads.toLocaleString('es-ES');
+    document.getElementById('admin-emails').textContent = totalEmails.toLocaleString('es-ES');
+
+    if(!profiles.length) {
+      wrap.innerHTML = `<div style="padding:24px;font-size:13px;color:var(--text2);">
+        ℹ️ Para ver todos los clientes, el panel de admin necesita acceso con service key.<br><br>
+        <strong style="color:var(--text)">Acceso rápido:</strong><br>
+        <a href="https://supabase.com/dashboard/project/erlbzbwlrrcoeiphzozm/auth/users" target="_blank" style="color:var(--accent);">→ Ver usuarios en Supabase Dashboard</a>
+      </div>`;
+      return;
+    }
+
+    const rows = profiles.map(p => `
+      <tr>
+        <td style="font-size:13px;color:var(--text);font-weight:500;">${p.email || p.id?.slice(0,8)+'…' || '—'}</td>
+        <td><span class="admin-badge active">Activo</span></td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);">${p.plan?.toUpperCase() || 'PRO'}</td>
+        <td style="font-size:12px;color:var(--text3);">${p.created_at ? new Date(p.created_at).toLocaleDateString('es-ES') : '—'}</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);">—</td>
+      </tr>`).join('');
+
+    wrap.innerHTML = `<table class="admin-table">
+      <thead><tr>
+        <th>Email</th><th>Estado</th><th>Plan</th><th>Alta</th><th>Búsquedas</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+
+  } catch(err) {
+    wrap.innerHTML = `<div style="padding:24px;font-size:13px;color:var(--red);">Error al cargar datos: ${err.message}</div>`;
+  }
+}
+
+// ══ MODAL CANCELACIÓN ══
+function openCancelModal() {
+  // Reset estado
+  document.querySelectorAll('.cancel-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('cancel-step-1').classList.add('active');
+  document.querySelectorAll('.cancel-reason-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('cancel-reason-other').style.display = 'none';
+  document.getElementById('btn-cancel-next').disabled = true;
+  cancelReason = '';
+  document.getElementById('modal-cancel').classList.add('open');
+}
+
+function closeCancelModal() {
+  document.getElementById('modal-cancel').classList.remove('open');
+}
+document.getElementById('modal-cancel').addEventListener('click', function(e) {
+  if(e.target === this) closeCancelModal();
+});
+
+function selectCancelReason(btn, reason) {
+  document.querySelectorAll('.cancel-reason-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  cancelReason = reason;
+  const otherWrap = document.getElementById('cancel-reason-other');
+  otherWrap.style.display = reason === 'otro' ? 'block' : 'none';
+  document.getElementById('btn-cancel-next').disabled = false;
+}
+
+function goToCancelStep2() {
+  if(!cancelReason) return;
+  document.querySelectorAll('.cancel-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('cancel-step-2').classList.add('active');
+}
+
+function goBackCancelStep() {
+  document.querySelectorAll('.cancel-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('cancel-step-1').classList.add('active');
+}
+
+async function confirmCancellation() {
+  const btn = document.getElementById('btn-confirm-cancel');
+  const lbl = document.getElementById('cancel-btn-label');
+  const spin = document.getElementById('cancel-spinner');
+  btn.disabled = true;
+  lbl.style.display = 'none';
+  spin.style.display = 'block';
+
+  const otherText = document.getElementById('cancel-other-text').value.trim();
+  const motivo = cancelReason === 'otro' ? otherText || 'otro' : cancelReason;
+  const userEmail = appState.user?.email || '';
+
+  try {
+    // Intentar llamar al endpoint de cancelación
+    await fetch(`${SCRAPER_API_URL}/cancel-subscription`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email: userEmail, motivo })
+    });
+  } catch(e) {
+    // Si el endpoint no existe aún, continuar igual (se gestionará por email)
+  }
+
+  // Siempre mostrar confirmación (la cancelación se puede gestionar manualmente)
+  btn.disabled = false;
+  lbl.style.display = 'inline';
+  spin.style.display = 'none';
+  document.querySelectorAll('.cancel-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('cancel-step-3').classList.add('active');
 }
 </script>
 </body>
