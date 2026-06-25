@@ -214,13 +214,24 @@
   .email-limit-btn:hover { border-color:var(--border2); color:var(--text); }
   .email-limit-btn.selected { background:rgba(0,200,255,0.08); border-color:var(--accent); color:var(--accent); }
 
-  /* MULTI-CIUDAD */
-  .city-pills-wrap { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
-  .city-pill { display:flex; align-items:center; gap:6px; padding:8px 12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:20px; cursor:pointer; font-size:13px; color:var(--text2); transition:all 0.15s; user-select:none; }
-  .city-pill:hover { border-color:var(--border2); color:var(--text); }
-  .city-pill.selected { background:rgba(0,200,255,0.08); border-color:var(--accent); color:var(--accent); font-weight:600; }
-  .city-pill.selected::before { content:'✓ '; }
-  .city-group-label-plain { font-size:11px; font-weight:700; color:var(--accent); letter-spacing:1px; text-transform:uppercase; margin-top:12px; margin-bottom:4px; width:100%; }
+  /* MULTI-CIUDAD — dropdown */
+  .city-dropdown { position:relative; width:100%; }
+  .city-selected { width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:8px; padding:11px 14px; font-size:14px; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:8px; transition:border-color 0.2s,box-shadow 0.2s; user-select:none; min-height:44px; }
+  .city-selected:hover { border-color:var(--border2); }
+  .city-dropdown.open .city-selected { border-color:var(--accent); box-shadow:0 0 0 3px rgba(0,200,255,0.1); }
+  .city-selected-tags { display:flex; flex-wrap:wrap; gap:5px; flex:1; }
+  .city-tag { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; background:rgba(0,200,255,0.1); border:1px solid rgba(0,200,255,0.3); border-radius:20px; font-size:12px; color:var(--accent); font-weight:600; }
+  .city-tag-remove { cursor:pointer; font-size:14px; line-height:1; color:var(--accent); opacity:0.7; }
+  .city-tag-remove:hover { opacity:1; }
+  .city-placeholder { color:var(--text3); font-size:14px; }
+  .city-list { display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:var(--bg2); border:1px solid var(--border2); border-radius:10px; max-height:280px; overflow-y:auto; z-index:100; box-shadow:0 8px 32px rgba(0,0,0,0.4); padding:6px; }
+  .city-dropdown.open .city-list { display:block; }
+  .city-group-label { font-size:11px; font-weight:700; color:var(--accent); letter-spacing:1px; text-transform:uppercase; padding:10px 10px 6px; margin-top:4px; }
+  .city-option { display:flex; align-items:center; gap:8px; padding:9px 12px; font-size:13px; color:var(--text2); border-radius:6px; cursor:pointer; transition:all 0.12s; }
+  .city-option:hover { background:rgba(0,200,255,0.08); color:var(--text); }
+  .city-option.selected { background:rgba(0,200,255,0.06); color:var(--accent); }
+  .city-option .city-check { width:16px; height:16px; border-radius:4px; border:1.5px solid var(--text3); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:10px; transition:all 0.15s; }
+  .city-option.selected .city-check { background:var(--accent); border-color:var(--accent); color:#080C12; }
   .city-max-note { font-size:12px; color:var(--text3); margin-top:8px; }
   .multi-city-progress { background:rgba(0,200,255,0.05); border:1px solid var(--border); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--text2); }
   .multi-city-progress strong { color:var(--accent); }
@@ -417,41 +428,46 @@
             </div>
             <!-- MULTI-CIUDAD -->
             <div class="form-field">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                <label class="form-label" style="margin:0">Ciudades <span style="color:var(--text3);font-size:11px;font-weight:400">(máx. 5)</span></label>
-                <span id="cities-count" style="font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;">0 seleccionadas</span>
-              </div>
-              <div class="city-pills-wrap" id="city-pills-wrap">
-                <div class="city-group-label-plain">⭐ Principales</div>
-                <div class="city-pill" onclick="toggleCity('Madrid')">Madrid</div>
-                <div class="city-pill" onclick="toggleCity('Barcelona')">Barcelona</div>
-                <div class="city-pill" onclick="toggleCity('Valencia')">Valencia</div>
-                <div class="city-pill" onclick="toggleCity('Sevilla')">Sevilla</div>
-                <div class="city-pill" onclick="toggleCity('Zaragoza')">Zaragoza</div>
-                <div class="city-pill" onclick="toggleCity('Málaga')">Málaga</div>
-                <div class="city-pill" onclick="toggleCity('Murcia')">Murcia</div>
-                <div class="city-pill" onclick="toggleCity('Palma')">Palma</div>
-                <div class="city-pill" onclick="toggleCity('Las Palmas')">Las Palmas</div>
-                <div class="city-pill" onclick="toggleCity('Bilbao')">Bilbao</div>
-                <div class="city-group-label-plain">🗺️ Otras capitales</div>
-                <div class="city-pill" onclick="toggleCity('Alicante')">Alicante</div>
-                <div class="city-pill" onclick="toggleCity('Almería')">Almería</div>
-                <div class="city-pill" onclick="toggleCity('Badajoz')">Badajoz</div>
-                <div class="city-pill" onclick="toggleCity('Burgos')">Burgos</div>
-                <div class="city-pill" onclick="toggleCity('Cádiz')">Cádiz</div>
-                <div class="city-pill" onclick="toggleCity('Córdoba')">Córdoba</div>
-                <div class="city-pill" onclick="toggleCity('Granada')">Granada</div>
-                <div class="city-pill" onclick="toggleCity('Huelva')">Huelva</div>
-                <div class="city-pill" onclick="toggleCity('Jaén')">Jaén</div>
-                <div class="city-pill" onclick="toggleCity('León')">León</div>
-                <div class="city-pill" onclick="toggleCity('Marbella')">Marbella</div>
-                <div class="city-pill" onclick="toggleCity('Pamplona')">Pamplona</div>
-                <div class="city-pill" onclick="toggleCity('Salamanca')">Salamanca</div>
-                <div class="city-pill" onclick="toggleCity('San Sebastián')">San Sebastián</div>
-                <div class="city-pill" onclick="toggleCity('Santander')">Santander</div>
-                <div class="city-pill" onclick="toggleCity('Toledo')">Toledo</div>
-                <div class="city-pill" onclick="toggleCity('Valladolid')">Valladolid</div>
-                <div class="city-pill" onclick="toggleCity('Vitoria')">Vitoria</div>
+              <label class="form-label">Ciudades <span style="color:var(--text3);font-size:11px;font-weight:400">(máx. 5)</span></label>
+              <div class="city-dropdown" id="city-dropdown">
+                <div class="city-selected" id="city-selected-box" onclick="toggleCityDropdown()">
+                  <div class="city-selected-tags" id="city-selected-tags">
+                    <span class="city-placeholder">— Selecciona ciudades —</span>
+                  </div>
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none" style="flex-shrink:0"><path d="M1 1l5 5 5-5" stroke="#7A8BA0" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <div class="city-list" id="city-list">
+                  <div class="city-group-label">⭐ Principales</div>
+                  <div class="city-option" onclick="toggleCity('Madrid')"><div class="city-check"></div>📍 Madrid</div>
+                  <div class="city-option" onclick="toggleCity('Barcelona')"><div class="city-check"></div>📍 Barcelona</div>
+                  <div class="city-option" onclick="toggleCity('Valencia')"><div class="city-check"></div>📍 Valencia</div>
+                  <div class="city-option" onclick="toggleCity('Sevilla')"><div class="city-check"></div>📍 Sevilla</div>
+                  <div class="city-option" onclick="toggleCity('Zaragoza')"><div class="city-check"></div>📍 Zaragoza</div>
+                  <div class="city-option" onclick="toggleCity('Málaga')"><div class="city-check"></div>📍 Málaga</div>
+                  <div class="city-option" onclick="toggleCity('Murcia')"><div class="city-check"></div>📍 Murcia</div>
+                  <div class="city-option" onclick="toggleCity('Palma')"><div class="city-check"></div>📍 Palma de Mallorca</div>
+                  <div class="city-option" onclick="toggleCity('Las Palmas')"><div class="city-check"></div>📍 Las Palmas</div>
+                  <div class="city-option" onclick="toggleCity('Bilbao')"><div class="city-check"></div>📍 Bilbao</div>
+                  <div class="city-group-label">🗺️ Capitales de provincia</div>
+                  <div class="city-option" onclick="toggleCity('Alicante')"><div class="city-check"></div>📍 Alicante</div>
+                  <div class="city-option" onclick="toggleCity('Almería')"><div class="city-check"></div>📍 Almería</div>
+                  <div class="city-option" onclick="toggleCity('Badajoz')"><div class="city-check"></div>📍 Badajoz</div>
+                  <div class="city-option" onclick="toggleCity('Burgos')"><div class="city-check"></div>📍 Burgos</div>
+                  <div class="city-option" onclick="toggleCity('Cádiz')"><div class="city-check"></div>📍 Cádiz</div>
+                  <div class="city-option" onclick="toggleCity('Córdoba')"><div class="city-check"></div>📍 Córdoba</div>
+                  <div class="city-option" onclick="toggleCity('Granada')"><div class="city-check"></div>📍 Granada</div>
+                  <div class="city-option" onclick="toggleCity('Huelva')"><div class="city-check"></div>📍 Huelva</div>
+                  <div class="city-option" onclick="toggleCity('Jaén')"><div class="city-check"></div>📍 Jaén</div>
+                  <div class="city-option" onclick="toggleCity('León')"><div class="city-check"></div>📍 León</div>
+                  <div class="city-option" onclick="toggleCity('Marbella')"><div class="city-check"></div>📍 Marbella</div>
+                  <div class="city-option" onclick="toggleCity('Pamplona')"><div class="city-check"></div>📍 Pamplona</div>
+                  <div class="city-option" onclick="toggleCity('Salamanca')"><div class="city-check"></div>📍 Salamanca</div>
+                  <div class="city-option" onclick="toggleCity('San Sebastián')"><div class="city-check"></div>📍 San Sebastián</div>
+                  <div class="city-option" onclick="toggleCity('Santander')"><div class="city-check"></div>📍 Santander</div>
+                  <div class="city-option" onclick="toggleCity('Toledo')"><div class="city-check"></div>📍 Toledo</div>
+                  <div class="city-option" onclick="toggleCity('Valladolid')"><div class="city-check"></div>📍 Valladolid</div>
+                  <div class="city-option" onclick="toggleCity('Vitoria')"><div class="city-check"></div>📍 Vitoria</div>
+                </div>
               </div>
               <div class="city-max-note" id="city-max-note" style="display:none;">⚠️ Máximo 5 ciudades. Deselecciona una para añadir otra.</div>
             </div>
@@ -963,10 +979,13 @@ function showPage(name){
   if(name==='admin')loadAdminData();
 }
 
-// ══ MULTI-CIUDAD ══
+// ══ MULTI-CIUDAD — dropdown ══
+function toggleCityDropdown(e) {
+  if(e) e.stopPropagation();
+  document.getElementById('city-dropdown').classList.toggle('open');
+}
+
 function toggleCity(city) {
-  const pills = document.querySelectorAll('.city-pill');
-  const pill = Array.from(pills).find(p => p.textContent.replace('✓ ','') === city);
   const isSelected = selectedCities.includes(city);
   if(!isSelected && selectedCities.length >= 5) {
     document.getElementById('city-max-note').style.display = 'block';
@@ -975,14 +994,50 @@ function toggleCity(city) {
   document.getElementById('city-max-note').style.display = 'none';
   if(isSelected) {
     selectedCities = selectedCities.filter(c => c !== city);
-    if(pill) pill.classList.remove('selected');
   } else {
     selectedCities.push(city);
-    if(pill) pill.classList.add('selected');
   }
-  document.getElementById('cities-count').textContent = selectedCities.length + ' seleccionada' + (selectedCities.length !== 1 ? 's' : '');
+  _renderCityDropdown();
   checkLaunchReady();
 }
+
+function removeCityTag(city, e) {
+  e.stopPropagation();
+  selectedCities = selectedCities.filter(c => c !== city);
+  document.getElementById('city-max-note').style.display = 'none';
+  _renderCityDropdown();
+  checkLaunchReady();
+}
+
+function _renderCityDropdown() {
+  // Actualizar tags en el selector
+  const tagsEl = document.getElementById('city-selected-tags');
+  if(selectedCities.length === 0) {
+    tagsEl.innerHTML = '<span class="city-placeholder">— Selecciona ciudades —</span>';
+  } else {
+    tagsEl.innerHTML = selectedCities.map(c =>
+      `<span class="city-tag">${c}<span class="city-tag-remove" onclick="removeCityTag('${c}',event)">×</span></span>`
+    ).join('');
+  }
+  // Actualizar checkmarks en la lista
+  document.querySelectorAll('.city-option').forEach(opt => {
+    const cityName = opt.textContent.replace('📍 ','').trim();
+    const check = opt.querySelector('.city-check');
+    if(selectedCities.includes(cityName)) {
+      opt.classList.add('selected');
+      if(check) check.textContent = '✓';
+    } else {
+      opt.classList.remove('selected');
+      if(check) check.textContent = '';
+    }
+  });
+}
+
+// Cerrar dropdown al click fuera
+document.addEventListener('click', function(e) {
+  const dd = document.getElementById('city-dropdown');
+  if(dd && !dd.contains(e.target)) dd.classList.remove('open');
+});
 
 function updateCategories(){
   const sector=document.getElementById('select-sector').value;
