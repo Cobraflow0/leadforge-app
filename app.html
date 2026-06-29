@@ -240,6 +240,16 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 .search-input::placeholder{color:var(--text3);}
 .search-input:focus{border-color:var(--accent);}
 .city-search-wrap{padding:8px 8px 4px;position:sticky;top:0;background:var(--bg2);z-index:1;}
+.preview-touch-tabs{display:flex;gap:6px;padding:10px 16px;background:#f0f4f8;border-bottom:1px solid #e2e8f0;overflow-x:auto;flex-shrink:0;}
+.preview-touch-tab{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #dde3ed;background:#fff;color:#4a5568;white-space:nowrap;transition:all 0.15s;font-family:'Space Grotesk',sans-serif;}
+.preview-touch-tab:hover{border-color:#aab;background:#f8fafc;}
+.preview-touch-tab.active{background:#0066FF;color:#fff;border-color:#0066FF;}
+.toggle-switch{position:relative;display:inline-flex;align-items:center;width:44px;height:24px;cursor:pointer;flex-shrink:0;}
+.toggle-switch input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-track{position:absolute;inset:0;background:var(--border2);border-radius:12px;transition:background 0.2s;}
+.toggle-switch input:checked+.toggle-track{background:var(--accent);}
+.toggle-thumb{position:absolute;height:18px;width:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25);pointer-events:none;}
+.toggle-switch input:checked~.toggle-thumb{transform:translateX(20px);}
 .multi-city-progress{background:rgba(0,200,255,0.04);border:1px solid var(--border);border-radius:10px;padding:12px 18px;margin-bottom:16px;font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px;}
 .multi-city-progress strong{color:var(--accent);}
 .crm-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;}
@@ -623,6 +633,45 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
         </div>
         <div id="sender-status-msg" style="display:none;margin-top:14px;padding:12px 16px;border-radius:10px;font-size:13px;line-height:1.5;"></div>
       </div>
+      <div class="card" style="margin-top:20px;">
+        <div class="card-title">🔔 Alertas semanales de leads</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.7;">Recibe cada lunes un resumen con los mejores leads de tu sector directamente en tu email.</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <span style="font-size:14px;font-weight:600;color:var(--text);">Activar alertas semanales</span>
+          <label class="toggle-switch"><input type="checkbox" id="alerta-toggle" onchange="toggleAlerta(this.checked)"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+        </div>
+        <div id="alerta-config" style="display:none;">
+          <div class="scraper-grid" style="margin-bottom:14px;">
+            <div>
+              <label class="form-label">Sector a monitorizar</label>
+              <select class="form-select" id="alerta-sector">
+                <option value="">— Selecciona —</option>
+                <option value="construccion">🏗️ Construcción e Interiorismo</option>
+                <option value="servicios_hogar">🔧 Servicios del Hogar</option>
+                <option value="energia">⚡ Energía y Eficiencia Energética</option>
+                <option value="inmobiliaria">🏘️ Inmobiliaria</option>
+                <option value="salud">🏥 Salud y Bienestar</option>
+                <option value="restauracion">🍽️ Restauración y Hostelería</option>
+                <option value="eventos">🎉 Eventos y Celebraciones</option>
+                <option value="automocion">🚗 Automoción</option>
+                <option value="retail">🛍️ Retail y Comercio</option>
+                <option value="educacion">📚 Educación</option>
+                <option value="legal">⚖️ Legal y Asesoría</option>
+                <option value="marketing">📣 Marketing y Publicidad</option>
+                <option value="tecnologia">💻 Tecnología e IT</option>
+                <option value="pymes">🏢 Pymes</option>
+                <option value="fincas">🏠 Gestión de Fincas</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Ciudad</label>
+              <input type="text" class="form-input-free" id="alerta-ciudad" placeholder="Ej: Madrid">
+            </div>
+          </div>
+          <button id="btn-save-alerta" onclick="saveAlerta()" style="padding:12px 24px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:10px;color:#05080F;font-size:13px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all 0.2s;">💾 Guardar alerta</button>
+        </div>
+        <div id="alerta-status" style="display:none;margin-top:14px;padding:12px 16px;border-radius:10px;font-size:13px;line-height:1.5;"></div>
+      </div>
       <div class="danger-zone" style="margin-top:20px;">
         <div class="danger-title">Cancelar suscripción</div>
         <div class="danger-sub">Al cancelar mantendrás el acceso hasta el final del período de facturación actual.</div>
@@ -685,7 +734,13 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 <div class="preview-overlay" id="preview-overlay">
   <div class="preview-box">
     <div class="preview-header"><span id="preview-subject">Vista previa del email</span><button class="preview-close" onclick="closePreview()">✕</button></div>
-    <iframe class="preview-iframe" id="preview-iframe" style="height:500px;width:100%;"></iframe>
+    <div class="preview-touch-tabs">
+      <button class="preview-touch-tab active" id="ptab-1" onclick="switchPreviewTouch(1)">✉️ Toque 1 — Hoy</button>
+      <button class="preview-touch-tab" id="ptab-2" onclick="switchPreviewTouch(2)">🔄 Día 4</button>
+      <button class="preview-touch-tab" id="ptab-3" onclick="switchPreviewTouch(3)">🔄 Día 8</button>
+      <button class="preview-touch-tab" id="ptab-4" onclick="switchPreviewTouch(4)">🔚 Día 14</button>
+    </div>
+    <iframe class="preview-iframe" id="preview-iframe" style="height:460px;width:100%;"></iframe>
   </div>
 </div>
 <!-- MODAL CANCELACIÓN -->
@@ -804,6 +859,8 @@ async function loadApp(user){
   const ss=localStorage.getItem('lf_sender_email'),sn=localStorage.getItem('lf_sender_name');
   if(ss)document.getElementById('sender-email-input').value=ss;if(sn)document.getElementById('sender-name-input').value=sn;
   loadCRM();
+  loadSearchHistoryFromSupabase();
+  loadAlertaConfig();
 }
 async function loadCRM(){crmLeads=await CRM.load();renderCRM();}
 function doLogout(){sb.signOut();crmLeads=[];selectedCities=[];appState={user:null,profile:null,searches:appState.searches,currentSearch:null,currentJobId:null,currentLeads:[]};showScreen('login');}
@@ -908,7 +965,7 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources){
   const ciudadesStr=ciudades.length>1?ciudades.join(' + '):ciudades[0];
   document.getElementById('results-sub').textContent=`${totalResult.total} leads en ${ciudadesStr}.`;document.getElementById('results-done').style.display='block';setProgress(100,'Completado');
   const entry={id:Date.now(),job_id:lastJobId,sector:appState.currentSearch?.sector||sector,ciudad:ciudadesStr,cats:cats.length,total:totalResult.total,alta:totalResult.alta,media:totalResult.media,baja:totalResult.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};
-  appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();
+  appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);
 }
 async function runScrapingReal(sector,ciudad,cats,sources){
   try{
@@ -921,7 +978,7 @@ async function runScrapingReal(sector,ciudad,cats,sources){
       await delay(2000);const sr=await fetch(`${SCRAPER_API_URL}/status/${job_id}`);if(!sr.ok){addLog('⚠️ Error consultando estado…','warn');continue;}
       const data=await sr.json();data.logs.slice(lastLog).forEach(line=>{const t=line.includes('✅')||line.includes('✓')?'ok':line.includes('❌')?'error':'info';addLog(line.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,''),t);});lastLog=data.logs.length;
       setProgress(data.progress,data.logs.at(-1)?.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')||'');
-      if(data.status==='done'){const r=data.result;document.getElementById('res-total').textContent=r.total;document.getElementById('res-alta').textContent=r.alta;document.getElementById('res-media').textContent=r.media;document.getElementById('res-baja').textContent=r.baja;document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';document.getElementById('results-sub').textContent=`${r.total} leads listos para descargar en Excel.`;document.getElementById('results-done').style.display='block';appState.currentLeads=r.leads||[];const entry={id:Date.now(),job_id,sector:appState.currentSearch?.sector||sector,ciudad,cats:cats.length,total:r.total,alta:r.alta,media:r.media,baja:r.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();break;}
+      if(data.status==='done'){const r=data.result;document.getElementById('res-total').textContent=r.total;document.getElementById('res-alta').textContent=r.alta;document.getElementById('res-media').textContent=r.media;document.getElementById('res-baja').textContent=r.baja;document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';document.getElementById('results-sub').textContent=`${r.total} leads listos para descargar en Excel.`;document.getElementById('results-done').style.display='block';appState.currentLeads=r.leads||[];const entry={id:Date.now(),job_id,sector:appState.currentSearch?.sector||sector,ciudad,cats:cats.length,total:r.total,alta:r.alta,media:r.media,baja:r.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);break;}
       if(data.status==='error'){addLog(`❌ Error: ${data.error}`,'error');setProgress(0,'Error — intenta de nuevo');break;}
     }
   }catch(err){addLog(`❌ ${err.message}`,'error');setProgress(0,'Error de conexión');}
@@ -933,7 +990,7 @@ function newSearch(){showPage('dashboard');}
 function renderHistory(){
   const list=document.getElementById('history-list'),searches=appState.searches;
   if(!searches.length){list.innerHTML=`<div class="empty-state"><span class="emoji">📋</span><p>Aún no tienes búsquedas guardadas.<br>Lanza tu primera búsqueda para verla aquí.</p></div>`;return;}
-  const icons={construccion:'🏗️',marketing:'📣',legal:'⚖️',tecnologia:'💻',salud:'🏥',restauracion:'🍽️',retail:'🛍️',pymes:'🏢',fincas:'🏠'};
+  const icons={construccion:'🏗️',marketing:'📣',legal:'⚖️',tecnologia:'💻',salud:'🏥',restauracion:'🍽️',retail:'🛍️',pymes:'🏢',fincas:'🏠',energia:'⚡',servicios_hogar:'🔧',inmobiliaria:'🏘️',educacion:'📚',automocion:'🚗',eventos:'🎉'};
   list.innerHTML=searches.map(s=>`<div class="history-item"><div class="history-icon">${icons[s.sector]||'📋'}</div><div class="history-info"><div class="history-name">${s.sector} — ${s.ciudad}</div><div class="history-meta">${s.cats} categorías · ${s.date}</div></div><div class="history-leads">${s.total} leads</div><button class="btn-redownload" onclick="downloadHistoryExcel('${s.job_id||''}')" ${!s.job_id?'disabled':''}>📥 Excel</button></div>`).join('');
 }
 function updateStats(){
@@ -949,7 +1006,28 @@ async function verifySender(){const email=document.getElementById('sender-email-
 async function checkSenderStatus(){const email=document.getElementById('sender-email-input').value.trim()||localStorage.getItem('lf_sender_email')||'';if(!email){_senderMsg('Introduce tu email primero.','err');return;}if(email)document.getElementById('sender-email-input').value=email;try{const r=await fetch(`${SCRAPER_API_URL}/check-sender`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});const d=await r.json();if(d.ok){const type=d.status==='verified'?'ok':d.status==='pending'?'warn':'err';_senderMsg(d.message,type);}}catch(e){_senderMsg('Error de conexión.','err');}}
 let selectedLimit=50;
 function selectLimit(n){selectedLimit=n;document.querySelectorAll('.email-limit-btn').forEach(b=>b.classList.remove('selected'));document.getElementById('limit-'+n).classList.add('selected');}
-function previewEmail(){const name=document.getElementById('camp-name').value.trim()||'Tu nombre',company=document.getElementById('camp-company').value.trim()||'Tu empresa',product=document.getElementById('camp-product').value.trim()||'tu producto',email=document.getElementById('camp-email').value.trim()||'tu@empresa.com';const html=`<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f6f9;font-family:'Helvetica Neue',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:40px 20px;"><tr><td align="center"><table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.07);"><tr><td style="padding:36px 40px 28px;"><p style="margin:0 0 20px;font-size:16px;color:#1a1a2e;">Hola <strong>Empresa Ejemplo</strong>,</p><p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">Soy <strong>${name}</strong> de <strong>${company}</strong>. Me pongo en contacto porque trabajamos en <strong>${product}</strong> y creo que podría encajaros.</p><p style="margin:0 0 28px;font-size:15px;color:#4a5568;">¿Tenéis 10 minutos esta semana para una llamada rápida?</p><table cellpadding="0" cellspacing="0" style="margin:0 0 28px;"><tr><td style="background:#0066FF;border-radius:7px;"><a href="mailto:${email}" style="display:inline-block;padding:12px 28px;color:#fff;text-decoration:none;font-weight:700;font-size:14px;">Responder →</a></td></tr></table><p style="margin:0;font-size:14px;color:#4a5568;">Un saludo,<br><strong>${name}</strong><br><span style="color:#7a8ba0;font-size:12px;">${company} · ${email}</span></p></td></tr><tr><td style="background:#f8fafc;padding:16px 40px;border-top:1px solid #e2e8f0;"><p style="margin:0;font-size:11px;color:#a0aec0;text-align:center;">Has recibido este email porque tu empresa aparece en directorios públicos de internet.</p></td></tr></table></td></tr></table></body></html>`;document.getElementById('preview-subject').textContent=`Asunto: ¿Trabajamos juntos? — ${company}`;document.getElementById('preview-iframe').srcdoc=html;document.getElementById('preview-overlay').classList.add('open');}
+let _previewData={name:'',company:'',product:'',email:''};
+function previewEmail(){
+  _previewData={name:document.getElementById('camp-name').value.trim()||'Tu nombre',company:document.getElementById('camp-company').value.trim()||'Tu empresa',product:document.getElementById('camp-product').value.trim()||'tu producto o servicio',email:document.getElementById('camp-email').value.trim()||'tu@empresa.com'};
+  document.querySelectorAll('.preview-touch-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('ptab-1').classList.add('active');
+  _renderPreviewTouch(1);
+  document.getElementById('preview-overlay').classList.add('open');
+}
+function switchPreviewTouch(n){document.querySelectorAll('.preview-touch-tab').forEach(t=>t.classList.remove('active'));document.getElementById('ptab-'+n).classList.add('active');_renderPreviewTouch(n);}
+function _renderPreviewTouch(n){
+  const {name,company,product,email}=_previewData;
+  const subjects={1:`¿Trabajamos juntos? — ${company}`,2:`Solo quería asegurarme — ${company}`,3:`Un último intento — ${company}`,4:`Cerramos el contacto — ${company}`};
+  const bodies={
+    1:`<p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">Soy <strong>${name}</strong> de <strong>${company}</strong>. Me pongo en contacto porque trabajamos en <strong>${product}</strong> y creo que podría encajaros.</p><p style="margin:0 0 28px;font-size:15px;color:#4a5568;">¿Tenéis 10 minutos esta semana para una llamada rápida?</p>`,
+    2:`<p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">Te escribía hace unos días de <strong>${company}</strong> sobre <strong>${product}</strong>. Quería asegurarme de que te llegó mi mensaje.</p><p style="margin:0 0 28px;font-size:15px;color:#4a5568;">¿Tenéis un momento esta semana para una llamada rápida?</p>`,
+    3:`<p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">Me he puesto en contacto un par de veces sobre <strong>${product}</strong>. Entiendo que puede no ser el momento adecuado.</p><p style="margin:0 0 28px;font-size:15px;color:#4a5568;">Si hay interés, estaré encantado de hablar. ¿15 minutos esta semana?</p>`,
+    4:`<p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">No quiero molestarte más, así que este será mi último mensaje sobre <strong>${product}</strong>.</p><p style="margin:0 0 28px;font-size:15px;color:#4a5568;">Si en algún momento cambia la situación, aquí estamos.<br>¡Mucho éxito con tu negocio!</p>`,
+  };
+  const html=`<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f4f6f9;font-family:'Helvetica Neue',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:40px 20px;"><tr><td align="center"><table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.07);"><tr><td style="padding:36px 40px 28px;"><p style="margin:0 0 20px;font-size:16px;color:#1a1a2e;">Hola <strong>Empresa Ejemplo</strong>,</p>${bodies[n]}<table cellpadding="0" cellspacing="0" style="margin:0 0 28px;"><tr><td style="background:#0066FF;border-radius:7px;"><a href="mailto:${email}" style="display:inline-block;padding:12px 28px;color:#fff;text-decoration:none;font-weight:700;font-size:14px;">Responder →</a></td></tr></table><p style="margin:0;font-size:14px;color:#4a5568;">Un saludo,<br><strong>${name}</strong><br><span style="color:#7a8ba0;font-size:12px;">${company} · ${email}</span></p></td></tr><tr><td style="background:#f8fafc;padding:16px 40px;border-top:1px solid #e2e8f0;"><p style="margin:0;font-size:11px;color:#a0aec0;text-align:center;">Has recibido este email porque tu empresa aparece en directorios públicos de internet.</p></td></tr></table></td></tr></table></body></html>`;
+  document.getElementById('preview-subject').textContent=`Asunto: ${subjects[n]}`;
+  document.getElementById('preview-iframe').srcdoc=html;
+}
 function closePreview(){document.getElementById('preview-overlay').classList.remove('open');}
 function showAlert(el,msg){el.textContent=msg;el.classList.add('show');}
 function delay(ms){return new Promise(r=>setTimeout(r,ms));}
@@ -1011,6 +1089,71 @@ function selectCancelReason(btn,reason){document.querySelectorAll('.cancel-reaso
 function goToCancelStep2(){if(!cancelReason)return;document.querySelectorAll('.cancel-step').forEach(s=>s.classList.remove('active'));document.getElementById('cancel-step-2').classList.add('active');}
 function goBackCancelStep(){document.querySelectorAll('.cancel-step').forEach(s=>s.classList.remove('active'));document.getElementById('cancel-step-1').classList.add('active');}
 async function confirmCancellation(){const btn=document.getElementById('btn-confirm-cancel'),lbl=document.getElementById('cancel-btn-label'),spin=document.getElementById('cancel-spinner');btn.disabled=true;lbl.style.display='none';spin.style.display='block';const otherText=document.getElementById('cancel-other-text').value.trim(),motivo=cancelReason==='otro'?otherText||'otro':cancelReason,userEmail=appState.user?.email||'';try{await fetch(`${SCRAPER_API_URL}/cancel-subscription`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:userEmail,motivo})});}catch(e){}btn.disabled=false;lbl.style.display='inline';spin.style.display='none';document.querySelectorAll('.cancel-step').forEach(s=>s.classList.remove('active'));document.getElementById('cancel-step-3').classList.add('active');}
+
+/* ═══════════════════════════════════════
+   HISTORIAL EN SUPABASE
+═══════════════════════════════════════ */
+async function saveSearchToSupabase(entry){
+  if(!appState.user?.id)return;
+  try{
+    await sb.req('/rest/v1/search_history',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({user_id:appState.user.id,user_email:appState.user.email||'',sector:entry.sector||'',ciudad:entry.ciudad||'',cats:entry.cats||0,total:entry.total||0,alta:entry.alta||0,media:entry.media||0,baja:entry.baja||0,job_id:entry.job_id||null})});
+  }catch(e){}
+}
+async function loadSearchHistoryFromSupabase(){
+  if(!appState.user?.id)return;
+  try{
+    const r=await sb.req(`/rest/v1/search_history?user_id=eq.${appState.user.id}&order=created_at.desc&limit=50`);
+    if(!r.ok)return;
+    const remote=await r.json();
+    if(!Array.isArray(remote)||!remote.length)return;
+    const localJobIds=new Set(appState.searches.filter(s=>s.job_id).map(s=>s.job_id));
+    let added=0;
+    remote.forEach(s=>{
+      if(s.job_id&&localJobIds.has(s.job_id))return;
+      appState.searches.push({id:new Date(s.created_at).getTime()+Math.random(),job_id:s.job_id||null,sector:s.sector||'',ciudad:s.ciudad||'',cats:s.cats||0,total:s.total||0,alta:s.alta||0,media:s.media||0,baja:s.baja||0,date:new Date(s.created_at).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})});
+      added++;
+    });
+    if(added>0){appState.searches.sort((a,b)=>b.id-a.id);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();}
+  }catch(e){}
+}
+
+/* ═══════════════════════════════════════
+   ALERTAS SEMANALES
+═══════════════════════════════════════ */
+async function loadAlertaConfig(){
+  if(!appState.user?.id)return;
+  try{
+    const r=await sb.req(`/rest/v1/user_alerts?user_id=eq.${appState.user.id}&limit=1`);
+    if(!r.ok)return;
+    const data=await r.json();
+    if(!data.length)return;
+    const a=data[0];
+    document.getElementById('alerta-toggle').checked=a.active;
+    document.getElementById('alerta-config').style.display=a.active?'block':'none';
+    if(a.sector)document.getElementById('alerta-sector').value=a.sector;
+    if(a.ciudades&&a.ciudades.length)document.getElementById('alerta-ciudad').value=a.ciudades.join(', ');
+  }catch(e){}
+}
+function toggleAlerta(checked){document.getElementById('alerta-config').style.display=checked?'block':'none';}
+async function saveAlerta(){
+  const sector=document.getElementById('alerta-sector').value,ciudadStr=document.getElementById('alerta-ciudad').value.trim(),active=document.getElementById('alerta-toggle').checked;
+  if(!sector||!ciudadStr){showAlertaStatus('Selecciona sector y ciudad.','err');return;}
+  const ciudades=ciudadStr.split(',').map(c=>c.trim()).filter(Boolean);
+  const btn=document.getElementById('btn-save-alerta');
+  btn.disabled=true;
+  try{
+    const r=await sb.req(`/rest/v1/user_alerts?user_id=eq.${appState.user.id}`);
+    const existing=r.ok?await r.json():[];
+    if(existing.length>0){
+      await sb.req(`/rest/v1/user_alerts?user_id=eq.${appState.user.id}`,{method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify({sector,ciudades,active,updated_at:new Date().toISOString()})});
+    }else{
+      await sb.req('/rest/v1/user_alerts',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({user_id:appState.user.id,user_email:appState.user.email||'',sector,ciudades,active})});
+    }
+    showAlertaStatus('✅ Alerta guardada. Recibirás un resumen cada lunes a las 9:00 h.','ok');
+  }catch(e){showAlertaStatus('Error al guardar. Inténtalo de nuevo.','err');}
+  btn.disabled=false;
+}
+function showAlertaStatus(msg,type){const el=document.getElementById('alerta-status');el.style.display='block';if(type==='ok'){el.style.background='rgba(0,229,160,0.07)';el.style.border='1px solid rgba(0,229,160,0.2)';el.style.color='var(--green)';}else{el.style.background='rgba(255,61,90,0.07)';el.style.border='1px solid rgba(255,61,90,0.2)';el.style.color='var(--red)';}el.textContent=msg;}
 </script>
 </body>
 </html>
