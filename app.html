@@ -354,20 +354,31 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 .nuke-mode-btn:hover{background:rgba(255,61,90,0.15);}
 .nuke-mode-btn.active{background:rgba(255,61,90,0.18);border-color:#FF3D5A;box-shadow:0 0 14px rgba(255,61,90,0.35);animation:nukeBtnPulse 1.5s ease-in-out infinite;}
 @keyframes nukeBtnPulse{0%,100%{box-shadow:0 0 14px rgba(255,61,90,0.35)}50%{box-shadow:0 0 22px rgba(255,61,90,0.6)}}
-.nuke-counter{font-size:12px;color:#FF3D5A;font-family:'JetBrains Mono',monospace;font-weight:600;}
 #map-coverage.nuke-active{cursor:crosshair!important;}
 #map-coverage.nuke-active .leaflet-container{cursor:crosshair!important;}
-#nuke-confirm-panel{position:absolute;z-index:1000;background:rgba(5,8,15,0.96);border:1px solid rgba(255,61,90,0.4);border-radius:14px;padding:20px 24px;backdrop-filter:blur(20px);box-shadow:0 0 30px rgba(255,61,90,0.25),0 16px 50px rgba(0,0,0,0.6);min-width:260px;pointer-events:all;}
-#nuke-confirm-panel h3{font-size:14px;font-weight:700;color:#FF3D5A;margin-bottom:4px;}
-#nuke-confirm-panel .target-city{font-size:18px;font-weight:700;color:var(--text);margin-bottom:14px;}
-#nuke-confirm-panel select{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,61,90,0.25);border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Space Grotesk',sans-serif;color:var(--text);outline:none;margin-bottom:14px;}
+#nuke-type-selector{display:none;margin-top:12px;padding:12px 14px;background:rgba(255,61,90,0.05);border:1px solid rgba(255,61,90,0.18);border-radius:10px;}
+#nuke-type-selector .nts-label{font-size:10px;color:#FF3D5A;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;}
+.nuke-type-btn{flex:1;padding:10px 6px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:11px;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all 0.2s;text-align:center;line-height:1.5;}
+.nuke-type-btn .nt-emoji{font-size:20px;display:block;margin-bottom:3px;}
+.nuke-type-btn .nt-name{font-weight:700;font-size:12px;color:var(--text);}
+.nuke-type-btn .nt-info{font-size:10px;color:var(--text3);display:block;}
+.nuke-type-btn .nt-avail{font-size:10px;font-family:'JetBrains Mono',monospace;display:block;margin-top:2px;}
+.nuke-type-btn:hover{border-color:var(--border2);}
+.nuke-type-btn.selected.tactical{border-color:#FFD93D;background:rgba(255,217,61,0.08);box-shadow:0 0 12px rgba(255,217,61,0.2);}
+.nuke-type-btn.selected.strategic{border-color:#FF7A00;background:rgba(255,122,0,0.08);box-shadow:0 0 12px rgba(255,122,0,0.2);}
+.nuke-type-btn.selected.moab{border-color:#FF3D5A;background:rgba(255,61,90,0.1);box-shadow:0 0 12px rgba(255,61,90,0.3);}
+.nuke-type-btn:disabled{opacity:0.35;cursor:not-allowed;}
+#nuke-confirm-panel{position:absolute;z-index:1000;background:rgba(5,8,15,0.96);border-radius:14px;padding:18px 20px;backdrop-filter:blur(20px);box-shadow:0 16px 50px rgba(0,0,0,0.7);min-width:250px;pointer-events:all;}
+#nuke-confirm-panel h3{font-size:13px;font-weight:700;margin-bottom:2px;}
+#nuke-confirm-panel .target-city{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px;}
+#nuke-cities-list{font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.6;background:rgba(255,255,255,0.03);border-radius:8px;padding:8px 10px;}
+#nuke-confirm-panel select{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Space Grotesk',sans-serif;color:var(--text);outline:none;margin-bottom:12px;}
 #nuke-confirm-panel select option{background:#090D18;}
-.nuke-launch-btn{width:100%;padding:12px;background:linear-gradient(135deg,#cc0000,#FF3D5A);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;letter-spacing:0.3px;margin-bottom:8px;transition:all 0.2s;}
-.nuke-launch-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,61,90,0.4);}
-.nuke-cancel-btn{width:100%;padding:8px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:13px;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all 0.15s;}
-.nuke-cancel-btn:hover{border-color:var(--text2);}
-#nuke-missile{position:absolute;z-index:2000;font-size:28px;pointer-events:none;display:none;transform-origin:center;filter:drop-shadow(0 0 8px rgba(255,100,0,0.8));}
-@keyframes nukeExpRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(4);opacity:0}}
+.nuke-launch-btn{width:100%;padding:11px;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;letter-spacing:0.3px;margin-bottom:7px;transition:all 0.2s;}
+.nuke-launch-btn:hover{transform:translateY(-1px);}
+.nuke-cancel-btn{width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;font-family:'Space Grotesk',sans-serif;cursor:pointer;}
+#nuke-missile{position:absolute;z-index:2000;pointer-events:none;display:none;transform-origin:center;}
+@keyframes nukeShake{0%,100%{transform:translateX(0)}15%{transform:translateX(-8px)}30%{transform:translateX(8px)}45%{transform:translateX(-6px)}60%{transform:translateX(6px)}75%{transform:translateX(-3px)}90%{transform:translateX(3px)}}
 @media(max-width:900px){.sidebar{display:none;}.main{padding:24px 20px;}.stats-grid{grid-template-columns:1fr 1fr;}.scraper-grid{grid-template-columns:1fr;}.categories-grid{grid-template-columns:repeat(2,1fr);}.results-summary{grid-template-columns:repeat(2,1fr);}.cuenta-grid{grid-template-columns:1fr;}.crm-stats{grid-template-columns:repeat(3,1fr);}.camp-stats{grid-template-columns:repeat(2,1fr);}.admin-grid{grid-template-columns:repeat(2,1fr);}}
 #demo-upgrade-overlay.open{display:flex !important;}
 .demo-locked{position:relative;pointer-events:none;opacity:0.45;}
@@ -487,13 +498,38 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
           <div class="map-legend-item"><div class="map-legend-dot" style="background:#00C8FF;width:14px;height:14px;box-shadow:0 0 8px #00C8FF;"></div> +200 leads</div>
           <div style="margin-left:auto;font-size:12px;color:var(--text3)" id="map-stats-label">—</div>
           <button class="nuke-mode-btn" id="nuke-mode-btn" onclick="toggleNukeMode()">☢️ Nuke Mode</button>
-          <span class="nuke-counter" id="nuke-counter" style="display:none"></span>
+        </div>
+
+        <!-- Selector de tipo de nuke -->
+        <div id="nuke-type-selector">
+          <div class="nts-label">Selecciona tipo de nuke</div>
+          <div style="display:flex;gap:8px;">
+            <button class="nuke-type-btn tactical" id="ntype-tactical" onclick="selectNukeType('tactical')">
+              <span class="nt-emoji">💣</span>
+              <span class="nt-name">Táctica</span>
+              <span class="nt-info">75 km</span>
+              <span class="nt-avail" id="navail-tactical" style="color:#FFD93D;">—</span>
+            </button>
+            <button class="nuke-type-btn strategic" id="ntype-strategic" onclick="selectNukeType('strategic')">
+              <span class="nt-emoji">🚀</span>
+              <span class="nt-name">Estratégica</span>
+              <span class="nt-info">200 km</span>
+              <span class="nt-avail" id="navail-strategic" style="color:#FF7A00;">—</span>
+            </button>
+            <button class="nuke-type-btn moab" id="ntype-moab" onclick="selectNukeType('moab')">
+              <span class="nt-emoji">☢️</span>
+              <span class="nt-name">MOAB</span>
+              <span class="nt-info">500 km</span>
+              <span class="nt-avail" id="navail-moab" style="color:#FF3D5A;">—</span>
+            </button>
+          </div>
         </div>
 
         <!-- Panel de confirmación nuke -->
         <div id="nuke-confirm-panel" style="display:none;">
-          <h3>☢️ SCRAPING NUKE</h3>
+          <h3 id="nuke-panel-title">☢️ SCRAPING NUKE</h3>
           <div class="target-city" id="nuke-target-city">—</div>
+          <div id="nuke-cities-list"></div>
           <select id="nuke-sector-select">
             <option value="">— Selecciona sector —</option>
             <option value="construccion">🔨 Construcción y Reformas</option>
@@ -508,12 +544,12 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
             <option value="energia">☀️ Energía e Instalaciones</option>
             <option value="servicios_hogar">🔧 Servicios del Hogar</option>
           </select>
-          <button class="nuke-launch-btn" onclick="confirmNukeLaunch()">☢️ LANZAR NUKE</button>
+          <button class="nuke-launch-btn" id="nuke-launch-btn" onclick="confirmNukeLaunch()">☢️ LANZAR NUKE</button>
           <button class="nuke-cancel-btn" onclick="cancelNuke()">Cancelar</button>
         </div>
 
         <!-- Misil animado -->
-        <div id="nuke-missile">🚀</div>
+        <div id="nuke-missile"></div>
       </div>
 
       <div class="card">
@@ -1449,178 +1485,315 @@ function initMap(){
 }
 
 /* ══════════════════════════════════════════════════════════
-   SCRAPING NUKE
+   SCRAPING NUKE — Sistema completo
 ══════════════════════════════════════════════════════════ */
-let _nukeModeActive=false,_nukeTargetLatLng=null,_nukeTargetCity=null;
+const NUKE_TYPES={
+  tactical: {label:'Táctica',emoji:'💣',radiusKm:75,color:'#FFD93D',flashColor:'rgba(255,217,61,0.28)',missileDuration:900,rings:3,ringMax:28,sound:'tactical'},
+  strategic:{label:'Estratégica',emoji:'🚀',radiusKm:200,color:'#FF7A00',flashColor:'rgba(255,122,0,0.28)',missileDuration:1500,rings:5,ringMax:50,sound:'strategic'},
+  moab:     {label:'MOAB',emoji:'☢️',radiusKm:500,color:'#FF3D5A',flashColor:'rgba(255,61,90,0.38)',missileDuration:2200,rings:7,ringMax:80,sound:'moab',shake:true},
+};
+const NUKE_LIMITS={
+  demo:    {tactical:0,strategic:0,moab:0},
+  basic:   {tactical:3,strategic:1,moab:0},
+  pro:     {tactical:10,strategic:5,moab:2},
+  business:{tactical:20,strategic:10,moab:5},
+};
+
+let _nukeModeActive=false,_selectedNukeType='tactical',_nukeTargetLatLng=null,_nukeTargetCities=[],_hoverCircle=null;
+
+function _nukeMonthKey(type){const n=new Date();return `lf_nuke_${type}_${n.getFullYear()}_${n.getMonth()}`;}
+function _nukeUsed(type){return parseInt(localStorage.getItem(_nukeMonthKey(type))||'0');}
+function _nukeIncrement(type){localStorage.setItem(_nukeMonthKey(type),_nukeUsed(type)+1);}
+function _nukeRemaining(type){
+  const plan=DEMO_MODE?'demo':getPlan();
+  const lim=(NUKE_LIMITS[plan]||NUKE_LIMITS.demo)[type]||0;
+  return Math.max(0,lim-_nukeUsed(type));
+}
+
+function _haversineDist(lat1,lng1,lat2,lng2){
+  const R=6371,dL=(lat2-lat1)*Math.PI/180,dN=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dL/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dN/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function _getCitiesInRadius(lat,lng,radiusKm){
+  return Object.entries(CITY_COORDS)
+    .filter(([,[clat,clng]])=>_haversineDist(lat,lng,clat,clng)<=radiusKm)
+    .map(([city])=>city);
+}
 
 function toggleNukeMode(){
   _nukeModeActive=!_nukeModeActive;
   const btn=document.getElementById('nuke-mode-btn');
   const mapEl=document.getElementById('map-coverage');
-  const counter=document.getElementById('nuke-counter');
+  const selector=document.getElementById('nuke-type-selector');
   if(_nukeModeActive){
-    btn.classList.add('active');btn.textContent='✕ Cancelar Nuke';
+    btn.classList.add('active');btn.textContent='✕ Salir de Nuke Mode';
     mapEl.classList.add('nuke-active');
-    const remaining=getNukesRemaining();
-    counter.style.display='inline';counter.textContent=`${remaining} nuke${remaining!==1?'s':''} disponible${remaining!==1?'s':''}`;
-    if(_leafletMap)_leafletMap.on('click',_onNukeMapClick);
+    selector.style.display='block';
+    _updateNukeAvailability();
+    selectNukeType(_selectedNukeType);
+    if(_leafletMap){
+      _leafletMap.on('click',_onNukeMapClick);
+      _leafletMap.on('mousemove',_onNukeMapHover);
+    }
   }else{
     btn.classList.remove('active');btn.textContent='☢️ Nuke Mode';
     mapEl.classList.remove('nuke-active');
-    counter.style.display='none';
+    selector.style.display='none';
     cancelNuke();
-    if(_leafletMap)_leafletMap.off('click',_onNukeMapClick);
+    if(_hoverCircle){_leafletMap.removeLayer(_hoverCircle);_hoverCircle=null;}
+    if(_leafletMap){_leafletMap.off('click',_onNukeMapClick);_leafletMap.off('mousemove',_onNukeMapHover);}
   }
 }
 
-function getNukesRemaining(){
-  const limits=getPlanLimits(),used=getSearchesThisMonth();
-  return limits.searches===Infinity?999:Math.max(0,limits.searches-used);
+function _updateNukeAvailability(){
+  ['tactical','strategic','moab'].forEach(t=>{
+    const rem=_nukeRemaining(t);
+    const avail=document.getElementById('navail-'+t);
+    const btn=document.getElementById('ntype-'+t);
+    if(avail)avail.textContent=rem>0?`${rem} disponible${rem>1?'s':''}`:'Agotado';
+    if(btn)btn.disabled=(rem<=0);
+  });
+}
+
+function selectNukeType(type){
+  _selectedNukeType=type;
+  document.querySelectorAll('.nuke-type-btn').forEach(b=>b.classList.remove('selected'));
+  const btn=document.getElementById('ntype-'+type);
+  if(btn)btn.classList.add('selected');
+  // Actualizar radio del círculo de hover si existe
+  if(_hoverCircle){
+    const t=NUKE_TYPES[type];
+    _hoverCircle.setRadius(t.radiusKm*1000);
+    _hoverCircle.setStyle({color:t.color,fillColor:t.color});
+  }
+  cancelNuke();
+}
+
+function _onNukeMapHover(e){
+  if(!_nukeModeActive)return;
+  const t=NUKE_TYPES[_selectedNukeType];
+  if(_hoverCircle){
+    _hoverCircle.setLatLng(e.latlng);
+  }else{
+    _hoverCircle=L.circle(e.latlng,{
+      radius:t.radiusKm*1000,color:t.color,fillColor:t.color,
+      fillOpacity:0.06,weight:1.5,dashArray:'5,4',opacity:0.6,
+    }).addTo(_leafletMap);
+  }
 }
 
 function _onNukeMapClick(e){
   if(!_nukeModeActive)return;
-  const city=_findNearestCity(e.latlng.lat,e.latlng.lng);
-  if(!city)return;
+  if(_nukeRemaining(_selectedNukeType)<=0){
+    showUpgradeModal(`Has agotado las nukes <strong>${NUKE_TYPES[_selectedNukeType].label}</strong> de este mes.<br><br>Selecciona otro tipo o actualiza tu plan.`);return;
+  }
+  const t=NUKE_TYPES[_selectedNukeType];
+  const cities=_getCitiesInRadius(e.latlng.lat,e.latlng.lng,t.radiusKm);
   _nukeTargetLatLng=e.latlng;
-  _nukeTargetCity=city;
+  _nukeTargetCities=cities;
 
-  // Posicionar el panel cerca del click
+  // Actualizar panel
   const panel=document.getElementById('nuke-confirm-panel');
+  document.getElementById('nuke-panel-title').textContent=`${t.emoji} NUKE ${t.label.toUpperCase()}`;
+  panel.style.borderColor=t.color+'66';
+  panel.style.boxShadow=`0 0 24px ${t.color}30,0 16px 50px rgba(0,0,0,0.6)`;
+  const launchBtn=document.getElementById('nuke-launch-btn');
+  launchBtn.style.background=`linear-gradient(135deg,${t.color}cc,${t.color})`;
+  launchBtn.textContent=`${t.emoji} LANZAR NUKE`;
+
+  const targetEl=document.getElementById('nuke-target-city');
+  targetEl.textContent=cities.length>0?`📍 ${cities.slice(0,2).join(' + ')}${cities.length>2?` +${cities.length-2} más`:''}`:' Zona sin ciudades registradas';
+
+  const listEl=document.getElementById('nuke-cities-list');
+  if(cities.length>0){
+    const shown=cities.slice(0,5);
+    listEl.innerHTML=`<strong style="color:${t.color}">${cities.length} ciudad${cities.length>1?'es':''} en rango:</strong><br>${shown.join(' · ')}${cities.length>5?` <em style="color:var(--text3)">+${cities.length-5} más</em>`:''}`;
+  }else{
+    listEl.innerHTML=`<span style="color:var(--text3)">Sin ciudades guardadas en este radio. Amplía el rango o lanza igual.</span>`;
+  }
+
+  // Posicionar panel
   const mapRect=document.getElementById('map-coverage').getBoundingClientRect();
   const pt=_leafletMap.latLngToContainerPoint(e.latlng);
-  let left=pt.x+16,top=pt.y-60;
-  if(left+280>mapRect.width)left=pt.x-296;
+  let left=pt.x+16,top=pt.y-80;
+  if(left+265>mapRect.width)left=pt.x-275;
   if(top<0)top=10;
+  if(top+300>mapRect.height)top=mapRect.height-310;
   panel.style.left=left+'px';panel.style.top=top+'px';
   panel.style.display='block';
-  document.getElementById('nuke-target-city').textContent='📍 '+city;
-}
-
-function _findNearestCity(lat,lng){
-  let best=null,bestDist=Infinity;
-  Object.entries(CITY_COORDS).forEach(([city,[clat,clng]])=>{
-    const d=Math.sqrt((lat-clat)**2+(lng-clng)**2);
-    if(d<bestDist){bestDist=d;best=city;}
-  });
-  return best;
 }
 
 function cancelNuke(){
   document.getElementById('nuke-confirm-panel').style.display='none';
-  _nukeTargetLatLng=null;_nukeTargetCity=null;
+  _nukeTargetLatLng=null;_nukeTargetCities=[];
 }
 
 async function confirmNukeLaunch(){
   const sector=document.getElementById('nuke-sector-select').value;
   if(!sector){document.getElementById('nuke-sector-select').style.borderColor='#FF3D5A';return;}
-  if(getNukesRemaining()<=0){
-    showUpgradeModal('Has agotado tus búsquedas de este mes.<br><br>Actualiza tu plan para más nukes.');return;
-  }
-  const city=_nukeTargetCity,latlng=_nukeTargetLatLng;
+  const type=_selectedNukeType,latlng=_nukeTargetLatLng,cities=[..._nukeTargetCities];
   cancelNuke();
   toggleNukeMode();
-  await _animateAndLaunch(city,latlng,sector);
+  _nukeIncrement(type);
+  await _animateAndLaunch(type,latlng,cities,sector);
 }
 
-async function _animateAndLaunch(city,latlng,sector){
-  // Sonido de lanzamiento
-  _nukeWhooshSound();
+async function _animateAndLaunch(type,latlng,cities,sector){
+  const t=NUKE_TYPES[type];
 
-  // Animar misil
+  // Sonido de lanzamiento
+  _nukeLaunchSound(type);
+
+  // Animación del misil
   const mapEl=document.getElementById('map-coverage');
   const missile=document.getElementById('nuke-missile');
   const mapRect=mapEl.getBoundingClientRect();
   const targetPt=_leafletMap.latLngToContainerPoint(latlng);
-
-  const startX=mapRect.width/2,startY=-40;
+  const startX=mapRect.width/2,startY=-50;
   const endX=targetPt.x,endY=targetPt.y;
   const angle=Math.atan2(endY-startY,endX-startX)*(180/Math.PI)+45;
+  const fontSize=type==='moab'?42:type==='strategic'?34:26;
 
   missile.style.display='block';
+  missile.style.fontSize=fontSize+'px';
   missile.style.left=startX+'px';missile.style.top=startY+'px';
   missile.style.transform=`rotate(${angle}deg)`;
   missile.style.transition='none';
+  missile.style.filter=`drop-shadow(0 0 ${type==='moab'?14:8}px ${t.color})`;
+  missile.textContent=t.emoji;
 
   await new Promise(r=>setTimeout(r,50));
-  missile.style.transition='left 1.4s cubic-bezier(0.4,0,1,1),top 1.4s cubic-bezier(0.4,0,1,1)';
+  const dur=t.missileDuration;
+  missile.style.transition=`left ${dur}ms cubic-bezier(0.3,0,0.9,1),top ${dur}ms cubic-bezier(0.3,0,0.9,1)`;
   missile.style.left=endX+'px';missile.style.top=endY+'px';
 
-  await new Promise(r=>setTimeout(r,1400));
+  await new Promise(r=>setTimeout(r,dur));
   missile.style.display='none';
 
-  // Explosión
-  _nukeImpactSound();
-  _animateExplosion(latlng);
+  // Impacto
+  _nukeImpactSound(type);
+  _animateExplosion(latlng,t);
+  if(t.shake)_shakeMap();
+
+  await new Promise(r=>setTimeout(r,600));
 
   // Lanzar scraping
+  const targetCities=cities.length>0?cities:[_findNearestCity(latlng.lat,latlng.lng)];
   const cats=(SECTORES[sector]||[]).map(c=>c.id);
   const sources=['google_maps','paginas_amarillas'];
   const limits=getPlanLimits();
-  appState.currentSearch={sector,ciudad:city,cats,sources};appState.currentJobId=null;
-  _initResults(`☢️ Nuke impactó en ${city} — buscando leads…`,estimateScrapeTime(cats.length,1,sources.length));
-  await runScrapingMultiCiudad(sector,[city],cats,sources,limits.leads);
+  const ciudadStr=targetCities.join(', ');
+  appState.currentSearch={sector,ciudad:ciudadStr,cats,sources};appState.currentJobId=null;
+  _initResults(`${t.emoji} Nuke ${t.label} impactó — scrapeando ${targetCities.length} ciudad${targetCities.length>1?'es':''}…`,estimateScrapeTime(cats.length,targetCities.length,sources.length));
+  await runScrapingMultiCiudad(sector,targetCities,cats,sources,limits.leads);
 }
 
-function _animateExplosion(latlng){
-  [0,300,600].forEach((delay,i)=>{
+function _findNearestCity(lat,lng){
+  let best=null,bestDist=Infinity;
+  Object.entries(CITY_COORDS).forEach(([city,[clat,clng]])=>{
+    const d=_haversineDist(lat,lng,clat,clng);
+    if(d<bestDist){bestDist=d;best=city;}
+  });
+  return best;
+}
+
+function _shakeMap(){
+  const mapEl=document.getElementById('map-coverage');
+  mapEl.style.animation='nukeShake 0.6s ease-in-out';
+  setTimeout(()=>{mapEl.style.animation='';},700);
+}
+
+function _animateExplosion(latlng,t){
+  const delays=Array.from({length:t.rings},(_,i)=>i*220);
+  delays.forEach((delay,i)=>{
     setTimeout(()=>{
-      const r=Math.max(6,20-i*4);
-      const colors=['#FF3D5A','#FF7A00','#FFD93D'];
+      const pct=i/t.rings;
+      const colors=[t.color,'#FF7A00','#FFD93D','#ffffff'];
+      const col=colors[Math.min(i,colors.length-1)];
       const ring=L.circleMarker(latlng,{
-        radius:r,fillColor:colors[i],fillOpacity:0.6,
-        color:colors[i],weight:2,opacity:0.9
+        radius:t.ringMax*0.15,fillColor:col,fillOpacity:0.5,
+        color:col,weight:2,opacity:0.9
       }).addTo(_leafletMap);
-      let rad=r,op=0.9,fill=0.6;
+      let rad=t.ringMax*0.15,op=0.9,fill=0.5;
+      const speed=t.ringMax/25;
       const iv=setInterval(()=>{
-        rad+=3;op-=0.06;fill-=0.04;
+        rad+=speed;op-=0.045;fill-=0.03;
         if(op<=0){clearInterval(iv);_leafletMap.removeLayer(ring);return;}
         ring.setRadius(rad);ring.setStyle({opacity:op,fillOpacity:Math.max(0,fill)});
-      },40);
+      },35);
     },delay);
   });
-  // Flash de pantalla
   const flash=document.createElement('div');
-  flash.style.cssText='position:absolute;inset:0;background:rgba(255,61,90,0.25);pointer-events:none;z-index:999;border-radius:10px;transition:opacity 0.4s;';
+  flash.style.cssText=`position:absolute;inset:0;background:${t.flashColor};pointer-events:none;z-index:999;border-radius:10px;transition:opacity 0.5s;`;
   document.getElementById('map-coverage').appendChild(flash);
-  setTimeout(()=>{flash.style.opacity='0';setTimeout(()=>flash.remove(),400);},80);
+  setTimeout(()=>{flash.style.opacity='0';setTimeout(()=>flash.remove(),500);},100);
 }
 
-function _nukeWhooshSound(){
+function _nukeLaunchSound(type){
   try{
     const ctx=new(window.AudioContext||window.webkitAudioContext)();
     const osc=ctx.createOscillator(),gain=ctx.createGain();
     osc.connect(gain);gain.connect(ctx.destination);
-    osc.type='sawtooth';
-    osc.frequency.setValueAtTime(1200,ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(180,ctx.currentTime+1.4);
-    gain.gain.setValueAtTime(0.18,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+1.4);
-    osc.start();osc.stop(ctx.currentTime+1.4);
+    const cfg={
+      tactical: {type:'sine',  freqStart:1600,freqEnd:400, dur:0.9,  vol:0.12},
+      strategic:{type:'sawtooth',freqStart:1200,freqEnd:180,dur:1.5,vol:0.16},
+      moab:     {type:'sawtooth',freqStart:800, freqEnd:60,  dur:2.2,  vol:0.22},
+    }[type];
+    osc.type=cfg.type;
+    osc.frequency.setValueAtTime(cfg.freqStart,ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(cfg.freqEnd,ctx.currentTime+cfg.dur);
+    gain.gain.setValueAtTime(cfg.vol,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+cfg.dur);
+    osc.start();osc.stop(ctx.currentTime+cfg.dur);
+    // MOAB: añadir rumble grave adicional
+    if(type==='moab'){
+      const osc2=ctx.createOscillator(),g2=ctx.createGain();
+      osc2.type='sine';osc2.frequency.value=40;
+      osc2.connect(g2);g2.connect(ctx.destination);
+      g2.gain.setValueAtTime(0.3,ctx.currentTime);
+      g2.gain.linearRampToValueAtTime(0,ctx.currentTime+cfg.dur);
+      osc2.start();osc2.stop(ctx.currentTime+cfg.dur);
+    }
   }catch(e){}
 }
 
-function _nukeImpactSound(){
+function _nukeImpactSound(type){
   try{
     const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    // Boom bajo
-    const buf=ctx.createBuffer(1,ctx.sampleRate*0.8,ctx.sampleRate);
+    const cfg={
+      tactical: {boomDur:0.4,boomVol:0.8, boomFreq:120,crackFreq:600,crackDur:0.2},
+      strategic:{boomDur:0.7,boomVol:1.2, boomFreq:80, crackFreq:400,crackDur:0.3},
+      moab:     {boomDur:1.4,boomVol:2.0, boomFreq:40, crackFreq:200,crackDur:0.5},
+    }[type];
+    // Noise boom
+    const buf=ctx.createBuffer(1,ctx.sampleRate*cfg.boomDur,ctx.sampleRate);
     const d=buf.getChannelData(0);
-    for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*0.15));
+    for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*(cfg.boomDur*0.3)));
     const src=ctx.createBufferSource(),gain=ctx.createGain();
-    const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=180;
+    const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=cfg.boomFreq;
     src.buffer=buf;src.connect(filter);filter.connect(gain);gain.connect(ctx.destination);
-    gain.gain.setValueAtTime(1.2,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.8);
+    gain.gain.setValueAtTime(cfg.boomVol,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+cfg.boomDur);
     src.start();
-    // Crack agudo
-    const osc2=ctx.createOscillator(),g2=ctx.createGain();
-    osc2.connect(g2);g2.connect(ctx.destination);
-    osc2.frequency.setValueAtTime(400,ctx.currentTime);
-    osc2.frequency.exponentialRampToValueAtTime(50,ctx.currentTime+0.3);
-    g2.gain.setValueAtTime(0.5,ctx.currentTime);
-    g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
-    osc2.start();osc2.stop(ctx.currentTime+0.3);
+    // Crack
+    const osc=ctx.createOscillator(),g2=ctx.createGain();
+    osc.connect(g2);g2.connect(ctx.destination);
+    osc.frequency.setValueAtTime(cfg.crackFreq,ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(30,ctx.currentTime+cfg.crackDur);
+    g2.gain.setValueAtTime(0.6,ctx.currentTime);
+    g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+cfg.crackDur);
+    osc.start();osc.stop(ctx.currentTime+cfg.crackDur);
+    // MOAB: sub-bass extra
+    if(type==='moab'){
+      const o3=ctx.createOscillator(),g3=ctx.createGain();
+      o3.type='sine';o3.frequency.value=25;
+      o3.connect(g3);g3.connect(ctx.destination);
+      g3.gain.setValueAtTime(1.5,ctx.currentTime);
+      g3.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+1.2);
+      o3.start();o3.stop(ctx.currentTime+1.2);
+    }
   }catch(e){}
 }
 
