@@ -942,12 +942,21 @@ function loadDemoApp(){
   document.getElementById('stat-searches').innerHTML = '0 <span>/ 1 búsqueda</span>';
   document.getElementById('stat-leads').innerHTML = '0 <span>leads</span>';
   document.getElementById('stat-emails').innerHTML = '0 <span>emails</span>';
-  // Ocultar logout y nav innecesario en demo
+  // En demo: mostrar nav bloqueado con candado
   document.querySelector('.btn-logout').style.display = 'none';
-  document.getElementById('nav-cuenta').style.display = 'none';
-  document.getElementById('nav-campanas').style.display = 'none';
-  document.getElementById('nav-crm').style.display = 'none';
-  document.getElementById('nav-historial').style.display = 'none';
+  const lockedNavs = [
+    {id:'nav-historial', label:'Historial', icon:'📋'},
+    {id:'nav-campanas', label:'Mis campañas', icon:'📨'},
+    {id:'nav-crm', label:'Mis leads (CRM)', icon:'🎯'},
+    {id:'nav-cuenta', label:'Mi cuenta', icon:'👤'},
+  ];
+  lockedNavs.forEach(({id, label, icon})=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = `<span class="icon">${icon}</span> ${label} <span style="margin-left:auto;font-size:11px;opacity:0.6;">🔒</span>`;
+    el.style.opacity = '0.5';
+    el.onclick = (e)=>{ e.stopPropagation(); showDemoUpgrade(`🔒 <strong>${label}</strong> está disponible con cualquier plan de LeadForge.<br><br>Con el plan <strong>Pro</strong> tienes acceso completo a todas las funciones.`); };
+  });
   // Banner demo
   const banner = document.createElement('div');
   banner.id = 'demo-banner';
