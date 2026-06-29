@@ -1100,7 +1100,8 @@ async function launchScraping(){
     _initResults('Buscando "'+termino+'" en '+ciudad+'…', etaLibre);await runScrapingReal('libre',ciudad,[termino],fuentesLibre,demoLeads);
   }else{
     const sector=document.getElementById('select-sector').value;
-    const cats=(SECTORES[sector]||[]).filter(c=>document.getElementById('cat-'+c.id)?.classList.contains('selected')).map(c=>c.id);
+    let cats=(SECTORES[sector]||[]).filter(c=>document.getElementById('cat-'+c.id)?.classList.contains('selected')).map(c=>c.id);
+    if(DEMO_MODE) cats=cats.slice(0,1); // demo: solo 1 categoría para ser rápido
     const ciudades=DEMO_MODE?[selectedCities[0]||'Madrid']:[...selectedCities];
     appState.currentSearch={sector,ciudad:ciudades.join(', '),cats,sources};appState.currentJobId=null;
     const subtext=ciudades.length>1?`Buscando leads en ${ciudades.length} ciudades…`:`Buscando leads en ${ciudades[0]}…`;
