@@ -1052,10 +1052,28 @@ function updateCategories(){
   const sector=document.getElementById('select-sector').value,wrap=document.getElementById('cats-wrap'),grid=document.getElementById('cats-grid');
   grid.innerHTML='';if(!sector||!SECTORES[sector]){wrap.style.display='none';document.getElementById('btn-launch').disabled=true;return;}
   wrap.style.display='block';
-  SECTORES[sector].forEach(cat=>{const pill=document.createElement('div');pill.className='cat-pill selected';pill.id='cat-'+cat.id;pill.innerHTML=`<div class="cat-check">✓</div><span>${cat.emoji} ${cat.label}</span>`;pill.onclick=()=>toggleCat(cat.id);grid.appendChild(pill);});
+  SECTORES[sector].forEach((cat,i)=>{
+    const pill=document.createElement('div');
+    const selected=DEMO_MODE?(i===0):(true);
+    pill.className='cat-pill'+(selected?' selected':'');
+    pill.id='cat-'+cat.id;
+    pill.innerHTML=`<div class="cat-check">${selected?'✓':''}</div><span>${cat.emoji} ${cat.label}</span>`;
+    pill.onclick=()=>toggleCat(cat.id);
+    grid.appendChild(pill);
+  });
   checkLaunchReady();
 }
-function toggleCat(id){const el=document.getElementById('cat-'+id);el.classList.toggle('selected');el.querySelector('.cat-check').textContent=el.classList.contains('selected')?'✓':'';checkLaunchReady();}
+function toggleCat(id){
+  if(DEMO_MODE){
+    // En demo: solo 1 categoría permitida
+    const sector=document.getElementById('select-sector').value;
+    (SECTORES[sector]||[]).forEach(c=>{const e=document.getElementById('cat-'+c.id);if(e&&c.id!==id){e.classList.remove('selected');e.querySelector('.cat-check').textContent='';}});
+    const el=document.getElementById('cat-'+id);el.classList.add('selected');el.querySelector('.cat-check').textContent='✓';
+  }else{
+    const el=document.getElementById('cat-'+id);el.classList.toggle('selected');el.querySelector('.cat-check').textContent=el.classList.contains('selected')?'✓':'';
+  }
+  checkLaunchReady();
+}
 function toggleAllCats(){
   const sector=document.getElementById('select-sector').value;if(!sector||!SECTORES[sector])return;
   const cats=SECTORES[sector],allSelected=cats.every(c=>document.getElementById('cat-'+c.id)?.classList.contains('selected'));
