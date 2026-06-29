@@ -507,19 +507,19 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
             <button class="nuke-type-btn tactical" id="ntype-tactical" onclick="selectNukeType('tactical')">
               <span class="nt-emoji">💣</span>
               <span class="nt-name">Táctica</span>
-              <span class="nt-info">75 km</span>
+              <span class="nt-info">3 km</span>
               <span class="nt-avail" id="navail-tactical" style="color:#FFD93D;">—</span>
             </button>
             <button class="nuke-type-btn strategic" id="ntype-strategic" onclick="selectNukeType('strategic')">
               <span class="nt-emoji">🚀</span>
               <span class="nt-name">Estratégica</span>
-              <span class="nt-info">200 km</span>
+              <span class="nt-info">8 km</span>
               <span class="nt-avail" id="navail-strategic" style="color:#FF7A00;">—</span>
             </button>
             <button class="nuke-type-btn moab" id="ntype-moab" onclick="selectNukeType('moab')">
               <span class="nt-emoji">☢️</span>
               <span class="nt-name">MOAB</span>
-              <span class="nt-info">500 km</span>
+              <span class="nt-info">15 km</span>
               <span class="nt-avail" id="navail-moab" style="color:#FF3D5A;">—</span>
             </button>
           </div>
@@ -1488,9 +1488,9 @@ function initMap(){
    SCRAPING NUKE — Sistema completo
 ══════════════════════════════════════════════════════════ */
 const NUKE_TYPES={
-  tactical: {label:'Táctica',emoji:'💣',radiusKm:75,color:'#FFD93D',flashColor:'rgba(255,217,61,0.28)',missileDuration:900,rings:3,ringMax:28,sound:'tactical'},
-  strategic:{label:'Estratégica',emoji:'🚀',radiusKm:200,color:'#FF7A00',flashColor:'rgba(255,122,0,0.28)',missileDuration:1500,rings:5,ringMax:50,sound:'strategic'},
-  moab:     {label:'MOAB',emoji:'☢️',radiusKm:500,color:'#FF3D5A',flashColor:'rgba(255,61,90,0.38)',missileDuration:2200,rings:7,ringMax:80,sound:'moab',shake:true},
+  tactical: {label:'Táctica',emoji:'💣',radiusKm:3,color:'#FFD93D',flashColor:'rgba(255,217,61,0.28)',missileDuration:900,rings:3,ringMax:28,sound:'tactical'},
+  strategic:{label:'Estratégica',emoji:'🚀',radiusKm:8,color:'#FF7A00',flashColor:'rgba(255,122,0,0.28)',missileDuration:1500,rings:5,ringMax:50,sound:'strategic'},
+  moab:     {label:'MOAB',emoji:'☢️',radiusKm:15,color:'#FF3D5A',flashColor:'rgba(255,61,90,0.38)',missileDuration:2200,rings:7,ringMax:80,sound:'moab',shake:true},
 };
 const NUKE_LIMITS={
   demo:    {tactical:0,strategic:0,moab:0},
