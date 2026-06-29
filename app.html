@@ -250,6 +250,17 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 .toggle-switch input:checked+.toggle-track{background:var(--accent);}
 .toggle-thumb{position:absolute;height:18px;width:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25);pointer-events:none;}
 .toggle-switch input:checked~.toggle-thumb{transform:translateX(20px);}
+.source-pill.locked{opacity:0.35;cursor:not-allowed !important;}
+.source-pill.locked:hover{border-color:var(--border);color:var(--text2);background:rgba(255,255,255,0.025);}
+.plan-chip{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:0.5px;margin-left:6px;}
+.plan-chip.basic{background:rgba(107,127,160,0.12);color:var(--text2);border:1px solid var(--border2);}
+.plan-chip.pro{background:rgba(0,200,255,0.08);color:var(--accent);border:1px solid rgba(0,200,255,0.2);}
+.plan-chip.business{background:rgba(123,47,255,0.08);color:var(--accent3);border:1px solid rgba(123,47,255,0.2);}
+.limit-bar-wrap{height:4px;background:rgba(255,255,255,0.06);border-radius:10px;overflow:hidden;margin-top:10px;}
+.limit-bar-fill{height:100%;border-radius:10px;transition:width 0.5s ease;}
+.limit-bar-fill.ok{background:linear-gradient(90deg,var(--accent2),var(--accent));}
+.limit-bar-fill.warn{background:linear-gradient(90deg,#FF7A00,var(--yellow));}
+.limit-bar-fill.full{background:linear-gradient(90deg,var(--red),#FF7A00);}
 .multi-city-progress{background:rgba(0,200,255,0.04);border:1px solid var(--border);border-radius:10px;padding:12px 18px;margin-bottom:16px;font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px;}
 .multi-city-progress strong{color:var(--accent);}
 .crm-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;}
@@ -426,7 +437,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
               <input type="hidden" id="select-sector">
             </div>
             <div>
-              <label class="form-label">Ciudades <span style="color:var(--text3);font-size:11px;font-weight:400;text-transform:none;letter-spacing:0">(máx. 5)</span></label>
+              <label class="form-label">Ciudades <span id="city-max-label" style="color:var(--text3);font-size:11px;font-weight:400;text-transform:none;letter-spacing:0">(máx. 5)</span></label>
               <div class="city-dropdown" id="city-dropdown">
                 <div class="city-selected" id="city-selected-box" onclick="toggleCityDropdown(event)">
                   <div class="city-selected-tags" id="city-selected-tags"><span class="city-placeholder">— Selecciona ciudades —</span></div>
@@ -519,6 +530,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
             <div class="source-pill selected" id="src-houzz" onclick="toggleSource('houzz')"><span class="source-dot"></span>Houzz</div>
             <div class="source-pill selected" id="src-sortlist" onclick="toggleSource('sortlist')"><span class="source-dot"></span>Sortlist</div>
             <div class="source-pill selected" id="src-webs" onclick="toggleSource('webs')"><span class="source-dot"></span>Webs propias</div>
+            <div class="source-pill selected" id="src-europages" onclick="toggleSource('europages')"><span class="source-dot"></span>Europages</div>
             <div class="source-pill" id="src-linkedin" onclick="toggleSource('linkedin')"><span class="source-dot"></span>LinkedIn <span style="font-size:10px;opacity:0.5;margin-left:3px">beta</span></div>
             <div class="source-pill" id="src-instagram" onclick="toggleSource('instagram')"><span class="source-dot"></span>Instagram <span style="font-size:10px;opacity:0.5;margin-left:3px">beta</span></div>
           </div>
@@ -743,6 +755,17 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
     <iframe class="preview-iframe" id="preview-iframe" style="height:460px;width:100%;"></iframe>
   </div>
 </div>
+<!-- MODAL UPGRADE -->
+<div class="modal-overlay" id="modal-upgrade">
+  <div class="modal-box" style="max-width:440px;text-align:center;">
+    <button class="modal-close" onclick="closeUpgradeModal()">✕</button>
+    <div style="font-size:52px;margin-bottom:16px;">🚀</div>
+    <h2 class="modal-title" style="text-align:center;">Límite de tu plan</h2>
+    <p class="modal-sub" id="upgrade-msg" style="text-align:center;"></p>
+    <a href="https://leadforge.es/#pricing" target="_blank" class="btn-primary" style="text-decoration:none;display:flex;box-sizing:border-box;justify-content:center;">Ver todos los planes →</a>
+    <button onclick="closeUpgradeModal()" class="btn-new" style="margin-top:10px;">Ahora no</button>
+  </div>
+</div>
 <!-- MODAL CANCELACIÓN -->
 <div class="modal-overlay" id="modal-cancel">
   <div class="modal-box" style="max-width:500px;">
@@ -782,6 +805,18 @@ const SUPABASE_URL='https://erlbzbwlrrcoeiphzozm.supabase.co';
 const SUPABASE_ANON='sb_publishable_hScYuPWr3THMPToUzcLUmQ_ji64-g4Z';
 const SCRAPER_API_URL='https://web-production-e1dec.up.railway.app';
 const ADMIN_EMAIL='cobraflow0@gmail.com';
+const PLAN_LIMITS={
+  basic:   {label:'Basic',   searches:10,       leads:300,  emails:50,  maxEmailBtns:[50],         cities:1,  sequences:false, alerts:false},
+  pro:     {label:'Pro',     searches:30,       leads:600,  emails:150, maxEmailBtns:[50,100,150],  cities:5,  sequences:true,  alerts:true},
+  business:{label:'Business',searches:Infinity, leads:1000, emails:300, maxEmailBtns:[50,150,300],  cities:10, sequences:true,  alerts:true},
+};
+const BASIC_SOURCES=['googlemaps','paginasamarillas','europages'];
+function getPlan(){const p=(appState.profile?.plan||'pro').toLowerCase();return PLAN_LIMITS[p]?p:'pro';}
+function getPlanLimits(){return PLAN_LIMITS[getPlan()];}
+function getSearchesThisMonth(){const cut=Date.now()-30*24*60*60*1000;return appState.searches.filter(s=>s.id>cut).length;}
+function showUpgradeModal(msg){document.getElementById('upgrade-msg').innerHTML=msg;document.getElementById('modal-upgrade').classList.add('open');}
+function closeUpgradeModal(){document.getElementById('modal-upgrade').classList.remove('open');}
+document.addEventListener('DOMContentLoaded',()=>{const m=document.getElementById('modal-upgrade');if(m)m.addEventListener('click',e=>{if(e.target===m)closeUpgradeModal();});});
 const sb={
   async req(path,opts={}){const r=await fetch(SUPABASE_URL+path,{headers:{'apikey':SUPABASE_ANON,'Content-Type':'application/json',...(this._token?{'Authorization':`Bearer ${this._token}`}:{}),...(opts.headers||{})}, ...opts});return r;},
   async signIn(email,password){const r=await this.req('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});const d=await r.json();if(d.access_token){this._token=d.access_token;localStorage.setItem('lf_session',JSON.stringify(d));}return d;},
@@ -855,7 +890,7 @@ async function loadApp(user){
   document.getElementById('stat-plan').innerHTML=`${planStr} <span style="font-size:11px;color:var(--green)">✓</span>`;
   document.getElementById('cuenta-email').textContent=email;document.getElementById('cuenta-desde').textContent=since;document.getElementById('renewal-date').textContent=renewal;
   if(email===ADMIN_EMAIL)document.getElementById('nav-admin').style.display='flex';
-  updateStats();renderHistory();showScreen('app');showPage('dashboard');
+  updateStats();renderHistory();showScreen('app');showPage('dashboard');applyPlanLimits();
   const ss=localStorage.getItem('lf_sender_email'),sn=localStorage.getItem('lf_sender_name');
   if(ss)document.getElementById('sender-email-input').value=ss;if(sn)document.getElementById('sender-name-input').value=sn;
   loadCRM();
@@ -878,8 +913,14 @@ function filterSectors(q){const ql=q.toLowerCase();document.querySelectorAll('.s
 function selectSector(value,label){document.getElementById('select-sector').value=value;const lbl=document.getElementById('sector-selected-label');lbl.textContent=label;lbl.classList.add('chosen');document.querySelectorAll('.sector-option').forEach(o=>o.classList.toggle('active',o.dataset.value===value));document.getElementById('sector-dropdown').classList.remove('open');document.getElementById('sector-search').value='';filterSectors('');updateCategories();}
 function filterCities(q){const ql=q.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');document.querySelectorAll('.city-option').forEach(o=>{const c=o.dataset.city.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');o.style.display=c.includes(ql)?'':'none';});document.querySelectorAll('.city-group-label').forEach(lbl=>{let next=lbl.nextElementSibling,vis=false;while(next&&!next.classList.contains('city-group-label')&&!next.classList.contains('city-search-wrap')){if(next.classList.contains('city-option')&&next.style.display!=='none')vis=true;next=next.nextElementSibling;}lbl.style.display=vis?'':'none';});}
 function toggleCity(city){
-  const isSelected=selectedCities.includes(city);
-  if(!isSelected&&selectedCities.length>=5){document.getElementById('city-max-note').style.display='block';return;}
+  const maxCities=getPlanLimits().cities,isSelected=selectedCities.includes(city);
+  if(!isSelected&&selectedCities.length>=maxCities){
+    const note=document.getElementById('city-max-note');
+    note.style.display='block';
+    note.textContent=maxCities===1?'⚠️ El plan Basic solo permite 1 ciudad. Actualiza a Pro para hasta 5.':'⚠️ Máximo '+maxCities+' ciudades en tu plan.';
+    if(maxCities===1)setTimeout(()=>showUpgradeModal('El plan <strong>Basic</strong> solo permite 1 ciudad por búsqueda.<br><br>Con <strong>Pro</strong> puedes buscar hasta 5 ciudades a la vez.'),300);
+    return;
+  }
   document.getElementById('city-max-note').style.display='none';
   if(isSelected){selectedCities=selectedCities.filter(c=>c!==city);}else{selectedCities.push(city);}
   _renderCityDropdown();checkLaunchReady();
@@ -911,7 +952,13 @@ function toggleAllCats(){
   cats.forEach(c=>{const el=document.getElementById('cat-'+c.id);if(!el)return;if(allSelected){el.classList.remove('selected');el.querySelector('.cat-check').textContent='';}else{el.classList.add('selected');el.querySelector('.cat-check').textContent='✓';}});
   checkLaunchReady();
 }
-function toggleSource(id){document.getElementById('src-'+id).classList.toggle('selected');}
+function toggleSource(id){
+  if(getPlan()==='basic'&&!BASIC_SOURCES.includes(id)){
+    showUpgradeModal('Las fuentes adicionales están disponibles en el plan <strong>Pro</strong> o <strong>Business</strong>.<br><br>Con Pro accedes a Habitissimo, Houzz, Sortlist, Webs propias y más.');
+    return;
+  }
+  document.getElementById('src-'+id).classList.toggle('selected');
+}
 let currentMode='sector';
 function setMode(mode){currentMode=mode;document.getElementById('mode-sector').classList.toggle('active',mode==='sector');document.getElementById('mode-libre').classList.toggle('active',mode==='libre');document.getElementById('wrap-sector').style.display=mode==='sector'?'block':'none';document.getElementById('wrap-libre').style.display=mode==='libre'?'block':'none';document.getElementById('btn-launch').disabled=true;checkLaunchReady();}
 function checkLaunchReady(){
@@ -919,13 +966,19 @@ function checkLaunchReady(){
   else{const sector=document.getElementById('select-sector').value,hasCities=selectedCities.length>0,cats=SECTORES[sector]||[],hasCat=cats.some(c=>document.getElementById('cat-'+c.id)?.classList.contains('selected'));document.getElementById('btn-launch').disabled=!(sector&&hasCities&&hasCat);}
 }
 async function launchScraping(){
-  const srcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','paginasamarillas':'paginas_amarillas','houzz':'houzz','sortlist':'sortlist','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
-  const sources=Object.keys(srcMap).filter(s=>document.getElementById('src-'+s)?.classList.contains('selected')).map(s=>srcMap[s]);
+  const limits=getPlanLimits(),used=getSearchesThisMonth();
+  if(limits.searches!==Infinity&&used>=limits.searches){
+    showUpgradeModal(`Has usado las <strong>${limits.searches} búsquedas</strong> de tu plan ${limits.label} este mes.<br><br>Actualiza a <strong>Pro</strong> (30 búsquedas) o <strong>Business</strong> (ilimitadas) para seguir.`);
+    return;
+  }
+  const srcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','paginasamarillas':'paginas_amarillas','houzz':'houzz','sortlist':'sortlist','europages':'europages','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
+  let sources=Object.keys(srcMap).filter(s=>document.getElementById('src-'+s)?.classList.contains('selected')).map(s=>srcMap[s]);
+  if(getPlan()==='basic')sources=sources.filter(s=>['google_maps','paginas_amarillas','europages'].includes(s));
   if(currentMode==='libre'){
     const termino=document.getElementById('input-libre').value.trim(),ciudad=document.getElementById('input-ciudad-libre').value.trim();
-    const fuentesLibre=sources.filter(s=>['google_maps','paginas_amarillas','linkedin','instagram','webs_propias'].includes(s));
+    const fuentesLibre=sources.filter(s=>['google_maps','paginas_amarillas','linkedin','instagram','webs_propias','europages'].includes(s));
     appState.currentSearch={sector:termino,ciudad,cats:[termino],sources:fuentesLibre};appState.currentJobId=null;
-    _initResults('Buscando "'+termino+'" en '+ciudad+'…');await runScrapingReal('libre',ciudad,[termino],fuentesLibre);
+    _initResults('Buscando "'+termino+'" en '+ciudad+'…');await runScrapingReal('libre',ciudad,[termino],fuentesLibre,limits.leads);
   }else{
     const sector=document.getElementById('select-sector').value;
     const cats=(SECTORES[sector]||[]).filter(c=>document.getElementById('cat-'+c.id)?.classList.contains('selected')).map(c=>c.id);
@@ -933,12 +986,12 @@ async function launchScraping(){
     const subtext=ciudades.length>1?`Buscando leads en ${ciudades.length} ciudades: ${ciudades.join(', ')}…`:`Buscando leads en ${ciudades[0]}…`;
     _initResults(subtext);
     if(ciudades.length>1){document.getElementById('multi-city-progress').style.display='flex';document.getElementById('mcp-total').textContent=ciudades.length;}
-    await runScrapingMultiCiudad(sector,ciudades,cats,sources);
+    await runScrapingMultiCiudad(sector,ciudades,cats,sources,limits.leads);
   }
 }
 function _initResults(subtext){showPage('results');document.getElementById('nav-dashboard').classList.add('active');document.getElementById('results-done').style.display='none';document.getElementById('campaign-result').style.display='none';document.getElementById('multi-city-progress').style.display='none';document.getElementById('results-title').innerHTML='Scraping <span>en curso</span>';document.getElementById('results-sub').textContent=subtext;document.getElementById('log-terminal').innerHTML='';setProgress(0,'Conectando con el servidor…');}
 function addLog(msg,type='info'){const log=document.getElementById('log-terminal'),ts=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),line=document.createElement('span');line.className=`log-line ${type}`;line.innerHTML=`<span class="ts">[${ts}]</span><span class="msg">${msg}</span>`;log.appendChild(line);log.appendChild(document.createElement('br'));log.scrollTop=log.scrollHeight;}
-async function runScrapingMultiCiudad(sector,ciudades,cats,sources){
+async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000){
   let totalResult={total:0,alta:0,media:0,baja:0,leads:[]},lastJobId=null;
   for(let i=0;i<ciudades.length;i++){
     const ciudad=ciudades[i];
@@ -946,7 +999,7 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources){
     addLog(`🏙️ Iniciando búsqueda en ${ciudad} (${i+1}/${ciudades.length})…`,'accent');
     const baseProgress=Math.round((i/ciudades.length)*100),cityProgressScale=1/ciudades.length;
     try{
-      const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources})});
+      const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources,max_leads:maxLeads})});
       if(!lr.ok)throw new Error(`Error al lanzar: ${lr.status}`);
       const {job_id}=await lr.json();lastJobId=job_id;addLog(`✓ Job ${ciudad} iniciado (${job_id.slice(0,8)}…)`,'ok');
       let lastLog=0;
@@ -967,10 +1020,10 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources){
   const entry={id:Date.now(),job_id:lastJobId,sector:appState.currentSearch?.sector||sector,ciudad:ciudadesStr,cats:cats.length,total:totalResult.total,alta:totalResult.alta,media:totalResult.media,baja:totalResult.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};
   appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);
 }
-async function runScrapingReal(sector,ciudad,cats,sources){
+async function runScrapingReal(sector,ciudad,cats,sources,maxLeads=1000){
   try{
     addLog('▶ Conectando con LeadForge API…','accent');
-    const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources})});
+    const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources,max_leads:maxLeads})});
     if(!lr.ok)throw new Error(`Error al lanzar: ${lr.status}`);
     const {job_id}=await lr.json();appState.currentJobId=job_id;addLog(`✓ Job iniciado (${job_id.slice(0,8)}…)`,'ok');
     let lastLog=0;
@@ -996,7 +1049,10 @@ function renderHistory(){
 function updateStats(){
   const searches=appState.searches,thisMonth=searches.filter(s=>new Date(s.id)>new Date(Date.now()-30*24*60*60*1000));
   const totalLeads=searches.reduce((a,s)=>a+(s.total||0),0),totalEmails=parseInt(localStorage.getItem('lf_emails_sent')||'0');
-  document.getElementById('stat-searches').innerHTML=`${thisMonth.length} <span>búsquedas</span>`;
+  const limits=getPlanLimits(),used=thisMonth.length,cap=limits.searches,capStr=cap===Infinity?'∞':cap;
+  const pct=cap===Infinity?Math.min(used*3,100):Math.round(used/cap*100);
+  const barClass=pct>=100?'full':pct>=80?'warn':'ok';
+  document.getElementById('stat-searches').innerHTML=`${used}<span> / ${capStr} este mes</span><div class="limit-bar-wrap"><div class="limit-bar-fill ${barClass}" style="width:${Math.min(pct,100)}%"></div></div>`;
   document.getElementById('stat-leads').innerHTML=`${totalLeads} <span>leads</span>`;
   document.getElementById('stat-emails').innerHTML=`${totalEmails} <span>emails</span>`;
   document.getElementById('cuenta-searches').textContent=searches.length;renderHistory();
@@ -1031,7 +1087,36 @@ function _renderPreviewTouch(n){
 function closePreview(){document.getElementById('preview-overlay').classList.remove('open');}
 function showAlert(el,msg){el.textContent=msg;el.classList.add('show');}
 function delay(ms){return new Promise(r=>setTimeout(r,ms));}
-function openCampaignModal(){if(!appState.currentJobId)return;document.getElementById('campaign-result').style.display='none';document.getElementById('camp-sender-status').style.display='none';const saved=JSON.parse(localStorage.getItem('lf_campaign_data')||'{}');if(saved.name)document.getElementById('camp-name').value=saved.name;if(saved.company)document.getElementById('camp-company').value=saved.company;if(saved.product)document.getElementById('camp-product').value=saved.product;const se=localStorage.getItem('lf_sender_email')||saved.email||'';if(se)document.getElementById('camp-email').value=se;document.getElementById('modal-campaign').classList.add('open');}
+function openCampaignModal(){
+  if(!appState.currentJobId)return;
+  document.getElementById('campaign-result').style.display='none';
+  document.getElementById('camp-sender-status').style.display='none';
+  const saved=JSON.parse(localStorage.getItem('lf_campaign_data')||'{}');
+  if(saved.name)document.getElementById('camp-name').value=saved.name;
+  if(saved.company)document.getElementById('camp-company').value=saved.company;
+  if(saved.product)document.getElementById('camp-product').value=saved.product;
+  const se=localStorage.getItem('lf_sender_email')||saved.email||'';
+  if(se)document.getElementById('camp-email').value=se;
+  // Actualizar botones de límite de emails según plan
+  const limits=getPlanLimits();
+  const btnWrap=document.getElementById('limit-50')?.parentElement;
+  if(btnWrap){
+    btnWrap.innerHTML=limits.maxEmailBtns.map((n,i)=>`<div class="email-limit-btn ${i===limits.maxEmailBtns.length-1?'selected':''}" id="limit-${n}" onclick="selectLimit(${n})">${n} emails</div>`).join('');
+    selectedLimit=limits.maxEmailBtns[limits.maxEmailBtns.length-1];
+  }
+  // Bloquear secuencias para Basic
+  const followupCb=document.getElementById('camp-followup');
+  if(followupCb){
+    const locked=!limits.sequences;
+    followupCb.disabled=locked;
+    followupCb.checked=false;
+    const lbl=followupCb.closest('label');
+    if(lbl){lbl.style.opacity=locked?'0.4':'1';lbl.title=locked?'Disponible en plan Pro':'';
+    const chip=lbl.querySelector('.plan-lock-chip');
+    if(!chip&&locked)lbl.insertAdjacentHTML('beforeend','<span class="plan-chip basic" style="margin-left:8px">🔒 Pro+</span>');}
+  }
+  document.getElementById('modal-campaign').classList.add('open');
+}
 function closeCampaignModal(){document.getElementById('modal-campaign').classList.remove('open');}
 document.getElementById('modal-campaign').addEventListener('click',function(e){if(e.target===this)closeCampaignModal();});
 async function sendCampaign(){
@@ -1089,6 +1174,48 @@ function selectCancelReason(btn,reason){document.querySelectorAll('.cancel-reaso
 function goToCancelStep2(){if(!cancelReason)return;document.querySelectorAll('.cancel-step').forEach(s=>s.classList.remove('active'));document.getElementById('cancel-step-2').classList.add('active');}
 function goBackCancelStep(){document.querySelectorAll('.cancel-step').forEach(s=>s.classList.remove('active'));document.getElementById('cancel-step-1').classList.add('active');}
 async function confirmCancellation(){const btn=document.getElementById('btn-confirm-cancel'),lbl=document.getElementById('cancel-btn-label'),spin=document.getElementById('cancel-spinner');btn.disabled=true;lbl.style.display='none';spin.style.display='block';const otherText=document.getElementById('cancel-other-text').value.trim(),motivo=cancelReason==='otro'?otherText||'otro':cancelReason,userEmail=appState.user?.email||'';try{await fetch(`${SCRAPER_API_URL}/cancel-subscription`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:userEmail,motivo})});}catch(e){}btn.disabled=false;lbl.style.display='inline';spin.style.display='none';document.querySelectorAll('.cancel-step').forEach(s=>s.classList.remove('active'));document.getElementById('cancel-step-3').classList.add('active');}
+
+/* ═══════════════════════════════════════
+   PLAN LIMITS
+═══════════════════════════════════════ */
+function applyPlanLimits(){
+  const plan=getPlan(),limits=PLAN_LIMITS[plan];
+
+  // Badge en sidebar
+  const planEl=document.getElementById('sidebar-plan');
+  if(planEl){
+    const colors={basic:'var(--text2)',pro:'var(--accent)',business:'var(--accent3)'};
+    planEl.textContent=limits.label.toUpperCase()+' · ACTIVO';
+    planEl.style.color=colors[plan];
+  }
+
+  // Label de ciudades
+  const cityLbl=document.getElementById('city-max-label');
+  if(cityLbl)cityLbl.textContent=`(máx. ${limits.cities===Infinity?'∞':limits.cities})`;
+
+  // Fuentes bloqueadas para Basic
+  if(plan==='basic'){
+    ['habitissimo','houzz','sortlist','webs','linkedin','instagram'].forEach(src=>{
+      const el=document.getElementById('src-'+src);
+      if(!el)return;
+      el.classList.remove('selected');
+      el.classList.add('locked');
+    });
+  } else {
+    ['habitissimo','houzz','sortlist','webs','linkedin','instagram'].forEach(src=>{
+      const el=document.getElementById('src-'+src);
+      if(el)el.classList.remove('locked');
+    });
+  }
+
+  // Alertas bloqueadas para Basic
+  const alertToggle=document.getElementById('alerta-toggle');
+  if(alertToggle&&!limits.alerts){
+    alertToggle.disabled=true;
+    const card=alertToggle.closest('.card');
+    if(card){card.style.opacity='0.5';card.title='Disponible en plan Pro';}
+  }
+}
 
 /* ═══════════════════════════════════════
    HISTORIAL EN SUPABASE
