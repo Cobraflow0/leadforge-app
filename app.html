@@ -909,7 +909,7 @@ const SECTORES={
 };
 /* ── DEMO MODE ── */
 const DEMO_MODE = new URLSearchParams(window.location.search).get('demo') === 'true';
-const DEMO_MAX_LEADS = 15;
+const DEMO_MAX_LEADS = 20;
 function isDemoUsed(){return !!localStorage.getItem('lf_demo_used');}
 function markDemoUsed(){localStorage.setItem('lf_demo_used','1');}
 function showDemoUpgrade(msg){
@@ -1088,8 +1088,8 @@ async function launchScraping(){
     return;
   }
   const srcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','paginasamarillas':'paginas_amarillas','houzz':'houzz','sortlist':'sortlist','europages':'europages','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
-  let sources=Object.keys(srcMap).filter(s=>document.getElementById('src-'+s)?.classList.contains('selected')).map(s=>srcMap[s]);
-  if(getPlan()==='basic')sources=sources.filter(s=>['google_maps','paginas_amarillas','europages'].includes(s));
+  let sources=DEMO_MODE?['google_maps']:Object.keys(srcMap).filter(s=>document.getElementById('src-'+s)?.classList.contains('selected')).map(s=>srcMap[s]);
+  if(!DEMO_MODE&&getPlan()==='basic')sources=sources.filter(s=>['google_maps','paginas_amarillas','europages'].includes(s));
   if(currentMode==='libre'){
     const termino=document.getElementById('input-libre').value.trim(),ciudad=document.getElementById('input-ciudad-libre').value.trim();
     const fuentesLibre=sources.filter(s=>['google_maps','paginas_amarillas','linkedin','instagram','webs_propias','europages'].includes(s));
