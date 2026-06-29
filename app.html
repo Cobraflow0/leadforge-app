@@ -343,6 +343,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 .map-city-chip button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;line-height:1;padding:0 0 0 4px;opacity:0.7;}
 .map-city-chip button:hover{opacity:1;}
 .leaflet-container{background:#060a12!important;}
+.leaflet-tile{filter:brightness(0.28) saturate(0.3) hue-rotate(190deg);}
 .leaflet-tooltip{background:#0d1220!important;border:1px solid rgba(0,200,255,0.25)!important;border-radius:8px!important;color:#edf2ff!important;font-family:'Space Grotesk',sans-serif!important;font-size:12px!important;box-shadow:0 4px 20px rgba(0,0,0,0.5)!important;padding:6px 10px!important;}
 .leaflet-tooltip-top:before{border-top-color:rgba(0,200,255,0.25)!important;}
 .leaflet-control-zoom a{background:#0d1220!important;color:var(--accent)!important;border-color:rgba(0,200,255,0.2)!important;}
@@ -1391,8 +1392,8 @@ function initMap(){
     zoomControl:true,scrollWheelZoom:false,attributionControl:false
   }).setView([40.2,-3.5],5);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_matter/{z}/{x}/{y}{r}.png',{
-    maxZoom:18,subdomains:'abcd'
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:18,subdomains:'abc'
   }).addTo(_leafletMap);
 
   // Agrupar búsquedas por ciudad
