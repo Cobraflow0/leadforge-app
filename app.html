@@ -348,6 +348,25 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 .leaflet-control-zoom a{background:#0d1220!important;color:var(--accent)!important;border-color:rgba(0,200,255,0.2)!important;}
 .leaflet-control-zoom a:hover{background:#1a2540!important;}
 @keyframes mapRing{0%{transform:scale(1);opacity:0.6}100%{transform:scale(2.5);opacity:0}}
+/* ── NUKE MODE ── */
+.nuke-mode-btn{background:rgba(255,61,90,0.08);border:1px solid rgba(255,61,90,0.3);border-radius:8px;color:#FF3D5A;font-size:12px;font-family:'Space Grotesk',sans-serif;padding:5px 12px;cursor:pointer;transition:all 0.2s;font-weight:600;}
+.nuke-mode-btn:hover{background:rgba(255,61,90,0.15);}
+.nuke-mode-btn.active{background:rgba(255,61,90,0.18);border-color:#FF3D5A;box-shadow:0 0 14px rgba(255,61,90,0.35);animation:nukeBtnPulse 1.5s ease-in-out infinite;}
+@keyframes nukeBtnPulse{0%,100%{box-shadow:0 0 14px rgba(255,61,90,0.35)}50%{box-shadow:0 0 22px rgba(255,61,90,0.6)}}
+.nuke-counter{font-size:12px;color:#FF3D5A;font-family:'JetBrains Mono',monospace;font-weight:600;}
+#map-coverage.nuke-active{cursor:crosshair!important;}
+#map-coverage.nuke-active .leaflet-container{cursor:crosshair!important;}
+#nuke-confirm-panel{position:absolute;z-index:1000;background:rgba(5,8,15,0.96);border:1px solid rgba(255,61,90,0.4);border-radius:14px;padding:20px 24px;backdrop-filter:blur(20px);box-shadow:0 0 30px rgba(255,61,90,0.25),0 16px 50px rgba(0,0,0,0.6);min-width:260px;pointer-events:all;}
+#nuke-confirm-panel h3{font-size:14px;font-weight:700;color:#FF3D5A;margin-bottom:4px;}
+#nuke-confirm-panel .target-city{font-size:18px;font-weight:700;color:var(--text);margin-bottom:14px;}
+#nuke-confirm-panel select{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,61,90,0.25);border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Space Grotesk',sans-serif;color:var(--text);outline:none;margin-bottom:14px;}
+#nuke-confirm-panel select option{background:#090D18;}
+.nuke-launch-btn{width:100%;padding:12px;background:linear-gradient(135deg,#cc0000,#FF3D5A);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;letter-spacing:0.3px;margin-bottom:8px;transition:all 0.2s;}
+.nuke-launch-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,61,90,0.4);}
+.nuke-cancel-btn{width:100%;padding:8px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:13px;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all 0.15s;}
+.nuke-cancel-btn:hover{border-color:var(--text2);}
+#nuke-missile{position:absolute;z-index:2000;font-size:28px;pointer-events:none;display:none;transform-origin:center;filter:drop-shadow(0 0 8px rgba(255,100,0,0.8));}
+@keyframes nukeExpRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(4);opacity:0}}
 @media(max-width:900px){.sidebar{display:none;}.main{padding:24px 20px;}.stats-grid{grid-template-columns:1fr 1fr;}.scraper-grid{grid-template-columns:1fr;}.categories-grid{grid-template-columns:repeat(2,1fr);}.results-summary{grid-template-columns:repeat(2,1fr);}.cuenta-grid{grid-template-columns:1fr;}.crm-stats{grid-template-columns:repeat(3,1fr);}.camp-stats{grid-template-columns:repeat(2,1fr);}.admin-grid{grid-template-columns:repeat(2,1fr);}}
 #demo-upgrade-overlay.open{display:flex !important;}
 .demo-locked{position:relative;pointer-events:none;opacity:0.45;}
@@ -455,7 +474,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
       </div>
 
       <!-- MAPA DE COBERTURA -->
-      <div class="card map-card">
+      <div class="card map-card" style="position:relative;">
         <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
           <span>Cobertura de búsquedas — España</span>
           <button class="map-resize-btn" id="map-resize-btn" onclick="toggleMapSize()">⤢ Ampliar</button>
@@ -466,7 +485,34 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
           <div class="map-legend-item"><div class="map-legend-dot" style="background:#00E5A0;box-shadow:0 0 6px #00E5A0;"></div> 50–200 leads</div>
           <div class="map-legend-item"><div class="map-legend-dot" style="background:#00C8FF;width:14px;height:14px;box-shadow:0 0 8px #00C8FF;"></div> +200 leads</div>
           <div style="margin-left:auto;font-size:12px;color:var(--text3)" id="map-stats-label">—</div>
+          <button class="nuke-mode-btn" id="nuke-mode-btn" onclick="toggleNukeMode()">☢️ Nuke Mode</button>
+          <span class="nuke-counter" id="nuke-counter" style="display:none"></span>
         </div>
+
+        <!-- Panel de confirmación nuke -->
+        <div id="nuke-confirm-panel" style="display:none;">
+          <h3>☢️ SCRAPING NUKE</h3>
+          <div class="target-city" id="nuke-target-city">—</div>
+          <select id="nuke-sector-select">
+            <option value="">— Selecciona sector —</option>
+            <option value="construccion">🔨 Construcción y Reformas</option>
+            <option value="salud">🏥 Salud y Bienestar</option>
+            <option value="restauracion">🍽️ Restauración y Hostelería</option>
+            <option value="retail">🛒 Retail y Comercio</option>
+            <option value="legal">⚖️ Legal y Asesoría</option>
+            <option value="marketing">📢 Marketing y Publicidad</option>
+            <option value="tecnologia">💻 Tecnología y Software</option>
+            <option value="pymes">🏢 Pymes y Empresas</option>
+            <option value="fincas">🏠 Administración de Fincas</option>
+            <option value="energia">☀️ Energía e Instalaciones</option>
+            <option value="servicios_hogar">🔧 Servicios del Hogar</option>
+          </select>
+          <button class="nuke-launch-btn" onclick="confirmNukeLaunch()">☢️ LANZAR NUKE</button>
+          <button class="nuke-cancel-btn" onclick="cancelNuke()">Cancelar</button>
+        </div>
+
+        <!-- Misil animado -->
+        <div id="nuke-missile">🚀</div>
       </div>
 
       <div class="card">
@@ -1399,6 +1445,182 @@ function initMap(){
     const group=L.featureGroup(_leafletMarkers);
     _leafletMap.fitBounds(group.getBounds().pad(0.35));
   }
+}
+
+/* ══════════════════════════════════════════════════════════
+   SCRAPING NUKE
+══════════════════════════════════════════════════════════ */
+let _nukeModeActive=false,_nukeTargetLatLng=null,_nukeTargetCity=null;
+
+function toggleNukeMode(){
+  _nukeModeActive=!_nukeModeActive;
+  const btn=document.getElementById('nuke-mode-btn');
+  const mapEl=document.getElementById('map-coverage');
+  const counter=document.getElementById('nuke-counter');
+  if(_nukeModeActive){
+    btn.classList.add('active');btn.textContent='✕ Cancelar Nuke';
+    mapEl.classList.add('nuke-active');
+    const remaining=getNukesRemaining();
+    counter.style.display='inline';counter.textContent=`${remaining} nuke${remaining!==1?'s':''} disponible${remaining!==1?'s':''}`;
+    if(_leafletMap)_leafletMap.on('click',_onNukeMapClick);
+  }else{
+    btn.classList.remove('active');btn.textContent='☢️ Nuke Mode';
+    mapEl.classList.remove('nuke-active');
+    counter.style.display='none';
+    cancelNuke();
+    if(_leafletMap)_leafletMap.off('click',_onNukeMapClick);
+  }
+}
+
+function getNukesRemaining(){
+  const limits=getPlanLimits(),used=getSearchesThisMonth();
+  return limits.searches===Infinity?999:Math.max(0,limits.searches-used);
+}
+
+function _onNukeMapClick(e){
+  if(!_nukeModeActive)return;
+  const city=_findNearestCity(e.latlng.lat,e.latlng.lng);
+  if(!city)return;
+  _nukeTargetLatLng=e.latlng;
+  _nukeTargetCity=city;
+
+  // Posicionar el panel cerca del click
+  const panel=document.getElementById('nuke-confirm-panel');
+  const mapRect=document.getElementById('map-coverage').getBoundingClientRect();
+  const pt=_leafletMap.latLngToContainerPoint(e.latlng);
+  let left=pt.x+16,top=pt.y-60;
+  if(left+280>mapRect.width)left=pt.x-296;
+  if(top<0)top=10;
+  panel.style.left=left+'px';panel.style.top=top+'px';
+  panel.style.display='block';
+  document.getElementById('nuke-target-city').textContent='📍 '+city;
+}
+
+function _findNearestCity(lat,lng){
+  let best=null,bestDist=Infinity;
+  Object.entries(CITY_COORDS).forEach(([city,[clat,clng]])=>{
+    const d=Math.sqrt((lat-clat)**2+(lng-clng)**2);
+    if(d<bestDist){bestDist=d;best=city;}
+  });
+  return best;
+}
+
+function cancelNuke(){
+  document.getElementById('nuke-confirm-panel').style.display='none';
+  _nukeTargetLatLng=null;_nukeTargetCity=null;
+}
+
+async function confirmNukeLaunch(){
+  const sector=document.getElementById('nuke-sector-select').value;
+  if(!sector){document.getElementById('nuke-sector-select').style.borderColor='#FF3D5A';return;}
+  if(getNukesRemaining()<=0){
+    showUpgradeModal('Has agotado tus búsquedas de este mes.<br><br>Actualiza tu plan para más nukes.');return;
+  }
+  const city=_nukeTargetCity,latlng=_nukeTargetLatLng;
+  cancelNuke();
+  toggleNukeMode();
+  await _animateAndLaunch(city,latlng,sector);
+}
+
+async function _animateAndLaunch(city,latlng,sector){
+  // Sonido de lanzamiento
+  _nukeWhooshSound();
+
+  // Animar misil
+  const mapEl=document.getElementById('map-coverage');
+  const missile=document.getElementById('nuke-missile');
+  const mapRect=mapEl.getBoundingClientRect();
+  const targetPt=_leafletMap.latLngToContainerPoint(latlng);
+
+  const startX=mapRect.width/2,startY=-40;
+  const endX=targetPt.x,endY=targetPt.y;
+  const angle=Math.atan2(endY-startY,endX-startX)*(180/Math.PI)+45;
+
+  missile.style.display='block';
+  missile.style.left=startX+'px';missile.style.top=startY+'px';
+  missile.style.transform=`rotate(${angle}deg)`;
+  missile.style.transition='none';
+
+  await new Promise(r=>setTimeout(r,50));
+  missile.style.transition='left 1.4s cubic-bezier(0.4,0,1,1),top 1.4s cubic-bezier(0.4,0,1,1)';
+  missile.style.left=endX+'px';missile.style.top=endY+'px';
+
+  await new Promise(r=>setTimeout(r,1400));
+  missile.style.display='none';
+
+  // Explosión
+  _nukeImpactSound();
+  _animateExplosion(latlng);
+
+  // Lanzar scraping
+  const cats=(SECTORES[sector]||[]).map(c=>c.id);
+  const sources=['google_maps','paginas_amarillas'];
+  const limits=getPlanLimits();
+  appState.currentSearch={sector,ciudad:city,cats,sources};appState.currentJobId=null;
+  _initResults(`☢️ Nuke impactó en ${city} — buscando leads…`,estimateScrapeTime(cats.length,1,sources.length));
+  await runScrapingMultiCiudad(sector,[city],cats,sources,limits.leads);
+}
+
+function _animateExplosion(latlng){
+  [0,300,600].forEach((delay,i)=>{
+    setTimeout(()=>{
+      const r=Math.max(6,20-i*4);
+      const colors=['#FF3D5A','#FF7A00','#FFD93D'];
+      const ring=L.circleMarker(latlng,{
+        radius:r,fillColor:colors[i],fillOpacity:0.6,
+        color:colors[i],weight:2,opacity:0.9
+      }).addTo(_leafletMap);
+      let rad=r,op=0.9,fill=0.6;
+      const iv=setInterval(()=>{
+        rad+=3;op-=0.06;fill-=0.04;
+        if(op<=0){clearInterval(iv);_leafletMap.removeLayer(ring);return;}
+        ring.setRadius(rad);ring.setStyle({opacity:op,fillOpacity:Math.max(0,fill)});
+      },40);
+    },delay);
+  });
+  // Flash de pantalla
+  const flash=document.createElement('div');
+  flash.style.cssText='position:absolute;inset:0;background:rgba(255,61,90,0.25);pointer-events:none;z-index:999;border-radius:10px;transition:opacity 0.4s;';
+  document.getElementById('map-coverage').appendChild(flash);
+  setTimeout(()=>{flash.style.opacity='0';setTimeout(()=>flash.remove(),400);},80);
+}
+
+function _nukeWhooshSound(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type='sawtooth';
+    osc.frequency.setValueAtTime(1200,ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(180,ctx.currentTime+1.4);
+    gain.gain.setValueAtTime(0.18,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+1.4);
+    osc.start();osc.stop(ctx.currentTime+1.4);
+  }catch(e){}
+}
+
+function _nukeImpactSound(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    // Boom bajo
+    const buf=ctx.createBuffer(1,ctx.sampleRate*0.8,ctx.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*0.15));
+    const src=ctx.createBufferSource(),gain=ctx.createGain();
+    const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=180;
+    src.buffer=buf;src.connect(filter);filter.connect(gain);gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(1.2,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.8);
+    src.start();
+    // Crack agudo
+    const osc2=ctx.createOscillator(),g2=ctx.createGain();
+    osc2.connect(g2);g2.connect(ctx.destination);
+    osc2.frequency.setValueAtTime(400,ctx.currentTime);
+    osc2.frequency.exponentialRampToValueAtTime(50,ctx.currentTime+0.3);
+    g2.gain.setValueAtTime(0.5,ctx.currentTime);
+    g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
+    osc2.start();osc2.stop(ctx.currentTime+0.3);
+  }catch(e){}
 }
 
 function updateStats(){
