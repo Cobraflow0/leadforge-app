@@ -1336,9 +1336,14 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
       const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources,max_leads:maxLeads})});
       if(!lr.ok)throw new Error(`Error al lanzar: ${lr.status}`);
       const {job_id}=await lr.json();lastJobId=job_id;addLog(`✓ Job ${ciudad} iniciado (${job_id.slice(0,8)}…)`,'ok');
-      let lastLog=0;
+      let lastLog=0,errCount=0;
       while(true){
-        await delay(2000);const sr=await fetch(`${SCRAPER_API_URL}/status/${job_id}`);if(!sr.ok){addLog('⚠️ Error consultando estado…','warn');continue;}
+        await delay(2000);
+        let sr;
+        try{sr=await fetch(`${SCRAPER_API_URL}/status/${job_id}`);}catch(e){errCount++;if(errCount>=6){addLog(`❌ Sin conexión con el servidor tras ${errCount} intentos. Inténtalo de nuevo.`,'error');break;}addLog('⚠️ Sin conexión, reintentando…','warn');continue;}
+        if(sr.status===404){addLog(`❌ Job perdido (el servidor se reinició). Lanza la búsqueda de nuevo.`,'error');break;}
+        if(!sr.ok){errCount++;if(errCount>=6){addLog(`❌ Error del servidor (${sr.status}). Inténtalo de nuevo.`,'error');break;}addLog(`⚠️ Error ${sr.status} — reintentando…`,'warn');continue;}
+        errCount=0;
         const data=await sr.json();data.logs.slice(lastLog).forEach(line=>{const t=line.includes('✅')||line.includes('✓')?'ok':line.includes('❌')?'error':'info';addLog(line.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,''),t);});lastLog=data.logs.length;
         setProgress(Math.round(baseProgress+data.progress*cityProgressScale),`[${ciudad}] `+(data.logs.at(-1)?.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')||''));
         if(data.status==='done'){const r=data.result;totalResult.total+=r.total;totalResult.alta+=r.alta;totalResult.media+=r.media;totalResult.baja+=r.baja;try{const lr2=await fetch(`${SCRAPER_API_URL}/result/${job_id}`);if(lr2.ok){const rd=await lr2.json();totalResult.leads.push(...(rd.leads||[]))}}catch(e){}addLog(`✅ ${ciudad}: ${r.total} leads encontrados`,'ok');break;}
@@ -1361,9 +1366,14 @@ async function runScrapingReal(sector,ciudad,cats,sources,maxLeads=1000){
     const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources,max_leads:maxLeads})});
     if(!lr.ok)throw new Error(`Error al lanzar: ${lr.status}`);
     const {job_id}=await lr.json();appState.currentJobId=job_id;addLog(`✓ Job iniciado (${job_id.slice(0,8)}…)`,'ok');
-    let lastLog=0;
+    let lastLog=0,errCount=0;
     while(true){
-      await delay(2000);const sr=await fetch(`${SCRAPER_API_URL}/status/${job_id}`);if(!sr.ok){addLog('⚠️ Error consultando estado…','warn');continue;}
+      await delay(2000);
+      let sr;
+      try{sr=await fetch(`${SCRAPER_API_URL}/status/${job_id}`);}catch(e){errCount++;if(errCount>=6){addLog(`❌ Sin conexión con el servidor. Inténtalo de nuevo.`,'error');setProgress(0,'Error de conexión');break;}addLog('⚠️ Sin conexión, reintentando…','warn');continue;}
+      if(sr.status===404){addLog(`❌ Job perdido — el servidor se reinició. Lanza la búsqueda de nuevo.`,'error');setProgress(0,'Error — reinicia la búsqueda');break;}
+      if(!sr.ok){errCount++;if(errCount>=6){addLog(`❌ Error del servidor (${sr.status}). Inténtalo de nuevo.`,'error');setProgress(0,'Error');break;}addLog(`⚠️ Error ${sr.status} — reintentando…`,'warn');continue;}
+      errCount=0;
       const data=await sr.json();data.logs.slice(lastLog).forEach(line=>{const t=line.includes('✅')||line.includes('✓')?'ok':line.includes('❌')?'error':'info';addLog(line.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,''),t);});lastLog=data.logs.length;
       setProgress(data.progress,data.logs.at(-1)?.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')||'');
       if(data.status==='done'){const r=data.result;document.getElementById('res-total').textContent=r.total;document.getElementById('res-alta').textContent=r.alta;document.getElementById('res-media').textContent=r.media;document.getElementById('res-baja').textContent=r.baja;document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';document.getElementById('results-sub').textContent=`${r.total} leads listos para descargar en Excel.`;document.getElementById('results-done').style.display='block';try{const lr2=await fetch(`${SCRAPER_API_URL}/result/${job_id}`);if(lr2.ok){const rd=await lr2.json();appState.currentLeads=rd.leads||[];}else{appState.currentLeads=[];}}catch(e){appState.currentLeads=[];}const entry={id:Date.now(),job_id,sector:appState.currentSearch?.sector||sector,ciudad,cats:cats.length,total:r.total,alta:r.alta,media:r.media,baja:r.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);_saveHistoryLeads(job_id,appState.currentLeads);break;}
