@@ -6,6 +6,8 @@
 <title>LeadForge — Panel</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{--bg:#05080F;--bg2:#090D18;--bg3:#0D1220;--border:rgba(0,200,255,0.10);--border2:rgba(0,200,255,0.22);--border3:rgba(0,200,255,0.40);--accent:#00C8FF;--accent2:#0055FF;--accent3:#7B2FFF;--green:#00E5A0;--red:#FF3D5A;--yellow:#FFD93D;--text:#EDF2FF;--text2:#6B7FA0;--text3:#38455A;--card:rgba(9,13,24,0.85);--card2:rgba(13,18,32,0.9);--radius:14px;--radius-lg:20px;--radius-xl:28px;}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -42,8 +44,8 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 .alert.error{background:rgba(255,61,90,0.08);border:1px solid rgba(255,61,90,0.25);color:var(--red);}
 .alert.success{background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);color:var(--green);}
 .alert.show{display:block;}
-.app-screen{flex-direction:row;align-items:stretch;}
-.sidebar{width:252px;min-height:100vh;background:rgba(5,8,15,0.92);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:28px 0;flex-shrink:0;position:sticky;top:0;height:100vh;backdrop-filter:blur(20px);}
+.app-screen{flex-direction:row;align-items:stretch;height:100vh;overflow:hidden;}
+.sidebar{width:252px;height:100vh;background:rgba(5,8,15,0.92);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:28px 0;flex-shrink:0;overflow-y:auto;backdrop-filter:blur(20px);}
 .sidebar-logo{display:flex;align-items:center;gap:12px;padding:0 20px 28px;border-bottom:1px solid var(--border);margin-bottom:24px;}
 .sidebar-logo .logo-mark{width:34px;height:34px;border-radius:9px;font-size:16px;}
 .sidebar-logo .logo-text{font-size:17px;font-weight:700;}
@@ -65,7 +67,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 .user-plan{font-size:10px;color:var(--accent);font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:0.5px;margin-top:2px;}
 .btn-logout{width:100%;padding:9px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:13px;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all 0.15s;}
 .btn-logout:hover{border-color:var(--red);color:var(--red);background:rgba(255,61,90,0.04);}
-.main{flex:1;padding:44px 52px;overflow-y:auto;min-height:100vh;}
+.main{flex:1;padding:44px 52px;overflow-y:auto;height:100vh;}
 .page{display:none;}.page.active{display:block;animation:pageIn 0.35s cubic-bezier(0.16,1,0.3,1) both;}
 @keyframes pageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .page-header{margin-bottom:40px;}.page-title{font-size:30px;font-weight:700;letter-spacing:-1px;margin-bottom:6px;line-height:1.2;}
@@ -330,6 +332,16 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 .cancel-reason-btn.selected{border-color:var(--red);color:var(--red);background:rgba(255,61,90,0.05);}
 .cancel-warning{background:rgba(255,217,61,0.05);border:1px solid rgba(255,217,61,0.2);border-radius:10px;padding:14px 16px;margin:16px 0;font-size:13px;color:var(--yellow);line-height:1.7;}
 .cancel-warning strong{display:block;margin-bottom:4px;}
+#map-coverage{height:320px;border-radius:10px;overflow:hidden;background:#060a12;}
+.map-card{margin-bottom:32px;}
+.map-legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;}
+.map-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);}
+.map-legend-dot{width:10px;height:10px;border-radius:50%;}
+.leaflet-container{background:#060a12!important;}
+.leaflet-tile{filter:brightness(0.35) saturate(0.4) hue-rotate(180deg);}
+.leaflet-popup-content-wrapper{background:#0d1220;border:1px solid rgba(0,200,255,0.25);border-radius:10px;color:#edf2ff;box-shadow:0 8px 32px rgba(0,0,0,0.6);}
+.leaflet-popup-tip{background:#0d1220;}
+.leaflet-popup-content{margin:10px 14px;font-family:'Space Grotesk',sans-serif;font-size:13px;}
 @media(max-width:900px){.sidebar{display:none;}.main{padding:24px 20px;}.stats-grid{grid-template-columns:1fr 1fr;}.scraper-grid{grid-template-columns:1fr;}.categories-grid{grid-template-columns:repeat(2,1fr);}.results-summary{grid-template-columns:repeat(2,1fr);}.cuenta-grid{grid-template-columns:1fr;}.crm-stats{grid-template-columns:repeat(3,1fr);}.camp-stats{grid-template-columns:repeat(2,1fr);}.admin-grid{grid-template-columns:repeat(2,1fr);}}
 #demo-upgrade-overlay.open{display:flex !important;}
 .demo-locked{position:relative;pointer-events:none;opacity:0.45;}
@@ -435,6 +447,18 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
         <div class="stat-card"><div class="stat-label">Emails enviados</div><div class="stat-value" id="stat-emails">0 <span>emails</span></div></div>
         <div class="stat-card"><div class="stat-label">Plan activo</div><div class="stat-value" id="stat-plan">PRO <span style="font-size:11px;color:var(--green)">✓</span></div></div>
       </div>
+
+      <!-- MAPA DE COBERTURA -->
+      <div class="card map-card">
+        <div class="card-title">Cobertura de búsquedas — España</div>
+        <div id="map-coverage"></div>
+        <div class="map-legend">
+          <div class="map-legend-item"><div class="map-legend-dot" style="background:#00E5A0;box-shadow:0 0 6px #00E5A0;"></div> Ciudad buscada</div>
+          <div class="map-legend-item"><div class="map-legend-dot" style="background:#00C8FF;width:16px;height:16px;box-shadow:0 0 8px #00C8FF;"></div> Alta actividad</div>
+          <div style="margin-left:auto;font-size:12px;color:var(--text3)" id="map-stats-label">—</div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-title">Configurar búsqueda</div>
         <div style="display:flex;gap:8px;margin-bottom:24px;">
@@ -1263,6 +1287,59 @@ function renderHistory(){
   const icons={construccion:'🏗️',marketing:'📣',legal:'⚖️',tecnologia:'💻',salud:'🏥',restauracion:'🍽️',retail:'🛍️',pymes:'🏢',fincas:'🏠',energia:'⚡',servicios_hogar:'🔧',inmobiliaria:'🏘️',educacion:'📚',automocion:'🚗',eventos:'🎉',hosteleria_venues:'🏨'};
   list.innerHTML=searches.map(s=>`<div class="history-item"><div class="history-icon">${icons[s.sector]||'📋'}</div><div class="history-info"><div class="history-name">${s.sector} — ${s.ciudad}</div><div class="history-meta">${s.cats} categorías · ${s.date}</div></div><div class="history-leads">${s.total} leads</div><button class="btn-redownload" onclick="downloadHistoryExcel('${s.job_id||''}')" ${!s.job_id?'disabled':''}>📥 Excel</button></div>`).join('');
 }
+const CITY_COORDS={
+  'Madrid':[40.4168,-3.7038],'Barcelona':[41.3851,2.1734],'Valencia':[39.4699,-0.3763],
+  'Sevilla':[37.3891,-5.9845],'Bilbao':[43.2630,-2.9350],'Málaga':[36.7213,-4.4214],
+  'Zaragoza':[41.6488,-0.8891],'Murcia':[37.9922,-1.1307],'Palma de Mallorca':[39.5696,2.6502],
+  'Alicante':[38.3452,-0.4810],'Granada':[37.1773,-3.5986],'Córdoba':[37.8882,-4.7794],
+  'Valladolid':[41.6523,-4.7245],'A Coruña':[43.3623,-8.4115],'San Sebastián':[43.3183,-1.9812],
+  'Santander':[43.4623,-3.8099],'Salamanca':[40.9701,-5.6635],'Toledo':[39.8628,-4.0273],
+  'Burgos':[42.3439,-3.6969],'Vigo':[42.2314,-8.7124],'Lisboa':[38.7169,-9.1399],'Porto':[41.1579,-8.6291],
+  'Palma':[39.5696,2.6502]
+};
+let _leafletMap=null,_leafletMarkers=[];
+function initMap(){
+  if(_leafletMap){_leafletMap.remove();_leafletMap=null;_leafletMarkers=[];}
+  const el=document.getElementById('map-coverage');
+  if(!el)return;
+  _leafletMap=L.map('map-coverage',{zoomControl:true,scrollWheelZoom:false,attributionControl:false}).setView([40.2,-3.5],5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:14}).addTo(_leafletMap);
+
+  // Agrupar búsquedas por ciudad
+  const cityData={};
+  (appState.searches||[]).forEach(s=>{
+    if(!s.ciudad)return;
+    const key=s.ciudad.split(',')[0].trim();
+    if(!cityData[key])cityData[key]={total:0,searches:0};
+    cityData[key].total+=(s.total||0);
+    cityData[key].searches++;
+  });
+
+  const maxLeads=Math.max(1,...Object.values(cityData).map(d=>d.total));
+  let plotted=0;
+  Object.entries(cityData).forEach(([city,data])=>{
+    const coords=CITY_COORDS[city];
+    if(!coords)return;
+    const r=Math.max(8,Math.min(28,8+(data.total/maxLeads)*20));
+    const color=data.total>200?'#00C8FF':data.total>50?'#00E5A0':'#7B2FFF';
+    const circle=L.circleMarker(coords,{radius:r,fillColor:color,color:'rgba(0,0,0,0.3)',weight:1,fillOpacity:0.75})
+      .bindPopup(`<strong>${city}</strong><br>${data.total} leads · ${data.searches} búsqueda${data.searches>1?'s':''}`)
+      .addTo(_leafletMap);
+    _leafletMarkers.push(circle);
+    plotted++;
+  });
+
+  const lbl=document.getElementById('map-stats-label');
+  if(lbl){
+    const total=Object.values(cityData).reduce((a,d)=>a+d.total,0);
+    lbl.textContent=plotted>0?`${plotted} ciudades · ${total} leads totales`:'Aún no hay búsquedas — lanza tu primera';
+  }
+
+  if(_leafletMarkers.length>0){
+    const group=L.featureGroup(_leafletMarkers);_leafletMap.fitBounds(group.getBounds().pad(0.3));
+  }
+}
+
 function updateStats(){
   const searches=appState.searches,thisMonth=searches.filter(s=>new Date(s.id)>new Date(Date.now()-30*24*60*60*1000));
   const totalLeads=searches.reduce((a,s)=>a+(s.total||0),0),totalEmails=parseInt(localStorage.getItem('lf_emails_sent')||'0');
@@ -1273,6 +1350,7 @@ function updateStats(){
   document.getElementById('stat-leads').innerHTML=`${totalLeads} <span>leads</span>`;
   document.getElementById('stat-emails').innerHTML=`${totalEmails} <span>emails</span>`;
   document.getElementById('cuenta-searches').textContent=searches.length;renderHistory();
+  setTimeout(initMap,50);
 }
 function _senderMsg(msg,type){const el=document.getElementById('sender-status-msg');el.style.display='block';if(type==='ok'){el.style.background='rgba(0,229,160,0.07)';el.style.border='1px solid rgba(0,229,160,0.2)';el.style.color='var(--green)';}else if(type==='warn'){el.style.background='rgba(255,217,61,0.07)';el.style.border='1px solid rgba(255,217,61,0.2)';el.style.color='var(--yellow)';}else{el.style.background='rgba(255,61,90,0.07)';el.style.border='1px solid rgba(255,61,90,0.2)';el.style.color='var(--red)';}el.textContent=msg;}
 async function verifySender(){const email=document.getElementById('sender-email-input').value.trim(),name=document.getElementById('sender-name-input').value.trim();if(!email||!email.includes('@')){_senderMsg('Introduce un email válido.','err');return;}const btn=document.getElementById('btn-verify-sender');document.getElementById('verify-label').style.display='none';document.getElementById('verify-spinner').style.display='block';btn.disabled=true;try{const r=await fetch(`${SCRAPER_API_URL}/verify-sender`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,name:name||email.split('@')[0]})});const d=await r.json();if(d.ok){_senderMsg(d.message,d.status==='verified'?'ok':'warn');localStorage.setItem('lf_sender_email',email);if(name)localStorage.setItem('lf_sender_name',name);}else{_senderMsg(d.error||'Error al verificar.','err');}}catch(e){_senderMsg('Error de conexión.','err');}document.getElementById('verify-label').style.display='inline';document.getElementById('verify-spinner').style.display='none';btn.disabled=false;}
