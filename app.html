@@ -1329,7 +1329,7 @@ async function runDemoScraping(sector, ciudad, cats){
   appState.currentLeads=DEMO_LEADS_DATA;
   appState.currentJobId='demo-job';
 }
-async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000){
+async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000,quickMode=false){
   if(DEMO_MODE){await runDemoScraping(sector,ciudades[0],cats);return;}
   let totalResult={total:0,alta:0,media:0,baja:0,leads:[]},lastJobId=null;
   for(let i=0;i<ciudades.length;i++){
@@ -1338,7 +1338,7 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
     addLog(`🏙️ Iniciando búsqueda en ${ciudad} (${i+1}/${ciudades.length})…`,'accent');
     const baseProgress=Math.round((i/ciudades.length)*100),cityProgressScale=1/ciudades.length;
     try{
-      const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources,max_leads:maxLeads})});
+      const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources,max_leads:maxLeads,quick_mode:quickMode})});
       if(!lr.ok)throw new Error(`Error al lanzar: ${lr.status}`);
       const {job_id}=await lr.json();lastJobId=job_id;addLog(`✓ Job ${ciudad} iniciado (${job_id.slice(0,8)}…)`,'ok');
       let lastLog=0,errCount=0;
@@ -1744,12 +1744,12 @@ async function _animateAndLaunch(type,latlng,cities,sector){
   // Lanzar scraping
   const targetCities=cities.length>0?cities:[_findNearestCity(latlng.lat,latlng.lng)];
   const cats=(SECTORES[sector]||[]).map(c=>c.id);
-  const sources=['google_maps','paginas_amarillas'];
+  const sources=['google_maps'];
   const limits=getPlanLimits();
   const ciudadStr=targetCities.join(', ');
   appState.currentSearch={sector,ciudad:ciudadStr,cats,sources};appState.currentJobId=null;
   _initResults(`${t.emoji} Nuke ${t.label} impactó — scrapeando ${targetCities.length} ciudad${targetCities.length>1?'es':''}…`,estimateScrapeTime(cats.length,targetCities.length,sources.length));
-  await runScrapingMultiCiudad(sector,targetCities,cats,sources,limits.leads);
+  await runScrapingMultiCiudad(sector,targetCities,cats,sources,limits.leads,true);
 }
 
 function _findNearestCity(lat,lng){
