@@ -551,6 +551,10 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
               <button class="select-all-btn" onclick="toggleAllCats()">Seleccionar todas</button>
             </div>
             <div class="categories-grid" id="cats-grid"></div>
+            <div id="demo-cats-note" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(0,102,255,0.08);border:1px solid rgba(0,102,255,0.2);border-radius:8px;font-size:12px;color:var(--text2);line-height:1.5;">
+              🔒 <strong>Demo:</strong> 1 categoría · 1 ciudad · 20 leads · Solo Google Maps<br>
+              <span style="color:var(--accent);">Con planes de pago:</span> todas las categorías, hasta 5 ciudades, 1.000+ leads y 9 fuentes de datos.
+            </div>
           </div>
         </div>
         <div id="wrap-libre" style="display:none">
@@ -1023,12 +1027,12 @@ function filterSectors(q){const ql=q.toLowerCase();document.querySelectorAll('.s
 function selectSector(value,label){document.getElementById('select-sector').value=value;const lbl=document.getElementById('sector-selected-label');lbl.textContent=label;lbl.classList.add('chosen');document.querySelectorAll('.sector-option').forEach(o=>o.classList.toggle('active',o.dataset.value===value));document.getElementById('sector-dropdown').classList.remove('open');document.getElementById('sector-search').value='';filterSectors('');updateCategories();}
 function filterCities(q){const ql=q.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');document.querySelectorAll('.city-option').forEach(o=>{const c=o.dataset.city.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');o.style.display=c.includes(ql)?'':'none';});document.querySelectorAll('.city-group-label').forEach(lbl=>{let next=lbl.nextElementSibling,vis=false;while(next&&!next.classList.contains('city-group-label')&&!next.classList.contains('city-search-wrap')){if(next.classList.contains('city-option')&&next.style.display!=='none')vis=true;next=next.nextElementSibling;}lbl.style.display=vis?'':'none';});}
 function toggleCity(city){
-  const maxCities=getPlanLimits().cities,isSelected=selectedCities.includes(city);
+  const maxCities=DEMO_MODE?1:getPlanLimits().cities,isSelected=selectedCities.includes(city);
   if(!isSelected&&selectedCities.length>=maxCities){
     const note=document.getElementById('city-max-note');
     note.style.display='block';
-    note.textContent=maxCities===1?'⚠️ El plan Basic solo permite 1 ciudad. Actualiza a Pro para hasta 5.':'⚠️ Máximo '+maxCities+' ciudades en tu plan.';
-    if(maxCities===1)setTimeout(()=>showUpgradeModal('El plan <strong>Basic</strong> solo permite 1 ciudad por búsqueda.<br><br>Con <strong>Pro</strong> puedes buscar hasta 5 ciudades a la vez.'),300);
+    if(DEMO_MODE){note.textContent='⚠️ La demo solo permite 1 ciudad. Con cualquier plan puedes buscar en múltiples ciudades a la vez.';setTimeout(()=>showDemoUpgrade('🔒 Con el plan <strong>Pro</strong> puedes buscar en hasta 5 ciudades simultáneamente.<br><br>Con <strong>Business</strong> ciudades ilimitadas.'),300);}
+    else{note.textContent=maxCities===1?'⚠️ El plan Basic solo permite 1 ciudad. Actualiza a Pro para hasta 5.':'⚠️ Máximo '+maxCities+' ciudades en tu plan.';if(maxCities===1)setTimeout(()=>showUpgradeModal('El plan <strong>Basic</strong> solo permite 1 ciudad por búsqueda.<br><br>Con <strong>Pro</strong> puedes buscar hasta 5 ciudades a la vez.'),300);}
     return;
   }
   document.getElementById('city-max-note').style.display='none';
@@ -1061,6 +1065,7 @@ function updateCategories(){
     pill.onclick=()=>toggleCat(cat.id);
     grid.appendChild(pill);
   });
+  if(DEMO_MODE) document.getElementById('demo-cats-note').style.display='block';
   checkLaunchReady();
 }
 function toggleCat(id){
