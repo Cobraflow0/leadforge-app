@@ -331,10 +331,28 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 .cancel-warning{background:rgba(255,217,61,0.05);border:1px solid rgba(255,217,61,0.2);border-radius:10px;padding:14px 16px;margin:16px 0;font-size:13px;color:var(--yellow);line-height:1.7;}
 .cancel-warning strong{display:block;margin-bottom:4px;}
 @media(max-width:900px){.sidebar{display:none;}.main{padding:24px 20px;}.stats-grid{grid-template-columns:1fr 1fr;}.scraper-grid{grid-template-columns:1fr;}.categories-grid{grid-template-columns:repeat(2,1fr);}.results-summary{grid-template-columns:repeat(2,1fr);}.cuenta-grid{grid-template-columns:1fr;}.crm-stats{grid-template-columns:repeat(3,1fr);}.camp-stats{grid-template-columns:repeat(2,1fr);}.admin-grid{grid-template-columns:repeat(2,1fr);}}
+#demo-upgrade-overlay.open{display:flex !important;}
+.demo-locked{position:relative;pointer-events:none;opacity:0.45;}
+.demo-lock-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;z-index:10;}
 </style>
 </head>
 <body>
 <div class="bg-canvas"><div class="bg-grid"></div><div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div><div class="bg-orb orb-3"></div></div>
+
+<!-- DEMO UPGRADE OVERLAY -->
+<div id="demo-upgrade-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;flex-direction:column;" onclick="if(event.target===this)closeDemoUpgrade()">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:36px 32px;max-width:480px;width:90%;text-align:center;">
+    <div style="font-size:36px;margin-bottom:12px;">🔒</div>
+    <h2 style="font-size:20px;font-weight:800;color:var(--text);margin:0 0 10px;">Función exclusiva de LeadForge</h2>
+    <p id="demo-upgrade-msg" style="font-size:14px;color:var(--text2);margin:0 0 24px;line-height:1.6;">Elige un plan para desbloquear todas las funciones.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+      <a href="https://buy.stripe.com/fZudR9bbhfXOey7bxObV606" style="display:block;padding:14px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);font-size:14px;font-weight:600;">Basic — 19€/mes · 5 búsquedas · 500 leads</a>
+      <a href="https://buy.stripe.com/8x29AT0wD3b2ahR31ibV607" style="display:block;padding:14px;background:linear-gradient(135deg,rgba(0,102,255,0.2),rgba(0,200,255,0.1));border:2px solid #0066FF;border-radius:12px;text-decoration:none;color:#fff;font-size:14px;font-weight:700;">⭐ Pro — 49€/mes · Búsquedas ilimitadas · 1.000 leads</a>
+      <a href="https://buy.stripe.com/8x27sL4MT6neblVdFWbV608" style="display:block;padding:14px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);font-size:14px;font-weight:600;">Business — 99€/mes · Todo incluido · API access</a>
+    </div>
+    <button onclick="closeDemoUpgrade()" style="background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;">Cerrar</button>
+  </div>
+</div>
 
 <!-- LOGIN -->
 <div class="screen auth-screen" id="screen-login">
@@ -887,13 +905,57 @@ const SECTORES={
   automocion:[{id:'talleres',emoji:'🔧',label:'Talleres mecánicos'},{id:'concesionarios',emoji:'🚘',label:'Concesionarios'},{id:'alquiler_vehiculos',emoji:'🚙',label:'Alquiler vehículos'},{id:'talleres_especializados',emoji:'🛠️',label:'Talleres especializados'},{id:'automocion_industrial',emoji:'🚛',label:'Automoción industrial'}],
   eventos:[{id:'organizacion_eventos',emoji:'🎪',label:'Organización eventos'},{id:'fotografos_videografos',emoji:'📸',label:'Fotógrafos'},{id:'musica_entretenimiento',emoji:'🎵',label:'Música y DJ'},{id:'decoracion_eventos',emoji:'💐',label:'Decoración'},{id:'espacios_eventos',emoji:'🏛️',label:'Espacios y salas'},{id:'catering_eventos',emoji:'🍽️',label:'Catering eventos'}],
 };
+/* ── DEMO MODE ── */
+const DEMO_MODE = new URLSearchParams(window.location.search).get('demo') === 'true';
+const DEMO_MAX_LEADS = 15;
+function isDemoUsed(){return !!localStorage.getItem('lf_demo_used');}
+function markDemoUsed(){localStorage.setItem('lf_demo_used','1');}
+function showDemoUpgrade(msg){
+  document.getElementById('demo-upgrade-msg').innerHTML = msg || '🔒 Esta función está disponible con un plan de LeadForge.';
+  document.getElementById('demo-upgrade-overlay').classList.add('open');
+}
+function closeDemoUpgrade(){document.getElementById('demo-upgrade-overlay').classList.remove('open');}
+document.addEventListener('DOMContentLoaded',()=>{
+  const ov=document.getElementById('demo-upgrade-overlay');
+  ov.addEventListener('transitionend',()=>{if(!ov.classList.contains('open'))ov.style.display='none';});
+});
+
 window.addEventListener('DOMContentLoaded',async()=>{
   const hash=window.location.hash;
   if(hash.includes('access_token')&&hash.includes('type=recovery')){const params=new URLSearchParams(hash.slice(1));sb._token=params.get('access_token');showScreen('setpass');window.history.replaceState(null,'',window.location.pathname);return;}
+
+  if(DEMO_MODE){
+    loadDemoApp();
+    return;
+  }
+
   const session=sb.loadSession();
   if(session&&session.access_token){sb._token=session.access_token;const user=await sb.getUser();if(user&&user.id){await loadApp(user);return;}}
   showScreen('login');
 });
+
+function loadDemoApp(){
+  document.getElementById('sidebar-avatar').textContent = '👤';
+  document.getElementById('sidebar-email').textContent = 'Demo gratuita';
+  document.getElementById('sidebar-plan').textContent = 'DEMO · 1 búsqueda';
+  document.getElementById('stat-plan').innerHTML = 'DEMO';
+  document.getElementById('stat-searches').innerHTML = '0 <span>/ 1 búsqueda</span>';
+  document.getElementById('stat-leads').innerHTML = '0 <span>leads</span>';
+  document.getElementById('stat-emails').innerHTML = '0 <span>emails</span>';
+  // Ocultar logout y nav innecesario en demo
+  document.querySelector('.btn-logout').style.display = 'none';
+  document.getElementById('nav-cuenta').style.display = 'none';
+  document.getElementById('nav-campanas').style.display = 'none';
+  document.getElementById('nav-crm').style.display = 'none';
+  document.getElementById('nav-historial').style.display = 'none';
+  // Banner demo
+  const banner = document.createElement('div');
+  banner.id = 'demo-banner';
+  banner.innerHTML = `<div style="background:linear-gradient(135deg,rgba(0,102,255,0.15),rgba(0,200,255,0.1));border:1px solid rgba(0,200,255,0.3);border-radius:14px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;"><span style="font-size:14px;color:var(--text);font-weight:600;">⚡ Estás en la demo gratuita — 1 búsqueda de ${DEMO_MAX_LEADS} leads</span><a href="https://cobraflow0.github.io/leadforge-app/index.html#pricing" style="background:linear-gradient(135deg,#0066FF,#00C8FF);color:#fff;padding:8px 18px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;">Ver planes →</a></div>`;
+  document.getElementById('page-dashboard').insertBefore(banner, document.getElementById('page-dashboard').firstChild);
+  showScreen('app');
+  showPage('dashboard');
+}
 function showScreen(name){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const el=document.getElementById('screen-'+name);if(el)el.classList.add('active');}
 async function doLogin(){
   const email=document.getElementById('login-email').value.trim(),pass=document.getElementById('login-pass').value,err=document.getElementById('login-error'),btn=document.getElementById('btn-login');
@@ -1002,8 +1064,15 @@ function checkLaunchReady(){
   else{const sector=document.getElementById('select-sector').value,hasCities=selectedCities.length>0,cats=SECTORES[sector]||[],hasCat=cats.some(c=>document.getElementById('cat-'+c.id)?.classList.contains('selected'));document.getElementById('btn-launch').disabled=!(sector&&hasCities&&hasCat);}
 }
 async function launchScraping(){
+  if(DEMO_MODE){
+    if(isDemoUsed()){
+      showDemoUpgrade('Has agotado tu búsqueda gratuita.<br><br>Elige un plan para hacer búsquedas ilimitadas y descargar todos tus leads.');
+      return;
+    }
+    markDemoUsed();
+  }
   const limits=getPlanLimits(),used=getSearchesThisMonth();
-  if(limits.searches!==Infinity&&used>=limits.searches){
+  if(!DEMO_MODE&&limits.searches!==Infinity&&used>=limits.searches){
     showUpgradeModal(`Has usado las <strong>${limits.searches} búsquedas</strong> de tu plan ${limits.label} este mes.<br><br>Actualiza a <strong>Pro</strong> (30 búsquedas) o <strong>Business</strong> (ilimitadas) para seguir.`);
     return;
   }
@@ -1013,16 +1082,18 @@ async function launchScraping(){
   if(currentMode==='libre'){
     const termino=document.getElementById('input-libre').value.trim(),ciudad=document.getElementById('input-ciudad-libre').value.trim();
     const fuentesLibre=sources.filter(s=>['google_maps','paginas_amarillas','linkedin','instagram','webs_propias','europages'].includes(s));
+    const demoLeads=DEMO_MODE?DEMO_MAX_LEADS:limits.leads;
     appState.currentSearch={sector:termino,ciudad,cats:[termino],sources:fuentesLibre};appState.currentJobId=null;
-    _initResults('Buscando "'+termino+'" en '+ciudad+'…');await runScrapingReal('libre',ciudad,[termino],fuentesLibre,limits.leads);
+    _initResults('Buscando "'+termino+'" en '+ciudad+'…');await runScrapingReal('libre',ciudad,[termino],fuentesLibre,demoLeads);
   }else{
     const sector=document.getElementById('select-sector').value;
     const cats=(SECTORES[sector]||[]).filter(c=>document.getElementById('cat-'+c.id)?.classList.contains('selected')).map(c=>c.id);
-    const ciudades=[...selectedCities];appState.currentSearch={sector,ciudad:ciudades.join(', '),cats,sources};appState.currentJobId=null;
-    const subtext=ciudades.length>1?`Buscando leads en ${ciudades.length} ciudades: ${ciudades.join(', ')}…`:`Buscando leads en ${ciudades[0]}…`;
+    const ciudades=DEMO_MODE?[selectedCities[0]||'Madrid']:[...selectedCities];
+    appState.currentSearch={sector,ciudad:ciudades.join(', '),cats,sources};appState.currentJobId=null;
+    const subtext=`Buscando leads en ${ciudades[0]}…`;
     _initResults(subtext);
-    if(ciudades.length>1){document.getElementById('multi-city-progress').style.display='flex';document.getElementById('mcp-total').textContent=ciudades.length;}
-    await runScrapingMultiCiudad(sector,ciudades,cats,sources,limits.leads);
+    const demoLeads=DEMO_MODE?DEMO_MAX_LEADS:limits.leads;
+    await runScrapingMultiCiudad(sector,ciudades,cats,sources,demoLeads);
   }
 }
 function _initResults(subtext){showPage('results');document.getElementById('nav-dashboard').classList.add('active');document.getElementById('results-done').style.display='none';document.getElementById('campaign-result').style.display='none';document.getElementById('multi-city-progress').style.display='none';document.getElementById('results-title').innerHTML='Scraping <span>en curso</span>';document.getElementById('results-sub').textContent=subtext;document.getElementById('log-terminal').innerHTML='';setProgress(0,'Conectando con el servidor…');}
@@ -1073,7 +1144,10 @@ async function runScrapingReal(sector,ciudad,cats,sources,maxLeads=1000){
   }catch(err){addLog(`❌ ${err.message}`,'error');setProgress(0,'Error de conexión');}
 }
 function setProgress(pct,stage){document.getElementById('progress-fill').style.width=pct+'%';document.getElementById('progress-pct').textContent=pct+'%';document.getElementById('progress-stage').textContent=stage;}
-function downloadExcel(){const j=appState.currentJobId;if(!j){alert('No hay ningún scraping completado.');return;}window.open(`${SCRAPER_API_URL}/download/${j}`,'_blank');}
+function downloadExcel(){
+  if(DEMO_MODE){showDemoUpgrade('🔒 La descarga de Excel está disponible con cualquier plan de LeadForge.<br><br>Elige tu plan para descargar todos tus leads.');return;}
+  const j=appState.currentJobId;if(!j){alert('No hay ningún scraping completado.');return;}window.open(`${SCRAPER_API_URL}/download/${j}`,'_blank');
+}
 function downloadHistoryExcel(jobId){if(!jobId){alert('Este resultado no tiene job_id guardado.');return;}window.open(`${SCRAPER_API_URL}/download/${jobId}`,'_blank');}
 function newSearch(){showPage('dashboard');}
 function renderHistory(){
@@ -1124,6 +1198,7 @@ function closePreview(){document.getElementById('preview-overlay').classList.rem
 function showAlert(el,msg){el.textContent=msg;el.classList.add('show');}
 function delay(ms){return new Promise(r=>setTimeout(r,ms));}
 function openCampaignModal(){
+  if(DEMO_MODE){showDemoUpgrade('🔒 Las campañas de email están disponibles con cualquier plan de LeadForge.<br><br>Con el plan <strong>Pro</strong> puedes enviar hasta 1.000 emails personalizados con follow-up automático.');return;}
   if(!appState.currentJobId)return;
   document.getElementById('campaign-result').style.display='none';
   document.getElementById('camp-sender-status').style.display='none';
