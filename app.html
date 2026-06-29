@@ -1341,7 +1341,7 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
         await delay(2000);const sr=await fetch(`${SCRAPER_API_URL}/status/${job_id}`);if(!sr.ok){addLog('⚠️ Error consultando estado…','warn');continue;}
         const data=await sr.json();data.logs.slice(lastLog).forEach(line=>{const t=line.includes('✅')||line.includes('✓')?'ok':line.includes('❌')?'error':'info';addLog(line.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,''),t);});lastLog=data.logs.length;
         setProgress(Math.round(baseProgress+data.progress*cityProgressScale),`[${ciudad}] `+(data.logs.at(-1)?.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')||''));
-        if(data.status==='done'){const r=data.result;totalResult.total+=r.total;totalResult.alta+=r.alta;totalResult.media+=r.media;totalResult.baja+=r.baja;if(r.leads)totalResult.leads.push(...r.leads);addLog(`✅ ${ciudad}: ${r.total} leads encontrados`,'ok');break;}
+        if(data.status==='done'){const r=data.result;totalResult.total+=r.total;totalResult.alta+=r.alta;totalResult.media+=r.media;totalResult.baja+=r.baja;try{const lr2=await fetch(`${SCRAPER_API_URL}/result/${job_id}`);if(lr2.ok){const rd=await lr2.json();totalResult.leads.push(...(rd.leads||[]))}}catch(e){}addLog(`✅ ${ciudad}: ${r.total} leads encontrados`,'ok');break;}
         if(data.status==='error'){addLog(`❌ Error en ${ciudad}: ${data.error}`,'error');break;}
       }
     }catch(err){addLog(`❌ ${ciudad}: ${err.message}`,'error');}
@@ -1353,6 +1353,7 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
   document.getElementById('results-sub').textContent=`${totalResult.total} leads en ${ciudadesStr}.`;document.getElementById('results-done').style.display='block';setProgress(100,'Completado');
   const entry={id:Date.now(),job_id:lastJobId,sector:appState.currentSearch?.sector||sector,ciudad:ciudadesStr,cats:cats.length,total:totalResult.total,alta:totalResult.alta,media:totalResult.media,baja:totalResult.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};
   appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);
+  _saveHistoryLeads(lastJobId,totalResult.leads);
 }
 async function runScrapingReal(sector,ciudad,cats,sources,maxLeads=1000){
   try{
@@ -1365,17 +1366,63 @@ async function runScrapingReal(sector,ciudad,cats,sources,maxLeads=1000){
       await delay(2000);const sr=await fetch(`${SCRAPER_API_URL}/status/${job_id}`);if(!sr.ok){addLog('⚠️ Error consultando estado…','warn');continue;}
       const data=await sr.json();data.logs.slice(lastLog).forEach(line=>{const t=line.includes('✅')||line.includes('✓')?'ok':line.includes('❌')?'error':'info';addLog(line.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,''),t);});lastLog=data.logs.length;
       setProgress(data.progress,data.logs.at(-1)?.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')||'');
-      if(data.status==='done'){const r=data.result;document.getElementById('res-total').textContent=r.total;document.getElementById('res-alta').textContent=r.alta;document.getElementById('res-media').textContent=r.media;document.getElementById('res-baja').textContent=r.baja;document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';document.getElementById('results-sub').textContent=`${r.total} leads listos para descargar en Excel.`;document.getElementById('results-done').style.display='block';appState.currentLeads=r.leads||[];const entry={id:Date.now(),job_id,sector:appState.currentSearch?.sector||sector,ciudad,cats:cats.length,total:r.total,alta:r.alta,media:r.media,baja:r.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);break;}
+      if(data.status==='done'){const r=data.result;document.getElementById('res-total').textContent=r.total;document.getElementById('res-alta').textContent=r.alta;document.getElementById('res-media').textContent=r.media;document.getElementById('res-baja').textContent=r.baja;document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';document.getElementById('results-sub').textContent=`${r.total} leads listos para descargar en Excel.`;document.getElementById('results-done').style.display='block';try{const lr2=await fetch(`${SCRAPER_API_URL}/result/${job_id}`);if(lr2.ok){const rd=await lr2.json();appState.currentLeads=rd.leads||[];}else{appState.currentLeads=[];}}catch(e){appState.currentLeads=[];}const entry={id:Date.now(),job_id,sector:appState.currentSearch?.sector||sector,ciudad,cats:cats.length,total:r.total,alta:r.alta,media:r.media,baja:r.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);_saveHistoryLeads(job_id,appState.currentLeads);break;}
       if(data.status==='error'){addLog(`❌ Error: ${data.error}`,'error');setProgress(0,'Error — intenta de nuevo');break;}
     }
   }catch(err){addLog(`❌ ${err.message}`,'error');setProgress(0,'Error de conexión');}
 }
 function setProgress(pct,stage){document.getElementById('progress-fill').style.width=pct+'%';document.getElementById('progress-pct').textContent=pct+'%';document.getElementById('progress-stage').textContent=stage;}
+function _excelCols(){
+  return [
+    {k:'nombre',    h:'Nombre',     w:30}, {k:'telefono', h:'Teléfono',   w:16},
+    {k:'email',     h:'Email',      w:30}, {k:'web',      h:'Web',        w:32},
+    {k:'direccion', h:'Dirección',  w:32}, {k:'ciudad',   h:'Ciudad',     w:14},
+    {k:'valoracion',h:'Valoración', w:12}, {k:'resenas',  h:'Reseñas',    w:10},
+    {k:'fuente',    h:'Fuente',     w:18}, {k:'categoria',h:'Categoría',  w:22},
+    {k:'linkedin',  h:'LinkedIn',   w:32}, {k:'instagram',h:'Instagram',  w:30},
+    {k:'calidad',   h:'Calidad',    w:10}, {k:'score',    h:'Score',      w:8},
+    {k:'descripcion',h:'Descripción',w:40},
+  ];
+}
+function _generateExcelClientSide(leads, sector, ciudad){
+  const cols=_excelCols();
+  const rows=leads.map(l=>{const r={};cols.forEach(c=>{r[c.h]=l[c.k]??'';});return r;});
+  const ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=cols.map(c=>({wch:c.w}));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Leads');
+  const fecha=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');
+  XLSX.writeFile(wb,`LeadForge_${(sector||'leads').replace(/\s+/g,'_')}_${(ciudad||'').replace(/[\s,]+/g,'_')}_${fecha}.xlsx`);
+}
+function _saveHistoryLeads(jobId,leads){
+  if(!jobId||!leads?.length)return;
+  try{
+    localStorage.setItem('lf_leads_'+jobId,JSON.stringify(leads.slice(0,300)));
+    const idx=JSON.parse(localStorage.getItem('lf_leads_idx')||'[]');
+    idx.unshift(jobId);
+    idx.slice(5).forEach(id=>localStorage.removeItem('lf_leads_'+id));
+    localStorage.setItem('lf_leads_idx',JSON.stringify(idx.slice(0,5)));
+  }catch(e){}
+}
+function _loadHistoryLeads(jobId){
+  try{const d=localStorage.getItem('lf_leads_'+jobId);return d?JSON.parse(d):null;}catch(e){return null;}
+}
 function downloadExcel(){
   if(DEMO_MODE){showDemoUpgrade('🔒 La descarga de Excel está disponible con cualquier plan de LeadForge.<br><br>Elige tu plan para descargar todos tus leads.');return;}
-  const j=appState.currentJobId;if(!j){alert('No hay ningún scraping completado.');return;}window.open(`${SCRAPER_API_URL}/download/${j}`,'_blank');
+  const leads=appState.currentLeads;
+  if(!leads?.length){alert('No hay leads disponibles. Lanza una búsqueda primero.');return;}
+  _generateExcelClientSide(leads,appState.currentSearch?.sector,appState.currentSearch?.ciudad);
 }
-function downloadHistoryExcel(jobId){if(!jobId){alert('Este resultado no tiene job_id guardado.');return;}window.open(`${SCRAPER_API_URL}/download/${jobId}`,'_blank');}
+function downloadHistoryExcel(jobId){
+  if(!jobId){alert('Esta búsqueda no tiene ID guardado.');return;}
+  const leads=_loadHistoryLeads(jobId);
+  if(leads?.length){
+    const s=appState.searches.find(x=>x.job_id===jobId);
+    _generateExcelClientSide(leads,s?.sector,s?.ciudad);
+  }else{
+    alert('Los leads de esta búsqueda ya no están guardados en este dispositivo.\n\nLas búsquedas se guardan localmente durante la sesión. Lanza una nueva búsqueda para descargar los leads.');
+  }
+}
 function newSearch(){showPage('dashboard');}
 function renderHistory(){
   const list=document.getElementById('history-list'),searches=appState.searches;
@@ -1878,8 +1925,8 @@ async function sendCampaign(){
   localStorage.setItem('lf_campaign_data',JSON.stringify({name,company,product,email}));
   const btn=document.getElementById('btn-send-campaign'),lbl=document.getElementById('camp-label'),spin=document.getElementById('camp-spinner'),resEl=document.getElementById('campaign-result');
   btn.disabled=true;lbl.style.display='none';spin.style.display='block';
-  try{const r=await fetch(`${SCRAPER_API_URL}/send-campaign`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_email:email,user_id:appState.user?.id||'',max_emails:selectedLimit})});const data=await r.json();btn.disabled=false;lbl.style.display='inline';spin.style.display='none';
-  if(data.ok){const prev=parseInt(localStorage.getItem('lf_emails_sent')||'0');localStorage.setItem('lf_emails_sent',prev+data.enviados);updateStats();const followup=document.getElementById('camp-followup').checked;const campañas=JSON.parse(localStorage.getItem('lf_campanas')||'[]');campañas.unshift({id:Date.now(),tag:`lf_${jobId.slice(0,8)}`,job_id:jobId,sector:appState.currentSearch?.sector||'',ciudad:appState.currentSearch?.ciudad||'',enviados:data.enviados,company,user_email:email,has_sequence:followup,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})});localStorage.setItem('lf_campanas',JSON.stringify(campañas.slice(0,50)));if(followup&&jobId){fetch(`${SCRAPER_API_URL}/sequences/start`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_email:email,max_emails:selectedLimit})});}closeCampaignModal();let msg=`✅ Campaña enviada: ${data.enviados} emails`;if(data.ya_contactados)msg+=` · ${data.ya_contactados} ya contactados anteriormente omitidos`;if(data.en_blacklist)msg+=` · ${data.en_blacklist} en blacklist omitidos`;if(data.filtrados)msg+=` · ${data.filtrados} emails inválidos filtrados`;if(followup)msg+=` · Secuencia activada 🚀`;resEl.className='campaign-result ok';resEl.style.display='block';resEl.textContent=msg;}else{resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ ${data.error||'No se pudo enviar.'}`;}}catch(err){btn.disabled=false;lbl.style.display='inline';spin.style.display='none';resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ Error: ${err.message||'No se pudo conectar con la API'}`;}
+  try{const r=await fetch(`${SCRAPER_API_URL}/send-campaign`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_email:email,user_id:appState.user?.id||'',max_emails:selectedLimit,leads:appState.currentLeads})});const data=await r.json();btn.disabled=false;lbl.style.display='inline';spin.style.display='none';
+  if(data.ok){const prev=parseInt(localStorage.getItem('lf_emails_sent')||'0');localStorage.setItem('lf_emails_sent',prev+data.enviados);updateStats();const followup=document.getElementById('camp-followup').checked;const campañas=JSON.parse(localStorage.getItem('lf_campanas')||'[]');campañas.unshift({id:Date.now(),tag:`lf_${jobId.slice(0,8)}`,job_id:jobId,sector:appState.currentSearch?.sector||'',ciudad:appState.currentSearch?.ciudad||'',enviados:data.enviados,company,user_email:email,has_sequence:followup,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})});localStorage.setItem('lf_campanas',JSON.stringify(campañas.slice(0,50)));if(followup&&jobId){fetch(`${SCRAPER_API_URL}/sequences/start`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_email:email,max_emails:selectedLimit,leads:appState.currentLeads})});}closeCampaignModal();let msg=`✅ Campaña enviada: ${data.enviados} emails`;if(data.ya_contactados)msg+=` · ${data.ya_contactados} ya contactados anteriormente omitidos`;if(data.en_blacklist)msg+=` · ${data.en_blacklist} en blacklist omitidos`;if(data.filtrados)msg+=` · ${data.filtrados} emails inválidos filtrados`;if(followup)msg+=` · Secuencia activada 🚀`;resEl.className='campaign-result ok';resEl.style.display='block';resEl.textContent=msg;}else{resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ ${data.error||'No se pudo enviar.'}`;}}catch(err){btn.disabled=false;lbl.style.display='inline';spin.style.display='none';resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ Error: ${err.message||'No se pudo conectar con la API'}`;}
 }
 function _seqTouchLabel(touch,idx){const dias=[4,8,14];const dia=dias[idx]||'?';if(touch.sent>0)return`<span style="color:var(--green)">✅ Día ${dia} (${touch.sent} enviados)</span>`;const sch=touch.scheduled_at?new Date(touch.scheduled_at):null;const hoy=new Date();const diff=sch?Math.ceil((sch-hoy)/86400000):null;if(diff!==null&&diff>0)return`<span style="color:var(--text3)">⏳ Día ${dia} en ${diff}d</span>`;return`<span style="color:var(--yellow)">🔄 Día ${dia} procesando</span>`;}
 async function renderCampanas(){
