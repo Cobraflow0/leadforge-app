@@ -371,9 +371,15 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
               <select class="form-select" id="select-sector" onchange="updateCategories()">
                 <option value="">— Selecciona sector —</option>
                 <option value="construccion">🏗️ Construcción e Interiorismo</option>
+                <option value="servicios_hogar">🔧 Servicios del Hogar</option>
+                <option value="energia">⚡ Energía y Eficiencia Energética</option>
+                <option value="inmobiliaria">🏘️ Inmobiliaria y Tasación</option>
                 <option value="salud">🏥 Salud y Bienestar</option>
                 <option value="restauracion">🍽️ Restauración y Hostelería</option>
+                <option value="eventos">🎉 Eventos y Celebraciones</option>
+                <option value="automocion">🚗 Automoción y Vehículos</option>
                 <option value="retail">🛍️ Retail y Comercio</option>
+                <option value="educacion">📚 Educación y Formación</option>
                 <option value="legal">⚖️ Legal y Asesoría</option>
                 <option value="marketing">📣 Marketing y Publicidad</option>
                 <option value="tecnologia">💻 Tecnología e IT</option>
@@ -704,6 +710,12 @@ const SECTORES={
   tecnologia:[{id:'desarrollo_sw',emoji:'💻',label:'Software'},{id:'ciberseguridad',emoji:'🔒',label:'Ciberseguridad'},{id:'it_consulting',emoji:'🖥️',label:'Consultoría IT'},{id:'saas',emoji:'☁️',label:'SaaS'},{id:'ecommerce',emoji:'🛒',label:'Ecommerce'},{id:'agencias_ia',emoji:'🤖',label:'Agencias IA'}],
   pymes:[{id:'pymes_general',emoji:'🏢',label:'Pymes'},{id:'autonomos',emoji:'👤',label:'Autónomos'},{id:'startups',emoji:'🚀',label:'Startups'},{id:'franquicias',emoji:'🏪',label:'Franquicias'},{id:'coworkings',emoji:'🤝',label:'Coworkings'},{id:'asociaciones',emoji:'🤲',label:'Asociaciones'}],
   fincas:[{id:'administradores_fincas',emoji:'🏢',label:'Administradores'},{id:'comunidades_propietarios',emoji:'👥',label:'Comunidades'},{id:'mantenimiento_edificios',emoji:'🔧',label:'Mantenimiento'},{id:'inmobiliarias_alquiler',emoji:'🏠',label:'Inmobiliarias'},{id:'despachos_juridicos_fincas',emoji:'⚖️',label:'Asesoría jurídica'},{id:'seguros_comunidades',emoji:'🛡️',label:'Seguros'},{id:'reformas_comunidades',emoji:'🔨',label:'Reformas'}],
+  energia:[{id:'solar_fotovoltaica',emoji:'☀️',label:'Solar fotovoltaica'},{id:'eficiencia_energetica',emoji:'🔋',label:'Eficiencia energética'},{id:'climatizacion',emoji:'❄️',label:'Climatización'},{id:'instalaciones_electricas',emoji:'⚡',label:'Electricidad industrial'},{id:'fontaneria_industrial',emoji:'🚿',label:'Fontanería industrial'},{id:'telecomunicaciones',emoji:'📡',label:'Telecomunicaciones'}],
+  servicios_hogar:[{id:'fontaneria',emoji:'🚿',label:'Fontanería'},{id:'electricidad',emoji:'⚡',label:'Electricidad'},{id:'cerrajeria',emoji:'🔐',label:'Cerrajería'},{id:'mudanzas',emoji:'📦',label:'Mudanzas'},{id:'jardineria',emoji:'🌿',label:'Jardinería'},{id:'limpieza',emoji:'🧹',label:'Limpieza'},{id:'pintura',emoji:'🎨',label:'Pintura'},{id:'control_plagas',emoji:'🐛',label:'Control de plagas'}],
+  inmobiliaria:[{id:'agencias_inmobiliarias',emoji:'🏘️',label:'Agencias inmobiliarias'},{id:'promotores',emoji:'🏗️',label:'Promotores'},{id:'tasadores',emoji:'📊',label:'Tasadores'},{id:'property_management',emoji:'🔑',label:'Property management'},{id:'reformas_inmobiliarias',emoji:'🏠',label:'Home staging'}],
+  educacion:[{id:'academias_idiomas',emoji:'🗣️',label:'Academias de idiomas'},{id:'academias_oposiciones',emoji:'📝',label:'Academias oposiciones'},{id:'autoescuelas',emoji:'🚗',label:'Autoescuelas'},{id:'formacion_empresas',emoji:'💼',label:'Formación empresas'},{id:'guarderias_colegios',emoji:'🧒',label:'Guarderías'},{id:'formacion_digital',emoji:'💻',label:'Formación digital'}],
+  automocion:[{id:'talleres',emoji:'🔧',label:'Talleres mecánicos'},{id:'concesionarios',emoji:'🚘',label:'Concesionarios'},{id:'alquiler_vehiculos',emoji:'🚙',label:'Alquiler vehículos'},{id:'talleres_especializados',emoji:'🛠️',label:'Talleres especializados'},{id:'automocion_industrial',emoji:'🚛',label:'Automoción industrial'}],
+  eventos:[{id:'organizacion_eventos',emoji:'🎪',label:'Organización eventos'},{id:'fotografos_videografos',emoji:'📸',label:'Fotógrafos'},{id:'musica_entretenimiento',emoji:'🎵',label:'Música y DJ'},{id:'decoracion_eventos',emoji:'💐',label:'Decoración'},{id:'espacios_eventos',emoji:'🏛️',label:'Espacios y salas'},{id:'catering_eventos',emoji:'🍽️',label:'Catering eventos'}],
 };
 window.addEventListener('DOMContentLoaded',async()=>{
   const hash=window.location.hash;
