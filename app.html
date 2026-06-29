@@ -223,6 +223,23 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 .city-option .city-check{width:17px;height:17px;border-radius:5px;border:1.5px solid var(--text3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;transition:all 0.15s;}
 .city-option.selected .city-check{background:var(--accent);border-color:var(--accent);color:#05080F;box-shadow:0 0 8px rgba(0,200,255,0.4);}
 .city-max-note{font-size:12px;color:var(--yellow);margin-top:8px;}
+.sector-dropdown{position:relative;width:100%;}
+.sector-selected{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:10px;padding:10px 16px;font-size:14px;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;transition:all 0.2s;user-select:none;min-height:46px;}
+.sector-selected:hover{border-color:var(--border3);}
+.sector-dropdown.open .sector-selected{border-color:var(--accent);background:rgba(0,200,255,0.04);box-shadow:0 0 0 3px rgba(0,200,255,0.10);}
+.sector-selected-label{color:var(--text3);font-size:14px;flex:1;}
+.sector-selected-label.chosen{color:var(--text);}
+.sector-list{display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--bg2);border:1px solid var(--border2);border-radius:14px;z-index:100;box-shadow:0 16px 50px rgba(0,0,0,0.5);overflow:hidden;}
+.sector-dropdown.open .sector-list{display:block;animation:dropIn 0.2s cubic-bezier(0.16,1,0.3,1) both;}
+.sector-list-scroll{max-height:260px;overflow-y:auto;padding:6px;}
+.sector-search-wrap{padding:10px 10px 6px;border-bottom:1px solid var(--border2);}
+.sector-option{display:flex;align-items:center;padding:9px 12px;font-size:13px;color:var(--text2);border-radius:8px;cursor:pointer;transition:all 0.12s;}
+.sector-option:hover{background:rgba(0,200,255,0.07);color:var(--text);}
+.sector-option.active{color:var(--accent);background:rgba(0,200,255,0.06);}
+.search-input{width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);outline:none;font-family:'Space Grotesk',sans-serif;transition:border-color 0.2s;box-sizing:border-box;}
+.search-input::placeholder{color:var(--text3);}
+.search-input:focus{border-color:var(--accent);}
+.city-search-wrap{padding:8px 8px 4px;position:sticky;top:0;background:var(--bg2);z-index:1;}
 .multi-city-progress{background:rgba(0,200,255,0.04);border:1px solid var(--border);border-radius:10px;padding:12px 18px;margin-bottom:16px;font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px;}
 .multi-city-progress strong{color:var(--accent);}
 .crm-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;}
@@ -368,24 +385,35 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
           <div class="scraper-grid">
             <div>
               <label class="form-label">Sector</label>
-              <select class="form-select" id="select-sector" onchange="updateCategories()">
-                <option value="">— Selecciona sector —</option>
-                <option value="construccion">🏗️ Construcción e Interiorismo</option>
-                <option value="servicios_hogar">🔧 Servicios del Hogar</option>
-                <option value="energia">⚡ Energía y Eficiencia Energética</option>
-                <option value="inmobiliaria">🏘️ Inmobiliaria y Tasación</option>
-                <option value="salud">🏥 Salud y Bienestar</option>
-                <option value="restauracion">🍽️ Restauración y Hostelería</option>
-                <option value="eventos">🎉 Eventos y Celebraciones</option>
-                <option value="automocion">🚗 Automoción y Vehículos</option>
-                <option value="retail">🛍️ Retail y Comercio</option>
-                <option value="educacion">📚 Educación y Formación</option>
-                <option value="legal">⚖️ Legal y Asesoría</option>
-                <option value="marketing">📣 Marketing y Publicidad</option>
-                <option value="tecnologia">💻 Tecnología e IT</option>
-                <option value="pymes">🏢 Pymes y Negocios Locales</option>
-                <option value="fincas">🏠 Gestión de Fincas</option>
-              </select>
+              <div class="sector-dropdown" id="sector-dropdown">
+                <div class="sector-selected" id="sector-selected-box" onclick="toggleSectorDropdown(event)">
+                  <span class="sector-selected-label" id="sector-selected-label">— Selecciona sector —</span>
+                  <svg class="city-chevron" width="11" height="7" viewBox="0 0 11 7" fill="none"><path d="M1 1l4.5 4.5L10 1" stroke="#6B7FA0" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <div class="sector-list" id="sector-list">
+                  <div class="sector-search-wrap">
+                    <input type="text" class="search-input" id="sector-search" placeholder="🔍 Buscar sector..." oninput="filterSectors(this.value)" onclick="event.stopPropagation()">
+                  </div>
+                  <div class="sector-list-scroll">
+                    <div class="sector-option" data-value="construccion" onclick="selectSector('construccion','🏗️ Construcción e Interiorismo')">🏗️ Construcción e Interiorismo</div>
+                    <div class="sector-option" data-value="servicios_hogar" onclick="selectSector('servicios_hogar','🔧 Servicios del Hogar')">🔧 Servicios del Hogar</div>
+                    <div class="sector-option" data-value="energia" onclick="selectSector('energia','⚡ Energía y Eficiencia Energética')">⚡ Energía y Eficiencia Energética</div>
+                    <div class="sector-option" data-value="inmobiliaria" onclick="selectSector('inmobiliaria','🏘️ Inmobiliaria y Tasación')">🏘️ Inmobiliaria y Tasación</div>
+                    <div class="sector-option" data-value="salud" onclick="selectSector('salud','🏥 Salud y Bienestar')">🏥 Salud y Bienestar</div>
+                    <div class="sector-option" data-value="restauracion" onclick="selectSector('restauracion','🍽️ Restauración y Hostelería')">🍽️ Restauración y Hostelería</div>
+                    <div class="sector-option" data-value="eventos" onclick="selectSector('eventos','🎉 Eventos y Celebraciones')">🎉 Eventos y Celebraciones</div>
+                    <div class="sector-option" data-value="automocion" onclick="selectSector('automocion','🚗 Automoción y Vehículos')">🚗 Automoción y Vehículos</div>
+                    <div class="sector-option" data-value="retail" onclick="selectSector('retail','🛍️ Retail y Comercio')">🛍️ Retail y Comercio</div>
+                    <div class="sector-option" data-value="educacion" onclick="selectSector('educacion','📚 Educación y Formación')">📚 Educación y Formación</div>
+                    <div class="sector-option" data-value="legal" onclick="selectSector('legal','⚖️ Legal y Asesoría')">⚖️ Legal y Asesoría</div>
+                    <div class="sector-option" data-value="marketing" onclick="selectSector('marketing','📣 Marketing y Publicidad')">📣 Marketing y Publicidad</div>
+                    <div class="sector-option" data-value="tecnologia" onclick="selectSector('tecnologia','💻 Tecnología e IT')">💻 Tecnología e IT</div>
+                    <div class="sector-option" data-value="pymes" onclick="selectSector('pymes','🏢 Pymes y Negocios Locales')">🏢 Pymes y Negocios Locales</div>
+                    <div class="sector-option" data-value="fincas" onclick="selectSector('fincas','🏠 Gestión de Fincas')">🏠 Gestión de Fincas</div>
+                  </div>
+                </div>
+              </div>
+              <input type="hidden" id="select-sector">
             </div>
             <div>
               <label class="form-label">Ciudades <span style="color:var(--text3);font-size:11px;font-weight:400;text-transform:none;letter-spacing:0">(máx. 5)</span></label>
@@ -395,6 +423,9 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
                   <svg class="city-chevron" width="11" height="7" viewBox="0 0 11 7" fill="none"><path d="M1 1l4.5 4.5L10 1" stroke="#6B7FA0" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </div>
                 <div class="city-list" id="city-list">
+                  <div class="city-search-wrap">
+                    <input type="text" class="search-input" id="city-search" placeholder="🔍 Buscar ciudad..." oninput="filterCities(this.value)" onclick="event.stopPropagation()">
+                  </div>
                   <div class="city-group-label">⭐ Principales</div>
                   <div class="city-option" data-city="Madrid" onclick="toggleCity('Madrid')"><div class="city-check"></div>📍 Madrid</div>
                   <div class="city-option" data-city="Barcelona" onclick="toggleCity('Barcelona')"><div class="city-check"></div>📍 Barcelona</div>
@@ -425,6 +456,22 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
                   <div class="city-option" data-city="Toledo" onclick="toggleCity('Toledo')"><div class="city-check"></div>📍 Toledo</div>
                   <div class="city-option" data-city="Valladolid" onclick="toggleCity('Valladolid')"><div class="city-check"></div>📍 Valladolid</div>
                   <div class="city-option" data-city="Vitoria" onclick="toggleCity('Vitoria')"><div class="city-check"></div>📍 Vitoria</div>
+                  <div class="city-option" data-city="Vigo" onclick="toggleCity('Vigo')"><div class="city-check"></div>📍 Vigo</div>
+                  <div class="city-option" data-city="A Coruña" onclick="toggleCity('A Coruña')"><div class="city-check"></div>📍 A Coruña</div>
+                  <div class="city-option" data-city="Gijón" onclick="toggleCity('Gijón')"><div class="city-check"></div>📍 Gijón</div>
+                  <div class="city-option" data-city="Oviedo" onclick="toggleCity('Oviedo')"><div class="city-check"></div>📍 Oviedo</div>
+                  <div class="city-option" data-city="Elche" onclick="toggleCity('Elche')"><div class="city-check"></div>📍 Elche</div>
+                  <div class="city-option" data-city="Cartagena" onclick="toggleCity('Cartagena')"><div class="city-check"></div>📍 Cartagena</div>
+                  <div class="city-option" data-city="Jerez de la Frontera" onclick="toggleCity('Jerez de la Frontera')"><div class="city-check"></div>📍 Jerez de la Frontera</div>
+                  <div class="city-option" data-city="Castellón" onclick="toggleCity('Castellón')"><div class="city-check"></div>📍 Castellón</div>
+                  <div class="city-option" data-city="Tarragona" onclick="toggleCity('Tarragona')"><div class="city-check"></div>📍 Tarragona</div>
+                  <div class="city-option" data-city="Lleida" onclick="toggleCity('Lleida')"><div class="city-check"></div>📍 Lleida</div>
+                  <div class="city-option" data-city="Girona" onclick="toggleCity('Girona')"><div class="city-check"></div>📍 Girona</div>
+                  <div class="city-option" data-city="Logroño" onclick="toggleCity('Logroño')"><div class="city-check"></div>📍 Logroño</div>
+                  <div class="city-option" data-city="Albacete" onclick="toggleCity('Albacete')"><div class="city-check"></div>📍 Albacete</div>
+                  <div class="city-option" data-city="Cáceres" onclick="toggleCity('Cáceres')"><div class="city-check"></div>📍 Cáceres</div>
+                  <div class="city-option" data-city="Lugo" onclick="toggleCity('Lugo')"><div class="city-check"></div>📍 Lugo</div>
+                  <div class="city-option" data-city="Ourense" onclick="toggleCity('Ourense')"><div class="city-check"></div>📍 Ourense</div>
                   <div class="city-group-label">🇵🇹 Portugal</div>
                   <div class="city-option" data-city="Lisboa" onclick="toggleCity('Lisboa')"><div class="city-check"></div>📍 Lisboa</div>
                   <div class="city-option" data-city="Porto" onclick="toggleCity('Porto')"><div class="city-check"></div>📍 Porto</div>
@@ -769,6 +816,10 @@ function showPage(name){
 }
 /* MULTI-CIUDAD — BUG FIXED using data-city */
 function toggleCityDropdown(e){e.stopPropagation();document.getElementById('city-dropdown').classList.toggle('open');}
+function toggleSectorDropdown(e){e.stopPropagation();document.getElementById('sector-dropdown').classList.toggle('open');}
+function filterSectors(q){const ql=q.toLowerCase();document.querySelectorAll('.sector-option').forEach(o=>o.style.display=o.textContent.toLowerCase().includes(ql)?'':'none');}
+function selectSector(value,label){document.getElementById('select-sector').value=value;const lbl=document.getElementById('sector-selected-label');lbl.textContent=label;lbl.classList.add('chosen');document.querySelectorAll('.sector-option').forEach(o=>o.classList.toggle('active',o.dataset.value===value));document.getElementById('sector-dropdown').classList.remove('open');document.getElementById('sector-search').value='';filterSectors('');updateCategories();}
+function filterCities(q){const ql=q.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');document.querySelectorAll('.city-option').forEach(o=>{const c=o.dataset.city.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');o.style.display=c.includes(ql)?'':'none';});document.querySelectorAll('.city-group-label').forEach(lbl=>{let next=lbl.nextElementSibling,vis=false;while(next&&!next.classList.contains('city-group-label')&&!next.classList.contains('city-search-wrap')){if(next.classList.contains('city-option')&&next.style.display!=='none')vis=true;next=next.nextElementSibling;}lbl.style.display=vis?'':'none';});}
 function toggleCity(city){
   const isSelected=selectedCities.includes(city);
   if(!isSelected&&selectedCities.length>=5){document.getElementById('city-max-note').style.display='block';return;}
@@ -788,7 +839,7 @@ function _renderCityDropdown(){
     else{opt.classList.remove('selected');if(check)check.textContent='';}
   });
 }
-document.addEventListener('click',function(e){const dd=document.getElementById('city-dropdown');if(dd&&!dd.contains(e.target))dd.classList.remove('open');});
+document.addEventListener('click',function(e){const dd=document.getElementById('city-dropdown');if(dd&&!dd.contains(e.target))dd.classList.remove('open');const sd=document.getElementById('sector-dropdown');if(sd&&!sd.contains(e.target))sd.classList.remove('open');});
 function updateCategories(){
   const sector=document.getElementById('select-sector').value,wrap=document.getElementById('cats-wrap'),grid=document.getElementById('cats-grid');
   grid.innerHTML='';if(!sector||!SECTORES[sector]){wrap.style.display='none';document.getElementById('btn-launch').disabled=true;return;}
