@@ -1150,7 +1150,62 @@ function _initResults(subtext, eta){
   if(eta){etaEl.style.display='block';document.getElementById('results-eta-val').textContent=eta;}else{etaEl.style.display='none';}
 }
 function addLog(msg,type='info'){const log=document.getElementById('log-terminal'),ts=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),line=document.createElement('span');line.className=`log-line ${type}`;line.innerHTML=`<span class="ts">[${ts}]</span><span class="msg">${msg}</span>`;log.appendChild(line);log.appendChild(document.createElement('br'));log.scrollTop=log.scrollHeight;}
+const DEMO_LEADS_DATA = [
+  {nombre:'Reformas Martínez Madrid',email:'info@reformasmartinez.es',telefono:'910 234 567',web:'www.reformasmartinez.es',calidad:'Alta'},
+  {nombre:'Construcciones López & Hijos',email:'contacto@lopezyhijos.com',telefono:'911 345 678',web:'www.lopezyhijos.com',calidad:'Alta'},
+  {nombre:'Agencia de Marketing Digital Impulsa',email:'hola@impulsamarketing.es',telefono:'912 456 789',web:'www.impulsamarketing.es',calidad:'Alta'},
+  {nombre:'Inmobiliaria Castellana Premium',email:'info@castellanapremium.es',telefono:'913 567 890',web:'www.castellanapremium.es',calidad:'Alta'},
+  {nombre:'Asesoría Fiscal Rodríguez & Asociados',email:'contacto@asesoriarod.es',telefono:'914 678 901',web:'www.asesoriarod.es',calidad:'Alta'},
+  {nombre:'Catering Madrid Deluxe',email:'eventos@cateringmadriddeluxe.es',telefono:'915 789 012',web:'www.cateringmadriddeluxe.es',calidad:'Alta'},
+  {nombre:'Estudio de Arquitectura Vega',email:'info@arquitecturavega.com',telefono:'916 890 123',web:'www.arquitecturavega.com',calidad:'Alta'},
+  {nombre:'Clínica Dental Sonrisas',email:'citas@clinicasonrisas.es',telefono:'917 901 234',web:'www.clinicasonrisas.es',calidad:'Media'},
+  {nombre:'Eventos & Celebraciones Palacio',email:'info@eventospalacio.es',telefono:'918 012 345',web:'www.eventospalacio.es',calidad:'Media'},
+  {nombre:'Academia de Inglés Oxford Plus',email:'info@oxfordplus.es',telefono:'919 123 456',web:'www.oxfordplus.es',calidad:'Media'},
+  {nombre:'Consultoría de Negocio Estrategia',email:'hola@consultoriaestrategia.es',telefono:'910 234 568',web:'www.consultoriaestrategia.es',calidad:'Alta'},
+  {nombre:'Fontanería Urgente Madrid 24h',email:'info@fontaneriaurgente.es',telefono:'911 345 679',web:'www.fontaneriaurgente.es',calidad:'Media'},
+  {nombre:'Agencia Inmobiliaria El Prado',email:'ventas@inmobiliariaelprado.es',telefono:'912 456 790',web:'www.inmobiliariaelprado.es',calidad:'Alta'},
+  {nombre:'Gestoría Online Soluciones',email:'info@gestoriaonline.es',telefono:'913 567 891',web:'www.gestoriaonline.es',calidad:'Media'},
+  {nombre:'Correduría de Seguros Fidalgo',email:'seguros@fidalgo.es',telefono:'914 678 902',web:'www.seguros-fidalgo.es',calidad:'Alta'},
+  {nombre:'Empresa de Limpieza Brillo Total',email:'presupuesto@brillototal.es',telefono:'915 789 013',web:'www.brillototal.es',calidad:'Media'},
+  {nombre:'Wedding Planner Madrid Dreams',email:'hola@madriddreams.es',telefono:'916 890 124',web:'www.madriddreams.es',calidad:'Alta'},
+  {nombre:'Fotografía y Video Momentos',email:'info@fotografiamomentos.es',telefono:'917 901 235',web:'www.fotografiamomentos.es',calidad:'Media'},
+  {nombre:'Software & Apps Tecnova',email:'info@tecnova.es',telefono:'918 012 346',web:'www.tecnova.es',calidad:'Alta'},
+  {nombre:'Academia de Formación Empresarial Cima',email:'formacion@academiacima.es',telefono:'919 123 457',web:'www.academiacima.es',calidad:'Media'},
+];
+async function runDemoScraping(sector, ciudad, cats){
+  const logs=[
+    `▶ Iniciando scraping: ${sector} | ${ciudad}`,
+    `Categorías: ${cats[0]}`,
+    `Fuentes: google_maps`,
+    `📁 Categoría: ${cats[0]}`,
+    `[Google Maps] Buscando '${cats[0]}' en ${ciudad}…`,
+    `✅ 8 resultados encontrados en Google Maps`,
+    `🔍 Procesando leads…`,
+    `✅ Verificando emails y teléfonos…`,
+    `✅ Calculando scoring de calidad…`,
+    `✓ ${DEMO_LEADS_DATA.length} leads listos`,
+  ];
+  for(let i=0;i<logs.length;i++){
+    await delay(800);
+    const t=logs[i].includes('✅')||logs[i].includes('✓')?'ok':logs[i].includes('❌')?'error':'info';
+    addLog(logs[i].replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,''),t);
+    setProgress(Math.round((i+1)/logs.length*100), logs[i]);
+  }
+  const alta=DEMO_LEADS_DATA.filter(l=>l.calidad==='Alta').length;
+  const media=DEMO_LEADS_DATA.filter(l=>l.calidad==='Media').length;
+  document.getElementById('res-total').textContent=DEMO_LEADS_DATA.length;
+  document.getElementById('res-alta').textContent=alta;
+  document.getElementById('res-media').textContent=media;
+  document.getElementById('res-baja').textContent=0;
+  document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';
+  document.getElementById('results-sub').textContent=`${DEMO_LEADS_DATA.length} leads encontrados en ${ciudad}.`;
+  document.getElementById('results-eta').style.display='none';
+  document.getElementById('results-done').style.display='block';
+  appState.currentLeads=DEMO_LEADS_DATA;
+  appState.currentJobId='demo-job';
+}
 async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000){
+  if(DEMO_MODE){await runDemoScraping(sector,ciudades[0],cats);return;}
   let totalResult={total:0,alta:0,media:0,baja:0,leads:[]},lastJobId=null;
   for(let i=0;i<ciudades.length;i++){
     const ciudad=ciudades[i];
