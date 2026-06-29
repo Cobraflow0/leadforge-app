@@ -586,6 +586,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
       <div class="page-header">
         <h1 class="page-title" id="results-title">Scraping <span>en curso</span></h1>
         <p class="page-sub" id="results-sub">Buscando leads en las fuentes seleccionadas…</p>
+        <p id="results-eta" style="font-size:13px;color:var(--text3);margin-top:4px;display:none;">⏱ Tiempo estimado: <span id="results-eta-val"></span></p>
       </div>
       <div id="multi-city-progress" style="display:none;" class="multi-city-progress">
         <span>🏙️</span> Ciudad <strong id="mcp-current">1</strong> de <strong id="mcp-total">1</strong>: <strong id="mcp-name"></strong>
@@ -1095,19 +1096,35 @@ async function launchScraping(){
     const fuentesLibre=sources.filter(s=>['google_maps','paginas_amarillas','linkedin','instagram','webs_propias','europages'].includes(s));
     const demoLeads=DEMO_MODE?DEMO_MAX_LEADS:limits.leads;
     appState.currentSearch={sector:termino,ciudad,cats:[termino],sources:fuentesLibre};appState.currentJobId=null;
-    _initResults('Buscando "'+termino+'" en '+ciudad+'…');await runScrapingReal('libre',ciudad,[termino],fuentesLibre,demoLeads);
+    const etaLibre=estimateScrapeTime(1,1,fuentesLibre.length||1);
+    _initResults('Buscando "'+termino+'" en '+ciudad+'…', etaLibre);await runScrapingReal('libre',ciudad,[termino],fuentesLibre,demoLeads);
   }else{
     const sector=document.getElementById('select-sector').value;
     const cats=(SECTORES[sector]||[]).filter(c=>document.getElementById('cat-'+c.id)?.classList.contains('selected')).map(c=>c.id);
     const ciudades=DEMO_MODE?[selectedCities[0]||'Madrid']:[...selectedCities];
     appState.currentSearch={sector,ciudad:ciudades.join(', '),cats,sources};appState.currentJobId=null;
-    const subtext=`Buscando leads en ${ciudades[0]}…`;
-    _initResults(subtext);
+    const subtext=ciudades.length>1?`Buscando leads en ${ciudades.length} ciudades…`:`Buscando leads en ${ciudades[0]}…`;
+    const eta=estimateScrapeTime(cats.length,ciudades.length,sources.length||1);
+    _initResults(subtext, eta);
     const demoLeads=DEMO_MODE?DEMO_MAX_LEADS:limits.leads;
     await runScrapingMultiCiudad(sector,ciudades,cats,sources,demoLeads);
   }
 }
-function _initResults(subtext){showPage('results');document.getElementById('nav-dashboard').classList.add('active');document.getElementById('results-done').style.display='none';document.getElementById('campaign-result').style.display='none';document.getElementById('multi-city-progress').style.display='none';document.getElementById('results-title').innerHTML='Scraping <span>en curso</span>';document.getElementById('results-sub').textContent=subtext;document.getElementById('log-terminal').innerHTML='';setProgress(0,'Conectando con el servidor…');}
+function estimateScrapeTime(numCats, numCities, numSources){
+  if(DEMO_MODE) return '~30-45 segundos';
+  const secsPerCat = 8 + (numSources - 1) * 6;
+  const total = numCats * numCities * secsPerCat;
+  if(total < 60) return `~${Math.max(20, Math.round(total/10)*10)} segundos`;
+  const mins = Math.ceil(total / 60);
+  if(mins === 1) return '~1 minuto';
+  if(mins <= 10) return `~${mins}-${mins+1} minutos`;
+  return `~${mins} minutos`;
+}
+function _initResults(subtext, eta){
+  showPage('results');document.getElementById('nav-dashboard').classList.add('active');document.getElementById('results-done').style.display='none';document.getElementById('campaign-result').style.display='none';document.getElementById('multi-city-progress').style.display='none';document.getElementById('results-title').innerHTML='Scraping <span>en curso</span>';document.getElementById('results-sub').textContent=subtext;document.getElementById('log-terminal').innerHTML='';setProgress(0,'Conectando con el servidor…');
+  const etaEl=document.getElementById('results-eta');
+  if(eta){etaEl.style.display='block';document.getElementById('results-eta-val').textContent=eta;}else{etaEl.style.display='none';}
+}
 function addLog(msg,type='info'){const log=document.getElementById('log-terminal'),ts=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),line=document.createElement('span');line.className=`log-line ${type}`;line.innerHTML=`<span class="ts">[${ts}]</span><span class="msg">${msg}</span>`;log.appendChild(line);log.appendChild(document.createElement('br'));log.scrollTop=log.scrollHeight;}
 async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000){
   let totalResult={total:0,alta:0,media:0,baja:0,leads:[]},lastJobId=null;
