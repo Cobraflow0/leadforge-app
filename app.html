@@ -332,16 +332,22 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 .cancel-reason-btn.selected{border-color:var(--red);color:var(--red);background:rgba(255,61,90,0.05);}
 .cancel-warning{background:rgba(255,217,61,0.05);border:1px solid rgba(255,217,61,0.2);border-radius:10px;padding:14px 16px;margin:16px 0;font-size:13px;color:var(--yellow);line-height:1.7;}
 .cancel-warning strong{display:block;margin-bottom:4px;}
-#map-coverage{height:320px;border-radius:10px;overflow:hidden;background:#060a12;}
+#map-coverage{height:320px;border-radius:10px;overflow:hidden;background:#060a12;transition:height 0.4s cubic-bezier(0.16,1,0.3,1);}
 .map-card{margin-bottom:32px;}
-.map-legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;}
+.map-legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;align-items:center;}
 .map-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);}
 .map-legend-dot{width:10px;height:10px;border-radius:50%;}
+.map-resize-btn{background:rgba(0,200,255,0.07);border:1px solid rgba(0,200,255,0.2);border-radius:8px;color:var(--accent);font-size:12px;font-family:'Space Grotesk',sans-serif;padding:5px 12px;cursor:pointer;transition:all 0.15s;}
+.map-resize-btn:hover{background:rgba(0,200,255,0.12);}
+.map-city-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(0,200,255,0.1);border:1px solid rgba(0,200,255,0.3);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--accent);}
+.map-city-chip button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;line-height:1;padding:0 0 0 4px;opacity:0.7;}
+.map-city-chip button:hover{opacity:1;}
 .leaflet-container{background:#060a12!important;}
-.leaflet-tile{filter:brightness(0.35) saturate(0.4) hue-rotate(180deg);}
-.leaflet-popup-content-wrapper{background:#0d1220;border:1px solid rgba(0,200,255,0.25);border-radius:10px;color:#edf2ff;box-shadow:0 8px 32px rgba(0,0,0,0.6);}
-.leaflet-popup-tip{background:#0d1220;}
-.leaflet-popup-content{margin:10px 14px;font-family:'Space Grotesk',sans-serif;font-size:13px;}
+.leaflet-tooltip{background:#0d1220!important;border:1px solid rgba(0,200,255,0.25)!important;border-radius:8px!important;color:#edf2ff!important;font-family:'Space Grotesk',sans-serif!important;font-size:12px!important;box-shadow:0 4px 20px rgba(0,0,0,0.5)!important;padding:6px 10px!important;}
+.leaflet-tooltip-top:before{border-top-color:rgba(0,200,255,0.25)!important;}
+.leaflet-control-zoom a{background:#0d1220!important;color:var(--accent)!important;border-color:rgba(0,200,255,0.2)!important;}
+.leaflet-control-zoom a:hover{background:#1a2540!important;}
+@keyframes mapRing{0%{transform:scale(1);opacity:0.6}100%{transform:scale(2.5);opacity:0}}
 @media(max-width:900px){.sidebar{display:none;}.main{padding:24px 20px;}.stats-grid{grid-template-columns:1fr 1fr;}.scraper-grid{grid-template-columns:1fr;}.categories-grid{grid-template-columns:repeat(2,1fr);}.results-summary{grid-template-columns:repeat(2,1fr);}.cuenta-grid{grid-template-columns:1fr;}.crm-stats{grid-template-columns:repeat(3,1fr);}.camp-stats{grid-template-columns:repeat(2,1fr);}.admin-grid{grid-template-columns:repeat(2,1fr);}}
 #demo-upgrade-overlay.open{display:flex !important;}
 .demo-locked{position:relative;pointer-events:none;opacity:0.45;}
@@ -450,11 +456,15 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 
       <!-- MAPA DE COBERTURA -->
       <div class="card map-card">
-        <div class="card-title">Cobertura de búsquedas — España</div>
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <span>Cobertura de búsquedas — España</span>
+          <button class="map-resize-btn" id="map-resize-btn" onclick="toggleMapSize()">⤢ Ampliar</button>
+        </div>
         <div id="map-coverage"></div>
         <div class="map-legend">
-          <div class="map-legend-item"><div class="map-legend-dot" style="background:#00E5A0;box-shadow:0 0 6px #00E5A0;"></div> Ciudad buscada</div>
-          <div class="map-legend-item"><div class="map-legend-dot" style="background:#00C8FF;width:16px;height:16px;box-shadow:0 0 8px #00C8FF;"></div> Alta actividad</div>
+          <div class="map-legend-item"><div class="map-legend-dot" style="background:#7B2FFF;box-shadow:0 0 6px #7B2FFF;"></div> 1–50 leads</div>
+          <div class="map-legend-item"><div class="map-legend-dot" style="background:#00E5A0;box-shadow:0 0 6px #00E5A0;"></div> 50–200 leads</div>
+          <div class="map-legend-item"><div class="map-legend-dot" style="background:#00C8FF;width:14px;height:14px;box-shadow:0 0 8px #00C8FF;"></div> +200 leads</div>
           <div style="margin-left:auto;font-size:12px;color:var(--text3)" id="map-stats-label">—</div>
         </div>
       </div>
@@ -676,6 +686,9 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
         <button class="crm-filter-btn" id="crm-f-interesado" onclick="setCRMFilter('interesado')">Interesados</button>
         <button class="crm-filter-btn" id="crm-f-cerrado" onclick="setCRMFilter('cerrado')">Cerrados</button>
         <button class="crm-filter-btn" id="crm-f-descartado" onclick="setCRMFilter('descartado')">Descartados</button>
+      </div>
+      <div id="map-city-filter-chip" style="display:none;margin:8px 0 16px;">
+        <span class="map-city-chip">📍 <span id="map-city-chip-label"></span><button onclick="clearMapCityFilter()">×</button></span>
       </div>
       <div class="card" style="padding:0;overflow:hidden;"><div id="crm-table-wrap"><div class="crm-empty"><div class="emoji">⏳</div><p>Cargando leads…</p></div></div></div>
     </div>
@@ -1297,13 +1310,44 @@ const CITY_COORDS={
   'Burgos':[42.3439,-3.6969],'Vigo':[42.2314,-8.7124],'Lisboa':[38.7169,-9.1399],'Porto':[41.1579,-8.6291],
   'Palma':[39.5696,2.6502]
 };
-let _leafletMap=null,_leafletMarkers=[];
+let _leafletMap=null,_leafletMarkers=[],_mapExpanded=false,_mapCityFilter=null;
+
+function toggleMapSize(){
+  _mapExpanded=!_mapExpanded;
+  const el=document.getElementById('map-coverage'),btn=document.getElementById('map-resize-btn');
+  el.style.height=_mapExpanded?'560px':'320px';
+  btn.textContent=_mapExpanded?'⤡ Reducir':'⤢ Ampliar';
+  setTimeout(()=>{if(_leafletMap)_leafletMap.invalidateSize();},420);
+}
+
+function filterCRMByCity(city){
+  _mapCityFilter=city;
+  const chip=document.getElementById('map-city-filter-chip'),lbl=document.getElementById('map-city-chip-label');
+  if(chip)chip.style.display='block';
+  if(lbl)lbl.textContent=city;
+  showPage('crm');
+  renderCRM();
+}
+
+function clearMapCityFilter(){
+  _mapCityFilter=null;
+  const chip=document.getElementById('map-city-filter-chip');
+  if(chip)chip.style.display='none';
+  renderCRM();
+}
+
 function initMap(){
   if(_leafletMap){_leafletMap.remove();_leafletMap=null;_leafletMarkers=[];}
   const el=document.getElementById('map-coverage');
   if(!el)return;
-  _leafletMap=L.map('map-coverage',{zoomControl:true,scrollWheelZoom:false,attributionControl:false}).setView([40.2,-3.5],5);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:14}).addTo(_leafletMap);
+
+  _leafletMap=L.map('map-coverage',{
+    zoomControl:true,scrollWheelZoom:false,attributionControl:false
+  }).setView([40.2,-3.5],5);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_matter/{z}/{x}/{y}{r}.png',{
+    maxZoom:18,subdomains:'abcd'
+  }).addTo(_leafletMap);
 
   // Agrupar búsquedas por ciudad
   const cityData={};
@@ -1317,26 +1361,43 @@ function initMap(){
 
   const maxLeads=Math.max(1,...Object.values(cityData).map(d=>d.total));
   let plotted=0;
+
   Object.entries(cityData).forEach(([city,data])=>{
     const coords=CITY_COORDS[city];
     if(!coords)return;
-    const r=Math.max(8,Math.min(28,8+(data.total/maxLeads)*20));
+    const r=Math.max(10,Math.min(30,10+(data.total/maxLeads)*20));
     const color=data.total>200?'#00C8FF':data.total>50?'#00E5A0':'#7B2FFF';
-    const circle=L.circleMarker(coords,{radius:r,fillColor:color,color:'rgba(0,0,0,0.3)',weight:1,fillOpacity:0.75})
-      .bindPopup(`<strong>${city}</strong><br>${data.total} leads · ${data.searches} búsqueda${data.searches>1?'s':''}`)
+    const size=r*2;
+
+    const icon=L.divIcon({
+      className:'',
+      html:`<div style="position:relative;width:${size}px;height:${size}px;">
+        <div style="position:absolute;inset:-6px;border-radius:50%;border:2px solid ${color};animation:mapRing 2s ease-out infinite;opacity:0;"></div>
+        <div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};opacity:0.85;box-shadow:0 0 ${r}px ${color}80;cursor:pointer;"></div>
+      </div>`,
+      iconSize:[size,size],
+      iconAnchor:[r,r],
+      popupAnchor:[0,-r-4]
+    });
+
+    const marker=L.marker(coords,{icon})
+      .bindTooltip(`<strong>${city}</strong><br>${data.total} leads · ${data.searches} búsqueda${data.searches>1?'s':''}<br><span style="color:#00C8FF;font-size:11px;">Click para ver en Mis leads →</span>`,{direction:'top',offset:[0,-r]})
       .addTo(_leafletMap);
-    _leafletMarkers.push(circle);
+
+    marker.on('click',()=>filterCRMByCity(city));
+    _leafletMarkers.push(marker);
     plotted++;
   });
 
   const lbl=document.getElementById('map-stats-label');
   if(lbl){
     const total=Object.values(cityData).reduce((a,d)=>a+d.total,0);
-    lbl.textContent=plotted>0?`${plotted} ciudades · ${total} leads totales`:'Aún no hay búsquedas — lanza tu primera';
+    lbl.textContent=plotted>0?`${plotted} ciudades · ${total} leads totales`:'Lanza tu primera búsqueda para ver el mapa';
   }
 
   if(_leafletMarkers.length>0){
-    const group=L.featureGroup(_leafletMarkers);_leafletMap.fitBounds(group.getBounds().pad(0.3));
+    const group=L.featureGroup(_leafletMarkers);
+    _leafletMap.fitBounds(group.getBounds().pad(0.35));
   }
 }
 
@@ -1447,7 +1508,9 @@ function exportCRMToExcel(){const filtered=crmFilter==='todos'?crmLeads:crmLeads
 function renderCRM(){
   const counts={total:crmLeads.length,contactado:0,interesado:0,cerrado:0,descartado:0};crmLeads.forEach(l=>{if(counts[l.status]!==undefined)counts[l.status]++;});
   document.getElementById('crm-stat-total').textContent=counts.total;document.getElementById('crm-stat-contactado').textContent=counts.contactado;document.getElementById('crm-stat-interesado').textContent=counts.interesado;document.getElementById('crm-stat-cerrado').textContent=counts.cerrado;document.getElementById('crm-stat-descartado').textContent=counts.descartado;
-  const wrap=document.getElementById('crm-table-wrap'),filtered=crmFilter==='todos'?crmLeads:crmLeads.filter(l=>l.status===crmFilter);
+  const wrap=document.getElementById('crm-table-wrap');
+  let filtered=crmFilter==='todos'?crmLeads:crmLeads.filter(l=>l.status===crmFilter);
+  if(_mapCityFilter)filtered=filtered.filter(l=>l.ciudad&&l.ciudad.toLowerCase().includes(_mapCityFilter.toLowerCase()));
   if(!crmLeads.length){wrap.innerHTML=`<div class="crm-empty"><div class="emoji">🎯</div><p>Aún no tienes leads en el CRM.<br>Lanza una búsqueda y pulsa <strong>"Importar leads al CRM"</strong>.</p></div>`;return;}
   if(!filtered.length){wrap.innerHTML=`<div class="crm-empty"><div class="emoji">🔍</div><p>No hay leads con este estado.</p></div>`;return;}
   const rows=filtered.map(lead=>{const opts=STATUS_ORDER.map(s=>`<option value="${s}" ${lead.status===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('');return `<tr><td><div class="crm-name">${lead.nombre||'—'}</div><div class="crm-meta">${lead.ciudad||''} · ${lead.fuente||''} · ${lead.fecha||''}</div></td><td style="color:var(--text2);font-size:12px;">${lead.email?`<div>✉️ ${lead.email}</div>`:''}${lead.telefono?`<div>📞 ${lead.telefono}</div>`:''}${lead.web?`<div><a href="${lead.web}" target="_blank" style="color:var(--accent);font-size:11px;">🌐 web</a></div>`:''}</td><td><select class="status-select ${lead.status}" onchange="updateCRMStatus(${lead.id},this.value);this.className='status-select '+this.value;">${opts}</select></td><td><input class="crm-note-input" placeholder="Añadir nota…" value="${(lead.nota||'').replace(/"/g,'&quot;')}" onblur="updateCRMNote(${lead.id},this.value)" onkeydown="if(event.key==='Enter'){updateCRMNote(${lead.id},this.value);this.blur();}"></td><td><button onclick="deleteCRMLead(${lead.id})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:4px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">🗑</button></td></tr>`;}).join('');
