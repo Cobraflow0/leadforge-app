@@ -101,6 +101,9 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 .source-pill.selected{background:rgba(0,200,255,0.07);border-color:rgba(0,200,255,0.35);color:var(--accent);}
 .source-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);transition:all 0.15s;}
 .source-pill.selected .source-dot{background:var(--accent);box-shadow:0 0 6px var(--accent);}
+.source-pill.coming-soon{cursor:not-allowed !important;opacity:0.55;pointer-events:none;}
+.source-pill.coming-soon:hover{border-color:var(--border);color:var(--text2);background:rgba(255,255,255,0.025);}
+.pronto-badge{font-size:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:2px 6px;color:var(--text3);margin-left:2px;letter-spacing:0.2px;}
 .mode-btn{padding:9px 20px;border-radius:10px;font-size:13px;font-weight:600;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all 0.15s;background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text2);}
 .mode-btn.active{background:rgba(0,200,255,0.07);border-color:rgba(0,200,255,0.3);color:var(--accent);}
 .mode-btn:hover:not(.active){border-color:var(--border2);color:var(--text);}
@@ -687,8 +690,8 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
           <div class="sources-row">
             <div class="source-pill selected" id="src-googlemaps" onclick="toggleSource('googlemaps')"><span class="source-dot"></span>Google Maps</div>
             <div class="source-pill selected" id="src-habitissimo" onclick="toggleSource('habitissimo')"><span class="source-dot"></span>Habitissimo</div>
-            <div class="source-pill selected" id="src-paginasamarillas" onclick="toggleSource('paginasamarillas')"><span class="source-dot"></span>Páginas Amarillas</div>
-            <div class="source-pill selected" id="src-houzz" onclick="toggleSource('houzz')"><span class="source-dot"></span>Houzz</div>
+            <div class="source-pill coming-soon" id="src-paginasamarillas"><span class="source-dot"></span>Páginas Amarillas <span class="pronto-badge">🔒 Pronto</span></div>
+            <div class="source-pill coming-soon" id="src-houzz"><span class="source-dot"></span>Houzz <span class="pronto-badge">🔒 Pronto</span></div>
             <div class="source-pill selected" id="src-sortlist" onclick="toggleSource('sortlist')"><span class="source-dot"></span>Sortlist</div>
             <div class="source-pill selected" id="src-webs" onclick="toggleSource('webs')"><span class="source-dot"></span>Webs propias</div>
             <div class="source-pill selected" id="src-europages" onclick="toggleSource('europages')"><span class="source-dot"></span>Europages</div>
@@ -1206,11 +1209,13 @@ function toggleAllCats(){
   checkLaunchReady();
 }
 function toggleSource(id){
+  const el=document.getElementById('src-'+id);
+  if(!el||el.classList.contains('coming-soon'))return;
   if(getPlan()==='basic'&&!BASIC_SOURCES.includes(id)){
-    showUpgradeModal('Las fuentes adicionales están disponibles en el plan <strong>Pro</strong> o <strong>Business</strong>.<br><br>Con Pro accedes a Habitissimo, Houzz, Sortlist, Webs propias y más.');
+    showUpgradeModal('Las fuentes adicionales están disponibles en el plan <strong>Pro</strong> o <strong>Business</strong>.<br><br>Con Pro accedes a Habitissimo, Sortlist, Webs propias y más.');
     return;
   }
-  document.getElementById('src-'+id).classList.toggle('selected');
+  el.classList.toggle('selected');
 }
 let currentMode='sector';
 function setMode(mode){currentMode=mode;document.getElementById('mode-sector').classList.toggle('active',mode==='sector');document.getElementById('mode-libre').classList.toggle('active',mode==='libre');document.getElementById('wrap-sector').style.display=mode==='sector'?'block':'none';document.getElementById('wrap-libre').style.display=mode==='libre'?'block':'none';document.getElementById('btn-launch').disabled=true;checkLaunchReady();}
@@ -2005,18 +2010,18 @@ function applyPlanLimits(){
   const cityLbl=document.getElementById('city-max-label');
   if(cityLbl)cityLbl.textContent=`(máx. ${limits.cities===Infinity?'∞':limits.cities})`;
 
-  // Fuentes bloqueadas para Basic
+  // Fuentes bloqueadas para Basic (excluir las que ya son coming-soon)
   if(plan==='basic'){
-    ['habitissimo','houzz','sortlist','webs','linkedin','instagram'].forEach(src=>{
+    ['habitissimo','sortlist','webs','linkedin','instagram'].forEach(src=>{
       const el=document.getElementById('src-'+src);
-      if(!el)return;
+      if(!el||el.classList.contains('coming-soon'))return;
       el.classList.remove('selected');
       el.classList.add('locked');
     });
   } else {
-    ['habitissimo','houzz','sortlist','webs','linkedin','instagram'].forEach(src=>{
+    ['habitissimo','sortlist','webs','linkedin','instagram'].forEach(src=>{
       const el=document.getElementById('src-'+src);
-      if(el)el.classList.remove('locked');
+      if(el&&!el.classList.contains('coming-soon'))el.classList.remove('locked');
     });
   }
 
