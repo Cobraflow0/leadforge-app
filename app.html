@@ -1305,6 +1305,7 @@ function checkLaunchReady(){
   else{const sector=document.getElementById('select-sector').value,hasCities=selectedCities.length>0,cats=SECTORES[sector]||[],hasCat=cats.some(c=>document.getElementById('cat-'+c.id)?.classList.contains('selected'));document.getElementById('btn-launch').disabled=!(sector&&hasCities&&hasCat);}
 }
 async function launchScraping(){
+  if('Notification' in window && Notification.permission==='default') Notification.requestPermission();
   if(DEMO_MODE){
     if(isDemoUsed()){
       showDemoUpgrade('Has agotado tu búsqueda gratuita.<br><br>Elige un plan para hacer búsquedas ilimitadas y descargar todos tus leads.');
@@ -1497,7 +1498,7 @@ async function runDemoScraping(sector, ciudad, cats){
   document.getElementById('results-sub').textContent=`${DEMO_LEADS_DATA.length} leads encontrados en ${ciudad}.`;
   document.getElementById('results-eta').style.display='none';
   document.getElementById('results-done').style.display='block';SnakeGame.hide();
-  appState.currentLeads=DEMO_LEADS_DATA;_updateEmailStats(DEMO_LEADS_DATA);
+  appState.currentLeads=DEMO_LEADS_DATA;_updateEmailStats(DEMO_LEADS_DATA);_notifyScrapingDone(DEMO_LEADS_DATA.length,'demo');
   appState.currentJobId='demo-job';
 }
 async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000,quickMode=false){
@@ -1528,7 +1529,7 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
       }
     }catch(err){addLog(`❌ ${ciudad}: ${err.message}`,'error');}
   }
-  appState.currentJobId=lastJobId;appState.currentLeads=totalResult.leads;_updateEmailStats(totalResult.leads);
+  appState.currentJobId=lastJobId;appState.currentLeads=totalResult.leads;_updateEmailStats(totalResult.leads);_notifyScrapingDone(totalResult.total,ciudades.join(', '));
   document.getElementById('res-total').textContent=totalResult.total;document.getElementById('res-alta').textContent=totalResult.alta;document.getElementById('res-media').textContent=totalResult.media;document.getElementById('res-baja').textContent=totalResult.baja;
   document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';
   const ciudadesStr=ciudades.length>1?ciudades.join(' + '):ciudades[0];
@@ -1584,7 +1585,7 @@ async function runScrapingReal(sector,ciudad,cats,sources,maxLeads=1000){
       _updateLiveStats(data.logs.map(l=>l.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')));
       setProgress(data.progress,data.logs.at(-1)?.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')||'');
       if(data.status==='done'){const r=data.result;document.getElementById('res-total').textContent=r.total;document.getElementById('res-alta').textContent=r.alta;document.getElementById('res-media').textContent=r.media;document.getElementById('res-baja').textContent=r.baja;document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';document.getElementById('results-sub').textContent=`${r.total} leads listos para descargar en Excel.`;document.getElementById('results-done').style.display='block';SnakeGame.hide();try{const lr2=await fetch(`${SCRAPER_API_URL}/result/${job_id}`);if(lr2.ok){const rd=await lr2.json();appState.currentLeads=rd.leads||[];}else{appState.currentLeads=[];}}catch(e){appState.currentLeads=[];}
-_updateEmailStats(appState.currentLeads);const entry={id:Date.now(),job_id,sector:appState.currentSearch?.sector||sector,ciudad,cats:cats.length,total:r.total,alta:r.alta,media:r.media,baja:r.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);_saveHistoryLeads(job_id,appState.currentLeads);break;}
+_updateEmailStats(appState.currentLeads);_notifyScrapingDone(r.total,ciudad);const entry={id:Date.now(),job_id,sector:appState.currentSearch?.sector||sector,ciudad,cats:cats.length,total:r.total,alta:r.alta,media:r.media,baja:r.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);_saveHistoryLeads(job_id,appState.currentLeads);break;}
       if(data.status==='error'){addLog(`❌ Error: ${data.error}`,'error');setProgress(0,'Error — intenta de nuevo');break;}
     }
   }catch(err){addLog(`❌ ${err.message}`,'error');setProgress(0,'Error de conexión');}
@@ -2177,6 +2178,18 @@ async function checkSenderStatus(){const email=document.getElementById('sender-e
 let selectedLimit=50;
 function selectLimit(n){selectedLimit=n;document.querySelectorAll('.email-limit-btn').forEach(b=>b.classList.remove('selected'));document.getElementById('limit-'+n).classList.add('selected');}
 function updateProductCounter(){const el=document.getElementById('camp-product'),c=document.getElementById('product-counter');if(el&&c){const n=el.value.length;c.textContent=n;c.style.color=n>130?'var(--red)':n>100?'var(--yellow)':'var(--text3)';}}
+function _notifyScrapingDone(total, ciudad){
+  document.title=`✅ ${total} leads — LeadForge`;
+  setTimeout(()=>{document.title='LeadForge';},8000);
+  if(!('Notification' in window))return;
+  if(Notification.permission==='granted'){
+    new Notification('LeadForge — Scraping completado',{body:`${total} leads encontrados en ${ciudad}`,icon:'/favicon.ico'});
+  } else if(Notification.permission!=='denied'){
+    Notification.requestPermission().then(p=>{
+      if(p==='granted')new Notification('LeadForge — Scraping completado',{body:`${total} leads encontrados en ${ciudad}`,icon:'/favicon.ico'});
+    });
+  }
+}
 function _updateEmailStats(leads){
   const withEmail=(leads||[]).filter(l=>l.email&&l.email.includes('@')).length;
   const el=document.getElementById('res-email');if(el)el.textContent=withEmail;
