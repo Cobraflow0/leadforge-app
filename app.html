@@ -1882,7 +1882,7 @@ async function _animateAndLaunch(type,latlng,cities,sector){
   // Lanzar scraping
   const targetCities=cities.length>0?cities:[_findNearestCity(latlng.lat,latlng.lng)];
   const cats=(SECTORES[sector]||[]).map(c=>c.id);
-  const sources=['google_maps'];
+  const sources=['google_maps','webs_propias'];
   const limits=getPlanLimits();
   const ciudadStr=targetCities.join(', ');
   appState.currentSearch={sector,ciudad:ciudadStr,cats,sources};appState.currentJobId=null;
