@@ -1058,7 +1058,7 @@ function showUpgradeModal(msg){document.getElementById('upgrade-msg').innerHTML=
 function closeUpgradeModal(){document.getElementById('modal-upgrade').classList.remove('open');}
 document.addEventListener('DOMContentLoaded',()=>{const m=document.getElementById('modal-upgrade');if(m)m.addEventListener('click',e=>{if(e.target===m)closeUpgradeModal();});});
 const sb={
-  async req(path,opts={}){const r=await fetch(SUPABASE_URL+path,{headers:{'apikey':SUPABASE_ANON,'Content-Type':'application/json',...(this._token?{'Authorization':`Bearer ${this._token}`}:{}),...(opts.headers||{})}, ...opts});return r;},
+  async req(path,opts={}){const {headers:extraHeaders,...restOpts}=opts;const r=await fetch(SUPABASE_URL+path,{headers:{'apikey':SUPABASE_ANON,'Content-Type':'application/json',...(this._token?{'Authorization':`Bearer ${this._token}`}:{}),...(extraHeaders||{})}, ...restOpts});return r;},
   async signIn(email,password){const r=await this.req('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});const d=await r.json();if(d.access_token){this._token=d.access_token;localStorage.setItem('lf_session',JSON.stringify(d));}return d;},
   async updatePassword(password){const r=await this.req('/auth/v1/user',{method:'PUT',body:JSON.stringify({password})});return r.json();},
   async getUser(){const r=await this.req('/auth/v1/user');return r.ok?r.json():null;},
