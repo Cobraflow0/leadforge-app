@@ -424,6 +424,34 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 #demo-upgrade-overlay.open{display:flex !important;}
 .demo-locked{position:relative;pointer-events:none;opacity:0.45;}
 .demo-lock-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;z-index:10;}
+/* ── ONBOARDING ── */
+#modal-onboarding{z-index:9999;background:rgba(5,8,15,0.92);backdrop-filter:blur(16px);}
+.ob-box{background:linear-gradient(160deg,#0d1220,#080c17);border:1px solid rgba(0,200,255,0.15);border-radius:24px;padding:40px 36px;max-width:520px;width:90%;margin:auto;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.7),0 0 40px rgba(0,200,255,0.05);}
+.ob-progress{display:flex;gap:6px;justify-content:center;margin-bottom:32px;}
+.ob-dot{width:28px;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);transition:all 0.3s;}
+.ob-dot.active{background:var(--accent);box-shadow:0 0 8px var(--accent);}
+.ob-dot.done{background:rgba(0,200,255,0.4);}
+.ob-step{animation:obFadeIn 0.25s ease;}
+@keyframes obFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ob-emoji{font-size:40px;text-align:center;margin-bottom:12px;}
+.ob-title{font-size:22px;font-weight:800;color:var(--text);text-align:center;margin-bottom:8px;}
+.ob-sub{font-size:14px;color:var(--text2);text-align:center;margin-bottom:28px;line-height:1.6;}
+.ob-sectors{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.ob-sector-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;cursor:pointer;transition:all 0.18s;font-family:'Space Grotesk',sans-serif;color:var(--text2);font-size:12px;font-weight:600;}
+.ob-sector-btn .ob-sec-emoji{font-size:24px;}
+.ob-sector-btn:hover{border-color:rgba(0,200,255,0.35);background:rgba(0,200,255,0.06);color:var(--text);}
+.ob-sector-btn.selected{border-color:var(--accent);background:rgba(0,200,255,0.1);color:var(--accent);box-shadow:0 0 16px rgba(0,200,255,0.15);}
+.ob-cities{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px;}
+.ob-city-btn{padding:8px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-family:'Space Grotesk',sans-serif;color:var(--text2);font-size:13px;font-weight:600;transition:all 0.15s;}
+.ob-city-btn:hover{border-color:rgba(0,200,255,0.35);color:var(--text);}
+.ob-city-btn.selected{border-color:var(--accent);background:rgba(0,200,255,0.1);color:var(--accent);}
+.ob-launch{width:100%;padding:15px;background:linear-gradient(135deg,#0066FF,var(--accent));border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:800;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:all 0.2s;letter-spacing:0.3px;margin-bottom:16px;}
+.ob-launch:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,200,255,0.3);}
+.ob-launch:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.ob-back{background:none;border:none;color:var(--text3);font-size:13px;font-family:'Space Grotesk',sans-serif;cursor:pointer;display:block;margin:0 auto 8px;}
+.ob-back:hover{color:var(--text2);}
+.ob-skip{display:block;text-align:center;color:var(--text3);font-size:12px;cursor:pointer;background:none;border:none;font-family:'Space Grotesk',sans-serif;margin:0 auto;padding:4px;}
+.ob-skip:hover{color:var(--text2);}
 </style>
 </head>
 <body>
@@ -491,27 +519,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
   <main class="main">
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
-      <!-- ONBOARDING -->
-      <div id="onboarding-banner" style="display:none;background:linear-gradient(135deg,rgba(0,102,255,0.12),rgba(0,200,255,0.08));border:1px solid rgba(0,200,255,0.25);border-radius:16px;padding:20px 24px;margin-bottom:24px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <span style="font-weight:700;font-size:15px;color:var(--text);">⚡ Primeros pasos — empieza a generar leads</span>
-          <button onclick="dismissOnboarding()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;line-height:1;">×</button>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <div id="ob-step1" style="display:flex;align-items:center;gap:12px;font-size:14px;color:var(--text2);">
-            <span id="ob-icon1" style="font-size:18px;">⬜</span>
-            <span>Configura tu email de envío en <b style="color:var(--text);cursor:pointer;" onclick="showPage('cuenta')">Mi cuenta → Email de envío</b></span>
-          </div>
-          <div id="ob-step2" style="display:flex;align-items:center;gap:12px;font-size:14px;color:var(--text2);">
-            <span id="ob-icon2" style="font-size:18px;">⬜</span>
-            <span>Lanza tu primera búsqueda de leads con el formulario de abajo</span>
-          </div>
-          <div id="ob-step3" style="display:flex;align-items:center;gap:12px;font-size:14px;color:var(--text2);">
-            <span id="ob-icon3" style="font-size:18px;">⬜</span>
-            <span>Envía tu primera campaña de email desde los resultados</span>
-          </div>
-        </div>
-      </div>
+      <!-- ONBOARDING BANNER (legacy, reemplazado por modal) -->
       <div class="page-header">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
           <h1 class="page-title" style="margin:0">Nueva <span>búsqueda</span></h1>
@@ -1031,6 +1039,51 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
     </div>
     <button class="btn-campaign" id="btn-send-campaign" onclick="sendCampaign()"><span id="camp-label">Enviar campaña →</span><div class="campaign-spinner" id="camp-spinner"></div></button>
     <button class="btn-preview" onclick="previewEmail()">👁️ Ver preview del email</button>
+  </div>
+</div>
+<!-- MODAL ONBOARDING -->
+<div class="modal-overlay" id="modal-onboarding" style="display:none;align-items:center;justify-content:center;">
+  <div class="ob-box">
+    <div class="ob-progress"><div class="ob-dot active" id="ob-d1"></div><div class="ob-dot" id="ob-d2"></div></div>
+    <!-- PASO 1: SECTOR -->
+    <div id="ob-p1" class="ob-step">
+      <div class="ob-emoji">👋</div>
+      <h2 class="ob-title">Bienvenido a LeadForge</h2>
+      <p class="ob-sub">En 2 minutos vas a tener tus primeros leads reales.<br>¿A qué sector van tus clientes?</p>
+      <div class="ob-sectors">
+        <button class="ob-sector-btn" onclick="obSelectSector('construccion',this)"><span class="ob-sec-emoji">🔨</span>Construcción</button>
+        <button class="ob-sector-btn" onclick="obSelectSector('servicios_hogar',this)"><span class="ob-sec-emoji">🔧</span>Hogar</button>
+        <button class="ob-sector-btn" onclick="obSelectSector('salud',this)"><span class="ob-sec-emoji">🏥</span>Salud</button>
+        <button class="ob-sector-btn" onclick="obSelectSector('marketing',this)"><span class="ob-sec-emoji">📢</span>Marketing</button>
+        <button class="ob-sector-btn" onclick="obSelectSector('legal',this)"><span class="ob-sec-emoji">⚖️</span>Legal</button>
+        <button class="ob-sector-btn" onclick="obSelectSector('restauracion',this)"><span class="ob-sec-emoji">🍽️</span>Restauración</button>
+        <button class="ob-sector-btn" onclick="obSelectSector('tecnologia',this)"><span class="ob-sec-emoji">💻</span>Tecnología</button>
+        <button class="ob-sector-btn" onclick="obSelectSector('energia',this)"><span class="ob-sec-emoji">☀️</span>Energía</button>
+        <button class="ob-sector-btn" onclick="obSelectSector('pymes',this)"><span class="ob-sec-emoji">🏢</span>Pymes</button>
+      </div>
+      <button class="ob-skip" onclick="dismissOnboarding()">Ya conozco LeadForge, saltar →</button>
+    </div>
+    <!-- PASO 2: CIUDAD -->
+    <div id="ob-p2" class="ob-step" style="display:none;">
+      <div class="ob-emoji">📍</div>
+      <h2 class="ob-title">¿En qué ciudad empezamos?</h2>
+      <p class="ob-sub">Elige una ciudad y lanzamos tu primera búsqueda ahora mismo.</p>
+      <div class="ob-cities">
+        <button class="ob-city-btn" onclick="obSelectCity('Madrid',this)">Madrid</button>
+        <button class="ob-city-btn" onclick="obSelectCity('Barcelona',this)">Barcelona</button>
+        <button class="ob-city-btn" onclick="obSelectCity('Valencia',this)">Valencia</button>
+        <button class="ob-city-btn" onclick="obSelectCity('Sevilla',this)">Sevilla</button>
+        <button class="ob-city-btn" onclick="obSelectCity('Zaragoza',this)">Zaragoza</button>
+        <button class="ob-city-btn" onclick="obSelectCity('Málaga',this)">Málaga</button>
+        <button class="ob-city-btn" onclick="obSelectCity('Bilbao',this)">Bilbao</button>
+        <button class="ob-city-btn" onclick="obSelectCity('Alicante',this)">Alicante</button>
+        <button class="ob-city-btn" onclick="obSelectCity('Murcia',this)">Murcia</button>
+        <button class="ob-city-btn" onclick="obSelectCity('Valladolid',this)">Valladolid</button>
+      </div>
+      <button class="ob-launch" id="ob-launch-btn" onclick="obLaunch()" disabled>🚀 Lanzar mi primera búsqueda</button>
+      <button class="ob-back" onclick="obGoBack()">← Cambiar sector</button>
+      <button class="ob-skip" onclick="dismissOnboarding()">Saltar →</button>
+    </div>
   </div>
 </div>
 <!-- MODAL PREVIEW -->
@@ -2684,18 +2737,59 @@ async function saveAlerta(){
 function showAlertaStatus(msg,type){const el=document.getElementById('alerta-status');el.style.display='block';if(type==='ok'){el.style.background='rgba(0,229,160,0.07)';el.style.border='1px solid rgba(0,229,160,0.2)';el.style.color='var(--green)';}else{el.style.background='rgba(255,61,90,0.07)';el.style.border='1px solid rgba(255,61,90,0.2)';el.style.color='var(--red)';}el.textContent=msg;}
 
 // ── ONBOARDING ──────────────────────────────────────────────
+let _obSector='',_obCity='';
 function checkOnboarding(){
-  if(localStorage.getItem('lf_onboarding_done'))return;
-  const hasSender=!!localStorage.getItem('lf_sender_email');
-  const hasSearches=(appState.searches||[]).length>0;
-  const hasCampaigns=JSON.parse(localStorage.getItem('lf_campanas')||'[]').length>0;
-  document.getElementById('ob-icon1').textContent=hasSender?'✅':'⬜';
-  document.getElementById('ob-icon2').textContent=hasSearches?'✅':'⬜';
-  document.getElementById('ob-icon3').textContent=hasCampaigns?'✅':'⬜';
-  if(hasSender&&hasSearches&&hasCampaigns){localStorage.setItem('lf_onboarding_done','1');return;}
-  document.getElementById('onboarding-banner').style.display='block';
+  if(DEMO_MODE||localStorage.getItem('lf_onboarding_done'))return;
+  // Mostrar solo si no ha hecho ninguna búsqueda aún
+  if((appState.searches||[]).length>0){localStorage.setItem('lf_onboarding_done','1');return;}
+  const modal=document.getElementById('modal-onboarding');
+  modal.style.display='flex';
 }
-function dismissOnboarding(){document.getElementById('onboarding-banner').style.display='none';localStorage.setItem('lf_onboarding_done','1');}
+function dismissOnboarding(){
+  document.getElementById('modal-onboarding').style.display='none';
+  localStorage.setItem('lf_onboarding_done','1');
+}
+function obSelectSector(sector,btn){
+  _obSector=sector;
+  document.querySelectorAll('.ob-sector-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  setTimeout(()=>obGoToStep2(),320);
+}
+function obGoToStep2(){
+  document.getElementById('ob-p1').style.display='none';
+  document.getElementById('ob-p2').style.display='block';
+  document.getElementById('ob-d1').classList.remove('active');document.getElementById('ob-d1').classList.add('done');
+  document.getElementById('ob-d2').classList.add('active');
+}
+function obGoBack(){
+  document.getElementById('ob-p2').style.display='none';
+  document.getElementById('ob-p1').style.display='block';
+  document.getElementById('ob-d2').classList.remove('active');
+  document.getElementById('ob-d1').classList.remove('done');document.getElementById('ob-d1').classList.add('active');
+  _obCity='';
+}
+function obSelectCity(city,btn){
+  _obCity=city;
+  document.querySelectorAll('.ob-city-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('ob-launch-btn').disabled=false;
+}
+function obLaunch(){
+  if(!_obSector||!_obCity)return;
+  dismissOnboarding();
+  // Pre-seleccionar sector y ciudad en el formulario principal
+  const sectorLabels={construccion:'🔨 Construcción y Reformas',servicios_hogar:'🔧 Servicios del Hogar',salud:'🏥 Salud y Bienestar',marketing:'📢 Marketing y Publicidad',legal:'⚖️ Legal y Asesoría',restauracion:'🍽️ Restauración y Hostelería',tecnologia:'💻 Tecnología y Software',energia:'☀️ Energía e Instalaciones',pymes:'🏢 Pymes y Empresas'};
+  selectSector(_obSector, sectorLabels[_obSector]||_obSector);
+  selectedCities=[_obCity];
+  _renderCityDropdown();
+  // Seleccionar todas las categorías
+  setTimeout(()=>{
+    (SECTORES[_obSector]||[]).forEach(c=>{const el=document.getElementById('cat-'+c.id);if(el){el.classList.add('selected');const chk=el.querySelector('.cat-check');if(chk)chk.textContent='✓';}});
+    checkLaunchReady();
+    // Auto-lanzar
+    setTimeout(()=>launchScraping(),200);
+  },100);
+}
 
 // ── BLACKLIST ────────────────────────────────────────────────
 async function resetContactados(){
