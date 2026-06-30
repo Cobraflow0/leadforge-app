@@ -963,7 +963,16 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
     <div id="camp-sender-status" style="display:none;padding:10px 14px;border-radius:10px;font-size:12px;margin-bottom:14px;"></div>
     <div class="modal-field"><label>Tu nombre</label><input type="text" id="camp-name" placeholder="Ej: Carlos García"></div>
     <div class="modal-field"><label>Tu empresa</label><input type="text" id="camp-company" placeholder="Ej: Neopanels"></div>
-    <div class="modal-field"><label>Tu producto o servicio</label><textarea id="camp-product" rows="2" placeholder="Ej: instalación de revestimientos para obras y reformas"></textarea></div>
+    <div class="modal-field">
+      <label>¿En qué ayudáis? <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0;">(una frase corta)</span></label>
+      <textarea id="camp-product" rows="2" maxlength="150" oninput="updateProductCounter()" placeholder="Ej: ayudamos a tiendas a vender más con publicidad en redes sociales"></textarea>
+      <div style="text-align:right;font-size:11px;color:var(--text3);margin-top:4px;"><span id="product-counter">0</span>/150 caracteres</div>
+    </div>
+    <div class="modal-field">
+      <label>Asunto del email</label>
+      <input type="text" id="camp-subject" maxlength="80" placeholder="Ej: Una pregunta rápida sobre vuestro negocio">
+      <div style="font-size:11px;color:var(--text3);margin-top:5px;">Si lo dejas vacío usará el asunto por defecto.</div>
+    </div>
     <div class="modal-field">
       <label>Email de respuesta</label>
       <input type="email" id="camp-email" placeholder="tu@empresa.com">
@@ -2166,9 +2175,10 @@ async function verifySender(){const email=document.getElementById('sender-email-
 async function checkSenderStatus(){const email=document.getElementById('sender-email-input').value.trim()||localStorage.getItem('lf_sender_email')||'';if(!email){_senderMsg('Introduce tu email primero.','err');return;}if(email)document.getElementById('sender-email-input').value=email;try{const r=await fetch(`${SCRAPER_API_URL}/check-sender`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});const d=await r.json();if(d.ok){const type=d.status==='verified'?'ok':d.status==='pending'?'warn':'err';_senderMsg(d.message,type);}}catch(e){_senderMsg('Error de conexión.','err');}}
 let selectedLimit=50;
 function selectLimit(n){selectedLimit=n;document.querySelectorAll('.email-limit-btn').forEach(b=>b.classList.remove('selected'));document.getElementById('limit-'+n).classList.add('selected');}
-let _previewData={name:'',company:'',product:'',email:''};
+function updateProductCounter(){const el=document.getElementById('camp-product'),c=document.getElementById('product-counter');if(el&&c){const n=el.value.length;c.textContent=n;c.style.color=n>130?'var(--red)':n>100?'var(--yellow)':'var(--text3)';}}
+let _previewData={name:'',company:'',product:'',subject:'',email:''};
 function previewEmail(){
-  _previewData={name:document.getElementById('camp-name').value.trim()||'Tu nombre',company:document.getElementById('camp-company').value.trim()||'Tu empresa',product:document.getElementById('camp-product').value.trim()||'tu producto o servicio',email:document.getElementById('camp-email').value.trim()||'tu@empresa.com'};
+  _previewData={name:document.getElementById('camp-name').value.trim()||'Tu nombre',company:document.getElementById('camp-company').value.trim()||'Tu empresa',product:document.getElementById('camp-product').value.trim()||'ayudamos a empresas como la tuya a conseguir más clientes',subject:document.getElementById('camp-subject')?.value.trim()||'',email:document.getElementById('camp-email').value.trim()||'tu@empresa.com'};
   document.querySelectorAll('.preview-touch-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('ptab-1').classList.add('active');
   _renderPreviewTouch(1);
@@ -2176,10 +2186,11 @@ function previewEmail(){
 }
 function switchPreviewTouch(n){document.querySelectorAll('.preview-touch-tab').forEach(t=>t.classList.remove('active'));document.getElementById('ptab-'+n).classList.add('active');_renderPreviewTouch(n);}
 function _renderPreviewTouch(n){
-  const {name,company,product,email}=_previewData;
-  const subjects={1:`¿Trabajamos juntos? — ${company}`,2:`Solo quería asegurarme — ${company}`,3:`Un último intento — ${company}`,4:`Cerramos el contacto — ${company}`};
+  const {name,company,product,subject,email}=_previewData;
+  const defaultSubject1=`¿Trabajamos juntos? — ${company}`;
+  const subjects={1:subject||defaultSubject1,2:`Solo quería asegurarme — ${company}`,3:`Un último intento — ${company}`,4:`Cerramos el contacto — ${company}`};
   const bodies={
-    1:`<p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">Soy <strong>${name}</strong> de <strong>${company}</strong>. Me pongo en contacto porque trabajamos en <strong>${product}</strong> y creo que podría encajaros.</p><p style="margin:0 0 28px;font-size:15px;color:#4a5568;">¿Tenéis 10 minutos esta semana para una llamada rápida?</p>`,
+    1:`<p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">Soy <strong>${name}</strong> de <strong>${company}</strong>. Te escribo porque <strong>${product}</strong>.</p><p style="margin:0 0 28px;font-size:15px;color:#4a5568;">¿Tendríais 10 minutos esta semana para una llamada rápida?</p>`,
     2:`<p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">Te escribía hace unos días de <strong>${company}</strong> sobre <strong>${product}</strong>. Quería asegurarme de que te llegó mi mensaje.</p><p style="margin:0 0 28px;font-size:15px;color:#4a5568;">¿Tenéis un momento esta semana para una llamada rápida?</p>`,
     3:`<p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">Me he puesto en contacto un par de veces sobre <strong>${product}</strong>. Entiendo que puede no ser el momento adecuado.</p><p style="margin:0 0 28px;font-size:15px;color:#4a5568;">Si hay interés, estaré encantado de hablar. ¿15 minutos esta semana?</p>`,
     4:`<p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">No quiero molestarte más, así que este será mi último mensaje sobre <strong>${product}</strong>.</p><p style="margin:0 0 28px;font-size:15px;color:#4a5568;">Si en algún momento cambia la situación, aquí estamos.<br>¡Mucho éxito con tu negocio!</p>`,
@@ -2241,6 +2252,8 @@ function openCampaignModal(){
   if(saved.name)document.getElementById('camp-name').value=saved.name;
   if(saved.company)document.getElementById('camp-company').value=saved.company;
   if(saved.product)document.getElementById('camp-product').value=saved.product;
+  if(saved.subject)document.getElementById('camp-subject').value=saved.subject;
+  updateProductCounter();
   const se=localStorage.getItem('lf_sender_email')||saved.email||'';
   if(se)document.getElementById('camp-email').value=se;
   // Actualizar botones de límite de emails según plan
@@ -2266,13 +2279,13 @@ function openCampaignModal(){
 function closeCampaignModal(){document.getElementById('modal-campaign').classList.remove('open');}
 document.getElementById('modal-campaign').addEventListener('click',function(e){if(e.target===this)closeCampaignModal();});
 async function sendCampaign(){
-  const name=document.getElementById('camp-name').value.trim(),company=document.getElementById('camp-company').value.trim(),product=document.getElementById('camp-product').value.trim(),email=document.getElementById('camp-email').value.trim(),jobId=appState.currentJobId;
+  const name=document.getElementById('camp-name').value.trim(),company=document.getElementById('camp-company').value.trim(),product=document.getElementById('camp-product').value.trim(),subject=document.getElementById('camp-subject').value.trim(),email=document.getElementById('camp-email').value.trim(),jobId=appState.currentJobId;
   if(!name||!company||!product||!email){alert('Rellena todos los campos.');return;}if(!email.includes('@')){alert('Introduce un email válido.');return;}
   const _bad=['tu nombre','tu empresa','tu producto o servicio','tu@empresa.com'];if(_bad.includes(name.toLowerCase())||_bad.includes(company.toLowerCase())||_bad.includes(product.toLowerCase())){alert('Parece que los campos contienen texto de ejemplo. Por favor, introduce tu información real (tu nombre, empresa y producto/servicio).');return;}
   const btn=document.getElementById('btn-send-campaign'),lbl=document.getElementById('camp-label'),spin=document.getElementById('camp-spinner'),resEl=document.getElementById('campaign-result');
   btn.disabled=true;lbl.style.display='none';spin.style.display='block';
-  try{const r=await fetch(`${SCRAPER_API_URL}/send-campaign`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_email:email,user_id:appState.user?.id||'',max_emails:selectedLimit,leads:appState.currentLeads})});const data=await r.json();btn.disabled=false;lbl.style.display='inline';spin.style.display='none';
-  if(data.ok){localStorage.setItem('lf_campaign_data',JSON.stringify({name,company,product,email}));const prev=parseInt(localStorage.getItem('lf_emails_sent')||'0');localStorage.setItem('lf_emails_sent',prev+data.enviados);updateStats();const followup=document.getElementById('camp-followup').checked;const campañas=JSON.parse(localStorage.getItem('lf_campanas')||'[]');campañas.unshift({id:Date.now(),tag:`lf_${jobId.slice(0,8)}`,job_id:jobId,sector:appState.currentSearch?.sector||'',ciudad:appState.currentSearch?.ciudad||'',enviados:data.enviados,company,user_email:email,has_sequence:followup,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})});localStorage.setItem('lf_campanas',JSON.stringify(campañas.slice(0,50)));saveCampaignToSupabase(campañas[0]);if(followup&&jobId){fetch(`${SCRAPER_API_URL}/sequences/start`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_email:email,max_emails:selectedLimit,leads:appState.currentLeads})});}closeCampaignModal();let msg=`✅ Campaña enviada: ${data.enviados} emails`;if(data.ya_contactados)msg+=` · ${data.ya_contactados} ya contactados anteriormente omitidos`;if(data.en_blacklist)msg+=` · ${data.en_blacklist} en blacklist omitidos`;if(data.filtrados)msg+=` · ${data.filtrados} emails inválidos filtrados`;if(followup)msg+=` · Secuencia activada 🚀`;resEl.className='campaign-result ok';resEl.style.display='block';resEl.textContent=msg;}else{resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ ${data.error||'No se pudo enviar.'}`;}}catch(err){btn.disabled=false;lbl.style.display='inline';spin.style.display='none';resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ Error: ${err.message||'No se pudo conectar con la API'}`;}
+  try{const r=await fetch(`${SCRAPER_API_URL}/send-campaign`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_subject:subject,user_email:email,user_id:appState.user?.id||'',max_emails:selectedLimit,leads:appState.currentLeads})});const data=await r.json();btn.disabled=false;lbl.style.display='inline';spin.style.display='none';
+  if(data.ok){localStorage.setItem('lf_campaign_data',JSON.stringify({name,company,product,subject,email}));const prev=parseInt(localStorage.getItem('lf_emails_sent')||'0');localStorage.setItem('lf_emails_sent',prev+data.enviados);updateStats();const followup=document.getElementById('camp-followup').checked;const campañas=JSON.parse(localStorage.getItem('lf_campanas')||'[]');campañas.unshift({id:Date.now(),tag:`lf_${jobId.slice(0,8)}`,job_id:jobId,sector:appState.currentSearch?.sector||'',ciudad:appState.currentSearch?.ciudad||'',enviados:data.enviados,company,user_email:email,has_sequence:followup,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})});localStorage.setItem('lf_campanas',JSON.stringify(campañas.slice(0,50)));saveCampaignToSupabase(campañas[0]);if(followup&&jobId){fetch(`${SCRAPER_API_URL}/sequences/start`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_subject:subject,user_email:email,max_emails:selectedLimit,leads:appState.currentLeads})});}closeCampaignModal();let msg=`✅ Campaña enviada: ${data.enviados} emails`;if(data.ya_contactados)msg+=` · ${data.ya_contactados} ya contactados anteriormente omitidos`;if(data.en_blacklist)msg+=` · ${data.en_blacklist} en blacklist omitidos`;if(data.filtrados)msg+=` · ${data.filtrados} emails inválidos filtrados`;if(followup)msg+=` · Secuencia activada 🚀`;resEl.className='campaign-result ok';resEl.style.display='block';resEl.textContent=msg;}else{resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ ${data.error||'No se pudo enviar.'}`;}}catch(err){btn.disabled=false;lbl.style.display='inline';spin.style.display='none';resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ Error: ${err.message||'No se pudo conectar con la API'}`;}
 }
 function _seqTouchLabel(touch,idx){const dias=[4,8,14];const dia=dias[idx]||'?';if(touch.sent>0)return`<span style="color:var(--green)">✅ Día ${dia} (${touch.sent} enviados)</span>`;const sch=touch.scheduled_at?new Date(touch.scheduled_at):null;const hoy=new Date();const diff=sch?Math.ceil((sch-hoy)/86400000):null;if(diff!==null&&diff>0)return`<span style="color:var(--text3)">⏳ Día ${dia} en ${diff}d</span>`;return`<span style="color:var(--yellow)">🔄 Día ${dia} procesando</span>`;}
 async function renderCampanas(){
