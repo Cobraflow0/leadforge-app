@@ -1207,6 +1207,13 @@ function showPage(name){
   const page=document.getElementById('page-'+name),nav=document.getElementById('nav-'+name);
   if(page)page.classList.add('active');if(nav)nav.classList.add('active');
   if(name==='crm')loadCRM();if(name==='campanas')renderCampanas();if(name==='admin')loadAdminData();
+  if(name==='dashboard'&&_leafletMap){
+    setTimeout(()=>{
+      _leafletMap.invalidateSize();
+      if(_leafletMarkers.length>0){const g=L.featureGroup(_leafletMarkers);_leafletMap.fitBounds(g.getBounds().pad(0.35));}
+      else{_leafletMap.setView([40.2,-3.5],5);}
+    },100);
+  }
 }
 /* MULTI-CIUDAD — BUG FIXED using data-city */
 function toggleCityDropdown(e){e.stopPropagation();document.getElementById('city-dropdown').classList.toggle('open');}
@@ -1753,7 +1760,17 @@ function initMap(){
   if(_leafletMarkers.length>0){
     const group=L.featureGroup(_leafletMarkers);
     _leafletMap.fitBounds(group.getBounds().pad(0.35));
+  } else {
+    _leafletMap.setView([40.2,-3.5],5);
   }
+  // Re-center after tiles render — fixes the "map stuck in corner" bug
+  setTimeout(()=>{
+    if(_leafletMap){
+      _leafletMap.invalidateSize();
+      if(_leafletMarkers.length>0){const g=L.featureGroup(_leafletMarkers);_leafletMap.fitBounds(g.getBounds().pad(0.35));}
+      else{_leafletMap.setView([40.2,-3.5],5);}
+    }
+  },300);
 }
 
 /* ══════════════════════════════════════════════════════════
