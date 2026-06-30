@@ -2055,6 +2055,10 @@ function _onNukeMapClick(e){
   // Inicializar subcategorías si ya hay sector seleccionado
   const currentSector=document.getElementById('nuke-sector-select').value;
   if(currentSector)nukeSectorChanged(currentSector);
+  // Una vez fijado el objetivo, restaurar cursor normal y dejar que Leaflet maneje el drag
+  document.getElementById('map-coverage').classList.remove('nuke-active');
+  _leafletMap.off('click',_onNukeMapClick);
+  _leafletMap.off('mousemove',_onNukeMapHover);
 }
 
 const _nukeSrcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','sortlist':'sortlist','europages':'europages','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
@@ -2086,6 +2090,14 @@ function cancelNuke(){
   document.getElementById('nuke-confirm-panel').style.display='none';
   _nukeTargetLatLng=null;_nukeTargetCities=[];
   if(_hoverCircle)_hoverCircle.setStyle({dashArray:'5,4',weight:1.5,fillOpacity:0.06,opacity:0.6});
+  // Restaurar crosshair y listeners para volver a seleccionar objetivo
+  if(_nukeModeActive){
+    document.getElementById('map-coverage').classList.add('nuke-active');
+    _leafletMap.off('click',_onNukeMapClick);
+    _leafletMap.off('mousemove',_onNukeMapHover);
+    _leafletMap.on('click',_onNukeMapClick);
+    _leafletMap.on('mousemove',_onNukeMapHover);
+  }
 }
 
 async function confirmNukeLaunch(){
