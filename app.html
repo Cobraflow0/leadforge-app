@@ -561,7 +561,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
           <h3 id="nuke-panel-title">☢️ SCRAPING NUKE</h3>
           <div class="target-city" id="nuke-target-city">—</div>
           <div id="nuke-cities-list"></div>
-          <select id="nuke-sector-select">
+          <select id="nuke-sector-select" onchange="nukeSectorChanged(this.value)">
             <option value="">— Selecciona sector —</option>
             <option value="construccion">🔨 Construcción y Reformas</option>
             <option value="salud">🏥 Salud y Bienestar</option>
@@ -575,6 +575,22 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
             <option value="energia">☀️ Energía e Instalaciones</option>
             <option value="servicios_hogar">🔧 Servicios del Hogar</option>
           </select>
+          <div id="nuke-cats-wrap" style="display:none;margin-bottom:10px;">
+            <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">Subcategorías <button onclick="nukeToggleAllCats()" style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--text3);font-size:9px;padding:1px 6px;cursor:pointer;font-family:'Space Grotesk',sans-serif;margin-left:4px;">Todas</button></div>
+            <div id="nuke-cats-grid" style="display:flex;flex-wrap:wrap;gap:5px;max-height:120px;overflow-y:auto;"></div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">Fuentes de datos</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">
+              <div class="source-pill selected" id="nuke-src-googlemaps" onclick="toggleNukeSrc('googlemaps',this)"><span class="source-dot"></span>Google Maps</div>
+              <div class="source-pill selected" id="nuke-src-habitissimo" onclick="toggleNukeSrc('habitissimo',this)"><span class="source-dot"></span>Habitissimo</div>
+              <div class="source-pill selected" id="nuke-src-sortlist" onclick="toggleNukeSrc('sortlist',this)"><span class="source-dot"></span>Sortlist</div>
+              <div class="source-pill selected" id="nuke-src-europages" onclick="toggleNukeSrc('europages',this)"><span class="source-dot"></span>Europages</div>
+              <div class="source-pill selected" id="nuke-src-webs" onclick="toggleNukeSrc('webs',this)"><span class="source-dot"></span>Webs propias</div>
+              <div class="source-pill" id="nuke-src-linkedin" onclick="toggleNukeSrc('linkedin',this)"><span class="source-dot"></span>LinkedIn <span style="font-size:9px;opacity:0.5;">beta</span></div>
+              <div class="source-pill" id="nuke-src-instagram" onclick="toggleNukeSrc('instagram',this)"><span class="source-dot"></span>Instagram <span style="font-size:9px;opacity:0.5;">beta</span></div>
+            </div>
+          </div>
           <button class="nuke-launch-btn" id="nuke-launch-btn" onclick="confirmNukeLaunch()">☢️ LANZAR NUKE</button>
           <button class="nuke-cancel-btn" onclick="cancelNuke()">Cancelar</button>
         </div>
@@ -789,6 +805,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
           <div class="result-stat alta"><span class="n" id="res-alta">0</span><span class="lbl">🟢 Alta calidad</span></div>
           <div class="result-stat media"><span class="n" id="res-media">0</span><span class="lbl">🟡 Media</span></div>
           <div class="result-stat baja"><span class="n" id="res-baja">0</span><span class="lbl">🔴 Baja</span></div>
+          <div class="result-stat" id="res-crm-stat" style="display:none;"><span class="n" id="res-crm">0</span><span class="lbl">🗂️ Ya en CRM</span></div>
         </div>
         <button class="btn-download" onclick="downloadExcel()"><span>📥</span> Descargar Excel de leads</button>
         <button class="btn-new" onclick="newSearch()">← Nueva búsqueda</button>
@@ -959,8 +976,18 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
   <div class="modal-box">
     <button class="modal-close" onclick="closeCampaignModal()">✕</button>
     <h2 class="modal-title">✉️ Enviar campaña</h2>
-    <p class="modal-sub">LeadForge enviará un email personalizado a los top leads con email de este scraping.</p>
-    <div class="modal-info">📊 <span id="modal-leads-info">Top 50 leads con mejor puntuación que tengan email.</span></div>
+    <p class="modal-sub">LeadForge enviará un email personalizado a los leads seleccionados.</p>
+    <details id="camp-lead-selector" style="margin-bottom:14px;">
+      <summary style="cursor:pointer;list-style:none;padding:10px 14px;background:rgba(123,47,255,0.06);border:1px solid rgba(123,47,255,0.2);border-radius:10px;font-size:13px;color:var(--text);font-weight:600;display:flex;align-items:center;justify-content:space-between;user-select:none;">
+        <span>📋 Leads a contactar — <span id="camp-lead-count" style="color:var(--accent);">0 seleccionados</span></span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button onclick="event.preventDefault();_selectAllCampLeads(true)" style="background:rgba(0,229,160,0.1);border:1px solid rgba(0,229,160,0.3);border-radius:5px;color:var(--green);font-size:10px;padding:2px 8px;cursor:pointer;font-family:'Space Grotesk',sans-serif;">Todos</button>
+          <button onclick="event.preventDefault();_selectAllCampLeads(false)" style="background:rgba(255,61,90,0.08);border:1px solid rgba(255,61,90,0.2);border-radius:5px;color:var(--red);font-size:10px;padding:2px 8px;cursor:pointer;font-family:'Space Grotesk',sans-serif;">Ninguno</button>
+          <span style="color:var(--text3);font-size:11px;">▼</span>
+        </div>
+      </summary>
+      <div id="camp-lead-list" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:4px 0;"></div>
+    </details>
     <div id="camp-sender-status" style="display:none;padding:10px 14px;border-radius:10px;font-size:12px;margin-bottom:14px;"></div>
     <div class="modal-field"><label>Tu nombre</label><input type="text" id="camp-name" placeholder="Ej: Carlos García"></div>
     <div class="modal-field"><label>Tu empresa</label><input type="text" id="camp-company" placeholder="Ej: Neopanels"></div>
@@ -1018,6 +1045,28 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
     <p class="modal-sub" id="upgrade-msg" style="text-align:center;"></p>
     <a href="https://leadforge.es/#pricing" target="_blank" class="btn-primary" style="text-decoration:none;display:flex;box-sizing:border-box;justify-content:center;">Ver todos los planes →</a>
     <button onclick="closeUpgradeModal()" class="btn-new" style="margin-top:10px;">Ahora no</button>
+  </div>
+</div>
+<!-- MODAL EDITAR LEAD -->
+<div class="modal-overlay" id="modal-edit-lead">
+  <div class="modal-box" style="max-width:440px;">
+    <button class="modal-close" onclick="closeEditLead()">✕</button>
+    <h2 class="modal-title">✏️ Editar lead</h2>
+    <div class="modal-field"><label>Nombre empresa</label><input type="text" id="edit-nombre" placeholder="Nombre"></div>
+    <div class="modal-field"><label>Email</label><input type="email" id="edit-email" placeholder="email@empresa.com"></div>
+    <div class="modal-field"><label>Teléfono</label><input type="text" id="edit-telefono" placeholder="612 345 678"></div>
+    <div class="modal-field"><label>Web</label><input type="text" id="edit-web" placeholder="https://empresa.com"></div>
+    <div class="modal-field"><label>Ciudad</label><input type="text" id="edit-ciudad" placeholder="Madrid"></div>
+    <button class="btn-campaign" id="btn-save-lead" onclick="saveEditLead()"><span id="edit-lead-label">Guardar cambios</span><div class="campaign-spinner" id="edit-lead-spinner" style="display:none"></div></button>
+  </div>
+</div>
+<!-- MODAL HISTORIAL EMAIL -->
+<div class="modal-overlay" id="modal-email-history">
+  <div class="modal-box" style="max-width:480px;">
+    <button class="modal-close" onclick="closeEmailHistory()">✕</button>
+    <h2 class="modal-title">📧 Historial de emails</h2>
+    <p class="modal-sub" id="email-history-sub">—</p>
+    <div id="email-history-list" style="margin-top:12px;"></div>
   </div>
 </div>
 <!-- MODAL CANCELACIÓN -->
@@ -1086,6 +1135,7 @@ const CRM={
   async insertMany(leads){const r=await sb.req('/rest/v1/crm_leads',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify(leads)});return r.ok;},
   async updateStatus(id,status){await sb.req(`/rest/v1/crm_leads?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({status})});},
   async updateNota(id,nota){await sb.req(`/rest/v1/crm_leads?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({nota})});},
+  async update(id,fields){const r=await sb.req(`/rest/v1/crm_leads?id=eq.${id}`,{method:'PATCH',body:JSON.stringify(fields)});return r.ok;},
   async delete(id){await sb.req(`/rest/v1/crm_leads?id=eq.${id}`,{method:'DELETE'});},
   async deleteAll(userId){await sb.req(`/rest/v1/crm_leads?user_id=eq.${userId}`,{method:'DELETE'});}
 };
@@ -1941,18 +1991,44 @@ function _onNukeMapClick(e){
   panel.style.display='block';
 }
 
+const _nukeSrcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','sortlist':'sortlist','europages':'europages','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
+function toggleNukeSrc(id,el){el.classList.toggle('selected');}
+function _getNukeSources(){
+  return Object.keys(_nukeSrcMap).filter(k=>document.getElementById('nuke-src-'+k)?.classList.contains('selected')).map(k=>_nukeSrcMap[k]);
+}
+function nukeSectorChanged(sector){
+  const wrap=document.getElementById('nuke-cats-wrap'),grid=document.getElementById('nuke-cats-grid');
+  grid.innerHTML='';
+  if(!sector||!SECTORES[sector]){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  SECTORES[sector].forEach(cat=>{
+    const pill=document.createElement('div');
+    pill.className='cat-pill selected';
+    pill.id='nuke-cat-'+cat.id;
+    pill.style.cssText='font-size:11px;padding:4px 8px;';
+    pill.innerHTML=`<div class="cat-check">✓</div><span>${cat.emoji} ${cat.label}</span>`;
+    pill.onclick=()=>{pill.classList.toggle('selected');pill.querySelector('.cat-check').textContent=pill.classList.contains('selected')?'✓':'';};
+    grid.appendChild(pill);
+  });
+}
+function nukeToggleAllCats(){
+  const sector=document.getElementById('nuke-sector-select').value;
+  if(!sector||!SECTORES[sector])return;
+  const allSel=SECTORES[sector].every(c=>document.getElementById('nuke-cat-'+c.id)?.classList.contains('selected'));
+  SECTORES[sector].forEach(c=>{const el=document.getElementById('nuke-cat-'+c.id);if(!el)return;if(allSel){el.classList.remove('selected');el.querySelector('.cat-check').textContent='';}else{el.classList.add('selected');el.querySelector('.cat-check').textContent='✓';}});
+}
 function cancelNuke(){
   document.getElementById('nuke-confirm-panel').style.display='none';
   _nukeTargetLatLng=null;_nukeTargetCities=[];
-  // Volver el círculo a modo hover (discontinuo, sigue al ratón)
   if(_hoverCircle)_hoverCircle.setStyle({dashArray:'5,4',weight:1.5,fillOpacity:0.06,opacity:0.6});
 }
 
 async function confirmNukeLaunch(){
   const sector=document.getElementById('nuke-sector-select').value;
   if(!sector){document.getElementById('nuke-sector-select').style.borderColor='#FF3D5A';return;}
+  const nukeCats=(SECTORES[sector]||[]).filter(c=>document.getElementById('nuke-cat-'+c.id)?.classList.contains('selected')).map(c=>c.id);
+  if(nukeCats.length===0){alert('Selecciona al menos una subcategoría.');return;}
   const type=_selectedNukeType,latlng=_nukeTargetLatLng,cities=[..._nukeTargetCities];
-  // Show city preview before MOAB — big investment, confirm target
   if(type==='moab'&&cities.length){
     const cityList=cities.slice(0,12).join(', ')+(cities.length>12?` y ${cities.length-12} más`:'');
     if(!confirm(`MOAB: vas a atacar ${cities.length} ciudad${cities.length!==1?'es':''} en el radio:\n\n${cityList}\n\n¿Confirmar lanzamiento?`))return;
@@ -1960,10 +2036,10 @@ async function confirmNukeLaunch(){
   cancelNuke();
   toggleNukeMode();
   _nukeIncrement(type);
-  await _animateAndLaunch(type,latlng,cities,sector);
+  await _animateAndLaunch(type,latlng,cities,sector,nukeCats);
 }
 
-async function _animateAndLaunch(type,latlng,cities,sector){
+async function _animateAndLaunch(type,latlng,cities,sector,nukeCats){
   const t=NUKE_TYPES[type];
 
   // Sonido de lanzamiento
@@ -2004,8 +2080,8 @@ async function _animateAndLaunch(type,latlng,cities,sector){
 
   // Lanzar scraping
   const targetCities=cities.length>0?cities:[_findNearestCity(latlng.lat,latlng.lng)];
-  const cats=(SECTORES[sector]||[]).map(c=>c.id);
-  const sources=['google_maps','webs_propias'];
+  const cats=(nukeCats&&nukeCats.length>0)?nukeCats:(SECTORES[sector]||[]).map(c=>c.id);
+  const sources=_getNukeSources().length>0?_getNukeSources():['google_maps','webs_propias'];
   const limits=getPlanLimits();
   const ciudadStr=targetCities.join(', ');
   appState.currentSearch={sector,ciudad:ciudadStr,cats,sources};appState.currentJobId=null;
@@ -2196,14 +2272,26 @@ function _notifyScrapingDone(total, ciudad){
     });
   }
 }
+function _getCRMEmailSet(){
+  return new Set((crmLeads||[]).filter(l=>l.email).map(l=>l.email.toLowerCase().trim()));
+}
 function _updateEmailStats(leads){
   const withEmail=(leads||[]).filter(l=>l.email&&l.email.includes('@')).length;
   const el=document.getElementById('res-email');if(el)el.textContent=withEmail;
+  // CRM duplicates
+  const crmEmails=_getCRMEmailSet();
+  const inCRM=(leads||[]).filter(l=>l.email&&crmEmails.has(l.email.toLowerCase().trim())).length;
+  const crmStat=document.getElementById('res-crm-stat'),crmEl=document.getElementById('res-crm');
+  if(crmStat&&crmEl){crmEl.textContent=inCRM;crmStat.style.display=inCRM>0?'':'none';}
   const info=document.getElementById('modal-leads-info');
   if(info){
     const total=(leads||[]).length;
     if(withEmail===0)info.innerHTML=`<span style="color:var(--red)">⚠️ Ningún lead tiene email en este scraping.</span>`;
-    else info.innerHTML=`<strong style="color:var(--accent)">${withEmail}</strong> de ${total} leads tienen email disponible para contactar.`;
+    else{
+      let html=`<strong style="color:var(--accent)">${withEmail}</strong> de ${total} leads tienen email disponible para contactar.`;
+      if(inCRM>0)html+=` <span style="color:var(--yellow);margin-left:6px;">🗂️ ${inCRM} ya están en tu CRM.</span>`;
+      info.innerHTML=html;
+    }
   }
 }
 let _previewData={name:'',company:'',product:'',subject:'',email:''};
@@ -2320,7 +2408,32 @@ function openCampaignModal(){
     statusEl.textContent=`📧 ${restanE} emails disponibles este mes de ${capE} (plan ${limits.label}).`;
     document.getElementById('btn-send-campaign').disabled=false;
   }
+  // Render lead selector
+  const leadsWithEmail=(appState.currentLeads||[]).filter(l=>l.email);
+  const listEl=document.getElementById('camp-lead-list');
+  if(listEl){
+    const crmEmails=_getCRMEmailSet();
+    const scoreColor=q=>q==='Alta'?'var(--green)':q==='Media'?'var(--yellow)':'var(--text3)';
+    const scoreLbl=q=>q==='Alta'?'⭐ Alta':q==='Media'?'● Media':'● Baja';
+    listEl.innerHTML=leadsWithEmail.length===0
+      ?'<div style="padding:14px;color:var(--text3);font-size:12px;text-align:center;">No hay leads con email en esta búsqueda.</div>'
+      :leadsWithEmail.map((l,i)=>{
+        const alreadyInCRM=crmEmails.has(l.email.toLowerCase().trim());
+        return `<label style="display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;font-size:12px;${alreadyInCRM?'opacity:0.6;':''}" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background=''"><input type="checkbox" class="camp-lead-cb" data-idx="${i}" ${alreadyInCRM?'':'checked'} style="accent-color:var(--accent);width:13px;height:13px;flex-shrink:0;" onchange="_updateCampLeadCount()"><span style="flex:1;color:var(--text);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.nombre||'—'}</span><span style="color:var(--text3);font-size:11px;flex-shrink:0;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.email}</span>${alreadyInCRM?'<span style="font-size:10px;color:var(--yellow);flex-shrink:0;background:rgba(255,217,61,0.1);border:1px solid rgba(255,217,61,0.3);border-radius:4px;padding:1px 5px;">🗂️ CRM</span>':`<span style="color:${scoreColor(l.calidad)};font-size:10px;flex-shrink:0;">${scoreLbl(l.calidad)}</span>`}</label>`;
+      }).join('');
+    _updateCampLeadCount();
+  }
   document.getElementById('modal-campaign').classList.add('open');
+}
+function _updateCampLeadCount(){
+  const total=document.querySelectorAll('.camp-lead-cb').length;
+  const checked=document.querySelectorAll('.camp-lead-cb:checked').length;
+  const el=document.getElementById('camp-lead-count');
+  if(el)el.textContent=`${checked} de ${total} seleccionados`;
+}
+function _selectAllCampLeads(v){
+  document.querySelectorAll('.camp-lead-cb').forEach(cb=>cb.checked=v);
+  _updateCampLeadCount();
 }
 function closeCampaignModal(){document.getElementById('modal-campaign').classList.remove('open');}
 document.getElementById('modal-campaign').addEventListener('click',function(e){if(e.target===this)closeCampaignModal();});
@@ -2329,9 +2442,13 @@ async function sendCampaign(){
   if(!name||!company||!product||!email){alert('Rellena todos los campos.');return;}if(!email.includes('@')){alert('Introduce un email válido.');return;}
   const _bad=['tu nombre','tu empresa','tu producto o servicio','tu@empresa.com'];if(_bad.includes(name.toLowerCase())||_bad.includes(company.toLowerCase())||_bad.includes(product.toLowerCase())){alert('Parece que los campos contienen texto de ejemplo. Por favor, introduce tu información real (tu nombre, empresa y producto/servicio).');return;}
   const btn=document.getElementById('btn-send-campaign'),lbl=document.getElementById('camp-label'),spin=document.getElementById('camp-spinner'),resEl=document.getElementById('campaign-result');
+  const leadsPool=(appState.currentLeads||[]).filter(l=>l.email);
+  const cbs=document.querySelectorAll('.camp-lead-cb');
+  const selectedLeads=cbs.length>0?leadsPool.filter((_,i)=>cbs[i]?.checked):leadsPool;
+  if(selectedLeads.length===0){alert('Selecciona al menos un lead para enviar.');return;}
   btn.disabled=true;lbl.style.display='none';spin.style.display='block';
-  try{const r=await fetch(`${SCRAPER_API_URL}/send-campaign`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_subject:subject,user_email:email,user_id:appState.user?.id||'',max_emails:selectedLimit,leads:appState.currentLeads})});const data=await r.json();btn.disabled=false;lbl.style.display='inline';spin.style.display='none';
-  if(data.ok){localStorage.setItem('lf_campaign_data',JSON.stringify({name,company,product,subject,email}));addEmailsSent(data.enviados);updateStats();const followup=document.getElementById('camp-followup').checked;const campañas=JSON.parse(localStorage.getItem('lf_campanas')||'[]');campañas.unshift({id:Date.now(),tag:`lf_${jobId.slice(0,8)}`,job_id:jobId,sector:appState.currentSearch?.sector||'',ciudad:appState.currentSearch?.ciudad||'',enviados:data.enviados,company,user_email:email,has_sequence:followup,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})});localStorage.setItem('lf_campanas',JSON.stringify(campañas.slice(0,50)));saveCampaignToSupabase(campañas[0]);if(followup&&jobId){fetch(`${SCRAPER_API_URL}/sequences/start`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_subject:subject,user_email:email,max_emails:selectedLimit,leads:appState.currentLeads})});}closeCampaignModal();let msg=`✅ Campaña enviada: ${data.enviados} emails`;if(data.ya_contactados)msg+=` · ${data.ya_contactados} ya contactados anteriormente omitidos`;if(data.en_blacklist)msg+=` · ${data.en_blacklist} en blacklist omitidos`;if(data.filtrados)msg+=` · ${data.filtrados} emails inválidos filtrados`;if(followup)msg+=` · Secuencia activada 🚀`;resEl.className='campaign-result ok';resEl.style.display='block';resEl.textContent=msg;}else{resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ ${data.error||'No se pudo enviar.'}`;}}catch(err){btn.disabled=false;lbl.style.display='inline';spin.style.display='none';resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ Error: ${err.message||'No se pudo conectar con la API'}`;}
+  try{const r=await fetch(`${SCRAPER_API_URL}/send-campaign`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_subject:subject,user_email:email,user_id:appState.user?.id||'',max_emails:selectedLeads.length,leads:selectedLeads})});const data=await r.json();btn.disabled=false;lbl.style.display='inline';spin.style.display='none';
+  if(data.ok){localStorage.setItem('lf_campaign_data',JSON.stringify({name,company,product,subject,email}));addEmailsSent(data.enviados);updateStats();const followup=document.getElementById('camp-followup').checked;const campañas=JSON.parse(localStorage.getItem('lf_campanas')||'[]');campañas.unshift({id:Date.now(),tag:`lf_${jobId.slice(0,8)}`,job_id:jobId,sector:appState.currentSearch?.sector||'',ciudad:appState.currentSearch?.ciudad||'',enviados:data.enviados,company,user_email:email,has_sequence:followup,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})});localStorage.setItem('lf_campanas',JSON.stringify(campañas.slice(0,50)));saveCampaignToSupabase(campañas[0]);if(followup&&jobId){fetch(`${SCRAPER_API_URL}/sequences/start`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_subject:subject,user_email:email,max_emails:selectedLeads.length,leads:selectedLeads})});}closeCampaignModal();let msg=`✅ Campaña enviada: ${data.enviados} emails`;if(data.ya_contactados)msg+=` · ${data.ya_contactados} ya contactados anteriormente omitidos`;if(data.en_blacklist)msg+=` · ${data.en_blacklist} en blacklist omitidos`;if(data.filtrados)msg+=` · ${data.filtrados} emails inválidos filtrados`;if(followup)msg+=` · Secuencia activada 🚀`;resEl.className='campaign-result ok';resEl.style.display='block';resEl.textContent=msg;}else{resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ ${data.error||'No se pudo enviar.'}`;}}catch(err){btn.disabled=false;lbl.style.display='inline';spin.style.display='none';resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ Error: ${err.message||'No se pudo conectar con la API'}`;}
 }
 function _seqTouchLabel(touch,idx){const dias=[4,8,14];const dia=dias[idx]||'?';if(touch.sent>0)return`<span style="color:var(--green)">✅ Día ${dia} (${touch.sent} enviados)</span>`;const sch=touch.scheduled_at?new Date(touch.scheduled_at):null;const hoy=new Date();const diff=sch?Math.ceil((sch-hoy)/86400000):null;if(diff!==null&&diff>0)return`<span style="color:var(--text3)">⏳ Día ${dia} en ${diff}d</span>`;return`<span style="color:var(--yellow)">🔄 Día ${dia} procesando</span>`;}
 async function renderCampanas(){
@@ -2372,6 +2489,50 @@ function setCRMFilter(f){crmFilter=f;document.querySelectorAll('.crm-filter-btn'
 async function updateCRMStatus(id,newStatus){const lead=crmLeads.find(l=>l.id===id);if(lead)lead.status=newStatus;renderCRM();await CRM.updateStatus(id,newStatus);}
 async function updateCRMNote(id,nota){const lead=crmLeads.find(l=>l.id===id);if(lead)lead.nota=nota;await CRM.updateNota(id,nota);}
 async function deleteCRMLead(id){crmLeads=crmLeads.filter(l=>l.id!==id);renderCRM();await CRM.delete(id);}
+let _editLeadId=null;
+function openEditLead(id){
+  const lead=crmLeads.find(l=>l.id===id);if(!lead)return;
+  _editLeadId=id;
+  document.getElementById('edit-nombre').value=lead.nombre||'';
+  document.getElementById('edit-email').value=lead.email||'';
+  document.getElementById('edit-telefono').value=lead.telefono||'';
+  document.getElementById('edit-web').value=lead.web||'';
+  document.getElementById('edit-ciudad').value=lead.ciudad||'';
+  document.getElementById('modal-edit-lead').classList.add('open');
+}
+function closeEditLead(){document.getElementById('modal-edit-lead').classList.remove('open');_editLeadId=null;}
+async function openEmailHistory(leadEmail,leadNombre){
+  const modal=document.getElementById('modal-email-history');
+  const listEl=document.getElementById('email-history-list');
+  const subEl=document.getElementById('email-history-sub');
+  subEl.textContent=leadNombre||leadEmail;
+  listEl.innerHTML='<div style="color:var(--text3);font-size:13px;padding:10px 0;">Cargando…</div>';
+  modal.classList.add('open');
+  try{
+    const userId=appState.user?.id||'';
+    const r=await fetch(`${SCRAPER_API_URL}/lead-email-history?user_id=${encodeURIComponent(userId)}&lead_email=${encodeURIComponent(leadEmail)}`);
+    const d=await r.json();
+    if(!d.ok||!d.history?.length){listEl.innerHTML='<div style="color:var(--text3);font-size:13px;padding:10px 0;">No se han enviado emails a este lead todavía.</div>';return;}
+    const touchLabel=n=>n===1?'✉️ Email inicial':n===2?'🔄 Follow-up día 4':n===3?'🔄 Follow-up día 8':n===4?'🔚 Follow-up día 14':`Toque ${n}`;
+    listEl.innerHTML=d.history.map(h=>{
+      const fecha=h.sent_at?new Date(h.sent_at).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'Fecha desconocida';
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--border);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-size:13px;font-weight:600;color:var(--text);">${touchLabel(h.touch_number||1)}</span><span style="font-size:11px;color:var(--text3);">${fecha}</span></div>${h.subject?`<div style="font-size:12px;color:var(--text2);">Asunto: ${h.subject}</div>`:''}</div>`;
+    }).join('');
+  }catch(e){listEl.innerHTML='<div style="color:var(--red);font-size:13px;padding:10px 0;">Error al cargar el historial.</div>';}
+}
+function closeEmailHistory(){document.getElementById('modal-email-history').classList.remove('open');}
+document.getElementById('modal-email-history').addEventListener('click',function(e){if(e.target===this)closeEmailHistory();});
+async function saveEditLead(){
+  if(!_editLeadId)return;
+  const btn=document.getElementById('btn-save-lead'),lbl=document.getElementById('edit-lead-label'),spin=document.getElementById('edit-lead-spinner');
+  btn.disabled=true;lbl.style.display='none';spin.style.display='block';
+  const fields={nombre:document.getElementById('edit-nombre').value.trim(),email:document.getElementById('edit-email').value.trim(),telefono:document.getElementById('edit-telefono').value.trim(),web:document.getElementById('edit-web').value.trim(),ciudad:document.getElementById('edit-ciudad').value.trim()};
+  const lead=crmLeads.find(l=>l.id===_editLeadId);
+  if(lead)Object.assign(lead,fields);
+  await CRM.update(_editLeadId,fields);
+  renderCRM();closeEditLead();
+  btn.disabled=false;lbl.style.display='inline';spin.style.display='none';
+}
 async function clearCRM(){if(!confirm('¿Vaciar todo el CRM? Esta acción no se puede deshacer.'))return;const userId=appState.user?.id;crmLeads=[];renderCRM();await CRM.deleteAll(userId);}
 function exportCRMToExcel(){const filtered=crmFilter==='todos'?crmLeads:crmLeads.filter(l=>l.status===crmFilter);if(!filtered.length){alert('No hay leads para exportar.');return;}const STATUS_ES={'sin-contactar':'Sin contactar','contactado':'Contactado','interesado':'Interesado','cerrado':'Cerrado','descartado':'Descartado'};const rows=filtered.map(l=>({'Empresa':l.nombre||'','Email':l.email||'','Teléfono':l.telefono||'','Web':l.web||'','Ciudad':l.ciudad||'','Fuente':l.fuente||'','Calidad':l.calidad||'','Score':l.score||0,'Estado':STATUS_ES[l.status]||l.status||'','Nota':l.nota||'','Fecha':l.fecha||''}));const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=[{wch:30},{wch:28},{wch:16},{wch:30},{wch:14},{wch:16},{wch:10},{wch:8},{wch:16},{wch:30},{wch:12}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Leads CRM');const fecha=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');XLSX.writeFile(wb,`LeadForge_CRM_${crmFilter==='todos'?'todos':crmFilter}_${fecha}.xlsx`);}
 function renderCRM(){
@@ -2382,7 +2543,7 @@ function renderCRM(){
   if(_mapCityFilter)filtered=filtered.filter(l=>l.ciudad&&l.ciudad.toLowerCase().includes(_mapCityFilter.toLowerCase()));
   if(!crmLeads.length){wrap.innerHTML=`<div class="crm-empty"><div class="emoji">🎯</div><p>Aún no tienes leads en el CRM.<br>Lanza una búsqueda y pulsa <strong>"Importar leads al CRM"</strong>.</p></div>`;return;}
   if(!filtered.length){wrap.innerHTML=`<div class="crm-empty"><div class="emoji">🔍</div><p>No hay leads con este estado.</p></div>`;return;}
-  const rows=filtered.map(lead=>{const opts=STATUS_ORDER.map(s=>`<option value="${s}" ${lead.status===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('');return `<tr><td><div class="crm-name">${lead.nombre||'—'}</div><div class="crm-meta">${lead.ciudad||''} · ${lead.fuente||''} · ${lead.fecha||''}</div></td><td style="color:var(--text2);font-size:12px;">${lead.email?`<div>✉️ ${lead.email}</div>`:''}${lead.telefono?`<div>📞 ${lead.telefono}</div>`:''}${lead.web?`<div><a href="${lead.web}" target="_blank" style="color:var(--accent);font-size:11px;">🌐 web</a></div>`:''}</td><td><select class="status-select ${lead.status}" onchange="updateCRMStatus(${lead.id},this.value);this.className='status-select '+this.value;">${opts}</select></td><td><input class="crm-note-input" placeholder="Añadir nota…" value="${(lead.nota||'').replace(/"/g,'&quot;')}" onblur="updateCRMNote(${lead.id},this.value)" onkeydown="if(event.key==='Enter'){updateCRMNote(${lead.id},this.value);this.blur();}"></td><td><button onclick="deleteCRMLead(${lead.id})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:4px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">🗑</button></td></tr>`;}).join('');
+  const rows=filtered.map(lead=>{const opts=STATUS_ORDER.map(s=>`<option value="${s}" ${lead.status===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('');return `<tr><td><div class="crm-name">${lead.nombre||'—'}</div><div class="crm-meta">${lead.ciudad||''} · ${lead.fuente||''} · ${lead.fecha||''}</div></td><td style="color:var(--text2);font-size:12px;">${lead.email?`<div>✉️ ${lead.email}</div>`:''}${lead.telefono?`<div>📞 ${lead.telefono}</div>`:''}${lead.web?`<div><a href="${lead.web}" target="_blank" style="color:var(--accent);font-size:11px;">🌐 web</a></div>`:''}</td><td><select class="status-select ${lead.status}" onchange="updateCRMStatus(${lead.id},this.value);this.className='status-select '+this.value;">${opts}</select></td><td><input class="crm-note-input" placeholder="Añadir nota…" value="${(lead.nota||'').replace(/"/g,'&quot;')}" onblur="updateCRMNote(${lead.id},this.value)" onkeydown="if(event.key==='Enter'){updateCRMNote(${lead.id},this.value);this.blur();}"></td><td style="display:flex;gap:4px;">${lead.email?`<button onclick="openEmailHistory('${lead.email.replace(/'/g,"\\'")}','${(lead.nombre||'').replace(/'/g,"\\'")}')\" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'" title="Historial emails">📧</button>`:''}<button onclick="openEditLead(${lead.id})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'" title="Editar">✏️</button><button onclick="deleteCRMLead(${lead.id})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'" title="Eliminar">🗑</button></td></tr>`;}).join('');
   wrap.innerHTML=`<table class="crm-table"><thead><tr><th>Empresa</th><th>Contacto</th><th>Estado</th><th>Nota</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 async function loadAdminData(){
