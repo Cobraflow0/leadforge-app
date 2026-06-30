@@ -124,6 +124,15 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 .log-terminal::before{content:'';position:absolute;top:0;left:0;right:0;height:24px;border-radius:var(--radius) var(--radius) 0 0;background:linear-gradient(180deg,rgba(0,200,255,0.04),transparent);pointer-events:none;}
 .log-line{display:block;}.log-line .ts{color:var(--text3);margin-right:10px;font-size:11px;}
 .log-line.ok .msg{color:var(--green);}.log-line.info .msg{color:var(--text2);}.log-line.accent .msg{color:var(--accent);}.log-line.warn .msg{color:var(--yellow);}.log-line.error .msg{color:var(--red);}
+.snake-card{padding:16px 20px;}
+.snake-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.snake-label{font-size:13px;color:var(--text2);}
+.snake-score{font-size:13px;color:var(--text2);}
+.snake-canvas-wrap{position:relative;display:block;line-height:0;border:1px solid rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;}
+#snake-canvas{display:block;background:#030609;width:100%;max-width:300px;}
+.snake-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(3,6,9,0.82);cursor:pointer;border-radius:8px;}
+#snake-overlay-text{color:var(--text2);font-size:13px;text-align:center;line-height:1.7;font-family:'JetBrains Mono',monospace;}
+.snake-hint{font-size:11px;color:var(--text3);margin-top:10px;text-align:center;letter-spacing:1px;}
 .results-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
 .result-stat{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center;transition:all 0.2s;}
 .result-stat:hover{transform:translateY(-2px);}
@@ -722,6 +731,21 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
         </div>
         <div class="log-terminal" id="log-terminal"></div>
       </div>
+      <div id="snake-game-container" style="display:none;margin-bottom:20px;">
+        <div class="card snake-card">
+          <div class="snake-header">
+            <span class="snake-label">🐍 Snake — Juega mientras esperas ⚡</span>
+            <span class="snake-score">Score: <strong id="snake-score">0</strong></span>
+          </div>
+          <div class="snake-canvas-wrap">
+            <canvas id="snake-canvas" width="300" height="300"></canvas>
+            <div id="snake-overlay" class="snake-overlay" onclick="SnakeGame.start()">
+              <span id="snake-overlay-text">Pulsa aquí o cualquier tecla<br>para empezar</span>
+            </div>
+          </div>
+          <div class="snake-hint">↑ ↓ ← → · WASD · Swipe</div>
+        </div>
+      </div>
       <div id="results-done" style="display:none">
         <div class="results-summary">
           <div class="result-stat total"><span class="n" id="res-total">0</span><span class="lbl">Total leads</span></div>
@@ -1269,10 +1293,100 @@ function estimateScrapeTime(numCats, numCities, numSources){
   if(mins <= 10) return `~${mins}-${mins+1} minutos`;
   return `~${mins} minutos`;
 }
+const SnakeGame = (() => {
+  const CELL=20,COLS=15,ROWS=15,SPEED=130;
+  let canvas,ctx,loop=null,snake,food,dir,nextDir,score,running=false;
+  let _tx=0,_ty=0;
+  function _init(){
+    canvas=document.getElementById('snake-canvas');
+    ctx=canvas.getContext('2d');
+    canvas.addEventListener('touchstart',e=>{_tx=e.touches[0].clientX;_ty=e.touches[0].clientY;if(!running)start();},{passive:true});
+    canvas.addEventListener('touchend',e=>{
+      if(!running)return;
+      const dx=e.changedTouches[0].clientX-_tx,dy=e.changedTouches[0].clientY-_ty;
+      if(Math.abs(dx)<10&&Math.abs(dy)<10)return;
+      if(Math.abs(dx)>Math.abs(dy)){nextDir=dx>0?{x:1,y:0}:{x:-1,y:0};}
+      else{nextDir=dy>0?{x:0,y:1}:{x:0,y:-1};}
+    },{passive:true});
+    document.addEventListener('keydown',_onKey);
+  }
+  const _KEYMAP={ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},w:{x:0,y:-1},s:{x:0,y:1},a:{x:-1,y:0},d:{x:1,y:0},W:{x:0,y:-1},S:{x:0,y:1},A:{x:-1,y:0},D:{x:1,y:0}};
+  function _onKey(e){
+    const d=_KEYMAP[e.key];
+    if(!d)return;
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))e.preventDefault();
+    if(!running){start();return;}
+    if(d.x!==-dir.x||d.y!==-dir.y)nextDir=d;
+  }
+  function _randomFood(){
+    let p;
+    do{p={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*ROWS)};}
+    while(snake.some(s=>s.x===p.x&&s.y===p.y));
+    return p;
+  }
+  function start(){
+    if(running)return;
+    if(!canvas)_init();
+    snake=[{x:7,y:7},{x:6,y:7},{x:5,y:7}];
+    dir={x:1,y:0};nextDir={x:1,y:0};score=0;
+    food=_randomFood();
+    document.getElementById('snake-score').textContent='0';
+    document.getElementById('snake-overlay').style.display='none';
+    running=true;clearInterval(loop);
+    loop=setInterval(_tick,SPEED);
+  }
+  function _stop(msg){
+    running=false;clearInterval(loop);
+    const ol=document.getElementById('snake-overlay');
+    if(ol){document.getElementById('snake-overlay-text').innerHTML=msg;ol.style.display='flex';}
+  }
+  function _tick(){
+    dir=nextDir;
+    const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+    if(head.x<0||head.x>=COLS||head.y<0||head.y>=ROWS||snake.some(s=>s.x===head.x&&s.y===head.y)){
+      _draw();_stop(`💀 Game over<br><span style="font-size:11px">Score: ${score}</span><br><span style="font-size:11px;opacity:.6">Pulsa para reintentar</span>`);return;
+    }
+    snake.unshift(head);
+    if(head.x===food.x&&head.y===food.y){score++;document.getElementById('snake-score').textContent=score;food=_randomFood();}
+    else{snake.pop();}
+    _draw();
+  }
+  function _draw(){
+    if(!ctx)return;
+    ctx.fillStyle='#030609';ctx.fillRect(0,0,COLS*CELL,ROWS*CELL);
+    ctx.fillStyle='rgba(255,255,255,0.025)';
+    for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++)ctx.fillRect(x*CELL+CELL/2-1,y*CELL+CELL/2-1,2,2);
+    ctx.fillStyle='#FF3D5A';ctx.beginPath();
+    ctx.arc(food.x*CELL+CELL/2,food.y*CELL+CELL/2,CELL/2-2,0,Math.PI*2);ctx.fill();
+    snake.forEach((seg,i)=>{
+      const a=i===0?1:Math.max(0.35,1-i*0.06);
+      ctx.fillStyle=i===0?'#4ADE80':`rgba(74,222,128,${a})`;
+      ctx.fillRect(seg.x*CELL+1,seg.y*CELL+1,CELL-2,CELL-2);
+    });
+  }
+  function show(){
+    const el=document.getElementById('snake-game-container');
+    if(!el)return;
+    el.style.display='block';
+    if(!canvas)_init();
+    running=false;clearInterval(loop);
+    const ol=document.getElementById('snake-overlay');
+    if(ol){document.getElementById('snake-overlay-text').innerHTML='Pulsa aquí o cualquier tecla<br>para empezar';ol.style.display='flex';}
+    document.getElementById('snake-score').textContent='0';
+    if(ctx){ctx.fillStyle='#030609';ctx.fillRect(0,0,COLS*CELL,ROWS*CELL);}
+  }
+  function hide(){
+    const el=document.getElementById('snake-game-container');
+    if(el)el.style.display='none';
+    running=false;clearInterval(loop);
+  }
+  return{show,hide,start};
+})();
 function _initResults(subtext, eta){
   showPage('results');document.getElementById('nav-dashboard').classList.add('active');document.getElementById('results-done').style.display='none';document.getElementById('campaign-result').style.display='none';document.getElementById('multi-city-progress').style.display='none';document.getElementById('results-title').innerHTML='Scraping <span>en curso</span>';document.getElementById('results-sub').textContent=subtext;document.getElementById('log-terminal').innerHTML='';setProgress(0,'Conectando con el servidor…');
   const etaEl=document.getElementById('results-eta');
   if(eta){etaEl.style.display='block';document.getElementById('results-eta-val').textContent=eta;}else{etaEl.style.display='none';}
+  SnakeGame.show();
 }
 function addLog(msg,type='info'){const log=document.getElementById('log-terminal'),ts=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),line=document.createElement('span');line.className=`log-line ${type}`;line.innerHTML=`<span class="ts">[${ts}]</span><span class="msg">${msg}</span>`;log.appendChild(line);log.appendChild(document.createElement('br'));log.scrollTop=log.scrollHeight;}
 const DEMO_LEADS_DATA = [
@@ -1325,7 +1439,7 @@ async function runDemoScraping(sector, ciudad, cats){
   document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';
   document.getElementById('results-sub').textContent=`${DEMO_LEADS_DATA.length} leads encontrados en ${ciudad}.`;
   document.getElementById('results-eta').style.display='none';
-  document.getElementById('results-done').style.display='block';
+  document.getElementById('results-done').style.display='block';SnakeGame.hide();
   appState.currentLeads=DEMO_LEADS_DATA;
   appState.currentJobId='demo-job';
 }
@@ -1360,7 +1474,7 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
   document.getElementById('res-total').textContent=totalResult.total;document.getElementById('res-alta').textContent=totalResult.alta;document.getElementById('res-media').textContent=totalResult.media;document.getElementById('res-baja').textContent=totalResult.baja;
   document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';
   const ciudadesStr=ciudades.length>1?ciudades.join(' + '):ciudades[0];
-  document.getElementById('results-sub').textContent=`${totalResult.total} leads en ${ciudadesStr}.`;document.getElementById('results-done').style.display='block';setProgress(100,'Completado');
+  document.getElementById('results-sub').textContent=`${totalResult.total} leads en ${ciudadesStr}.`;document.getElementById('results-done').style.display='block';SnakeGame.hide();setProgress(100,'Completado');
   const entry={id:Date.now(),job_id:lastJobId,sector:appState.currentSearch?.sector||sector,ciudad:ciudadesStr,cats:cats.length,total:totalResult.total,alta:totalResult.alta,media:totalResult.media,baja:totalResult.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};
   appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);
   _saveHistoryLeads(lastJobId,totalResult.leads);
@@ -1381,7 +1495,7 @@ async function runScrapingReal(sector,ciudad,cats,sources,maxLeads=1000){
       errCount=0;
       const data=await sr.json();data.logs.slice(lastLog).forEach(line=>{const t=line.includes('✅')||line.includes('✓')?'ok':line.includes('❌')?'error':'info';addLog(line.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,''),t);});lastLog=data.logs.length;
       setProgress(data.progress,data.logs.at(-1)?.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')||'');
-      if(data.status==='done'){const r=data.result;document.getElementById('res-total').textContent=r.total;document.getElementById('res-alta').textContent=r.alta;document.getElementById('res-media').textContent=r.media;document.getElementById('res-baja').textContent=r.baja;document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';document.getElementById('results-sub').textContent=`${r.total} leads listos para descargar en Excel.`;document.getElementById('results-done').style.display='block';try{const lr2=await fetch(`${SCRAPER_API_URL}/result/${job_id}`);if(lr2.ok){const rd=await lr2.json();appState.currentLeads=rd.leads||[];}else{appState.currentLeads=[];}}catch(e){appState.currentLeads=[];}const entry={id:Date.now(),job_id,sector:appState.currentSearch?.sector||sector,ciudad,cats:cats.length,total:r.total,alta:r.alta,media:r.media,baja:r.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);_saveHistoryLeads(job_id,appState.currentLeads);break;}
+      if(data.status==='done'){const r=data.result;document.getElementById('res-total').textContent=r.total;document.getElementById('res-alta').textContent=r.alta;document.getElementById('res-media').textContent=r.media;document.getElementById('res-baja').textContent=r.baja;document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';document.getElementById('results-sub').textContent=`${r.total} leads listos para descargar en Excel.`;document.getElementById('results-done').style.display='block';SnakeGame.hide();try{const lr2=await fetch(`${SCRAPER_API_URL}/result/${job_id}`);if(lr2.ok){const rd=await lr2.json();appState.currentLeads=rd.leads||[];}else{appState.currentLeads=[];}}catch(e){appState.currentLeads=[];}const entry={id:Date.now(),job_id,sector:appState.currentSearch?.sector||sector,ciudad,cats:cats.length,total:r.total,alta:r.alta,media:r.media,baja:r.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);_saveHistoryLeads(job_id,appState.currentLeads);break;}
       if(data.status==='error'){addLog(`❌ Error: ${data.error}`,'error');setProgress(0,'Error — intenta de nuevo');break;}
     }
   }catch(err){addLog(`❌ ${err.message}`,'error');setProgress(0,'Error de conexión');}
