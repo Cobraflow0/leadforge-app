@@ -1986,9 +1986,12 @@ function _onNukeMapClick(e){
   let left=pt.x+16,top=pt.y-80;
   if(left+265>mapRect.width)left=pt.x-275;
   if(top<0)top=10;
-  if(top+300>mapRect.height)top=mapRect.height-310;
+  if(top+480>mapRect.height)top=Math.max(10,mapRect.height-490);
   panel.style.left=left+'px';panel.style.top=top+'px';
   panel.style.display='block';
+  // Inicializar subcategorías si ya hay sector seleccionado
+  const currentSector=document.getElementById('nuke-sector-select').value;
+  if(currentSector)nukeSectorChanged(currentSector);
 }
 
 const _nukeSrcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','sortlist':'sortlist','europages':'europages','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
