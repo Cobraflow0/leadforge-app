@@ -2160,15 +2160,21 @@ function _nukeImpactSound(type){
   }catch(e){}
 }
 
+function _getMonthKey(){const n=new Date();return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;}
+function getEmailsSentThisMonth(){try{const d=JSON.parse(localStorage.getItem('lf_emails_month')||'{}');return d.month===_getMonthKey()?d.count:0;}catch(e){return 0;}}
+function addEmailsSent(n){const key=_getMonthKey();let d={month:key,count:0};try{const s=JSON.parse(localStorage.getItem('lf_emails_month')||'{}');d=s.month===key?s:{month:key,count:0};}catch(e){}d.count+=n;localStorage.setItem('lf_emails_month',JSON.stringify(d));}
 function updateStats(){
   const searches=appState.searches,thisMonth=searches.filter(s=>new Date(s.id)>new Date(Date.now()-30*24*60*60*1000));
-  const totalLeads=searches.reduce((a,s)=>a+(s.total||0),0),totalEmails=parseInt(localStorage.getItem('lf_emails_sent')||'0');
-  const limits=getPlanLimits(),used=thisMonth.length,cap=limits.searches,capStr=cap===Infinity?'∞':cap;
-  const pct=cap===Infinity?Math.min(used*3,100):Math.round(used/cap*100);
-  const barClass=pct>=100?'full':pct>=80?'warn':'ok';
-  document.getElementById('stat-searches').innerHTML=`${used}<span> / ${capStr} este mes</span><div class="limit-bar-wrap"><div class="limit-bar-fill ${barClass}" style="width:${Math.min(pct,100)}%"></div></div>`;
+  const totalLeads=searches.reduce((a,s)=>a+(s.total||0),0);
+  const limits=getPlanLimits();
+  const usedS=thisMonth.length,capS=limits.searches,capSStr=capS===Infinity?'∞':capS;
+  const pctS=capS===Infinity?Math.min(usedS*3,100):Math.round(usedS/capS*100);
+  const barS=pctS>=100?'full':pctS>=80?'warn':'ok';
+  document.getElementById('stat-searches').innerHTML=`${usedS}<span> / ${capSStr} este mes</span><div class="limit-bar-wrap"><div class="limit-bar-fill ${barS}" style="width:${Math.min(pctS,100)}%"></div></div>`;
   document.getElementById('stat-leads').innerHTML=`${totalLeads} <span>leads</span>`;
-  document.getElementById('stat-emails').innerHTML=`${totalEmails} <span>emails</span>`;
+  const usedE=getEmailsSentThisMonth(),capE=limits.emails,pctE=Math.round(usedE/capE*100);
+  const barE=pctE>=100?'full':pctE>=80?'warn':'ok';
+  document.getElementById('stat-emails').innerHTML=`${usedE}<span> / ${capE} este mes</span><div class="limit-bar-wrap"><div class="limit-bar-fill ${barE}" style="width:${Math.min(pctE,100)}%"></div></div>`;
   document.getElementById('cuenta-searches').textContent=searches.length;renderHistory();
   setTimeout(initMap,50);
 }
@@ -2298,6 +2304,22 @@ function openCampaignModal(){
     const chip=lbl.querySelector('.plan-lock-chip');
     if(!chip&&locked)lbl.insertAdjacentHTML('beforeend','<span class="plan-chip basic" style="margin-left:8px">🔒 Pro+</span>');}
   }
+  // Aviso de límite de emails del mes
+  const usedE=getEmailsSentThisMonth(),capE=limits.emails,restanE=capE-usedE;
+  const statusEl=document.getElementById('camp-sender-status');
+  if(restanE<=0){
+    statusEl.style.display='block';statusEl.style.background='rgba(255,61,90,0.08)';statusEl.style.border='1px solid rgba(255,61,90,0.25)';statusEl.style.color='var(--red)';
+    statusEl.textContent=`⛔ Has alcanzado el límite de ${capE} emails este mes. Se reinicia el 1 del mes que viene.`;
+    document.getElementById('btn-send-campaign').disabled=true;
+  } else if(restanE<=50){
+    statusEl.style.display='block';statusEl.style.background='rgba(255,217,61,0.08)';statusEl.style.border='1px solid rgba(255,217,61,0.25)';statusEl.style.color='var(--yellow)';
+    statusEl.textContent=`⚠️ Te quedan ${restanE} emails este mes de ${capE} (plan ${limits.label}).`;
+    document.getElementById('btn-send-campaign').disabled=false;
+  } else {
+    statusEl.style.display='block';statusEl.style.background='rgba(0,229,160,0.05)';statusEl.style.border='1px solid rgba(0,229,160,0.15)';statusEl.style.color='var(--text3)';
+    statusEl.textContent=`📧 ${restanE} emails disponibles este mes de ${capE} (plan ${limits.label}).`;
+    document.getElementById('btn-send-campaign').disabled=false;
+  }
   document.getElementById('modal-campaign').classList.add('open');
 }
 function closeCampaignModal(){document.getElementById('modal-campaign').classList.remove('open');}
@@ -2309,7 +2331,7 @@ async function sendCampaign(){
   const btn=document.getElementById('btn-send-campaign'),lbl=document.getElementById('camp-label'),spin=document.getElementById('camp-spinner'),resEl=document.getElementById('campaign-result');
   btn.disabled=true;lbl.style.display='none';spin.style.display='block';
   try{const r=await fetch(`${SCRAPER_API_URL}/send-campaign`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_subject:subject,user_email:email,user_id:appState.user?.id||'',max_emails:selectedLimit,leads:appState.currentLeads})});const data=await r.json();btn.disabled=false;lbl.style.display='inline';spin.style.display='none';
-  if(data.ok){localStorage.setItem('lf_campaign_data',JSON.stringify({name,company,product,subject,email}));const prev=parseInt(localStorage.getItem('lf_emails_sent')||'0');localStorage.setItem('lf_emails_sent',prev+data.enviados);updateStats();const followup=document.getElementById('camp-followup').checked;const campañas=JSON.parse(localStorage.getItem('lf_campanas')||'[]');campañas.unshift({id:Date.now(),tag:`lf_${jobId.slice(0,8)}`,job_id:jobId,sector:appState.currentSearch?.sector||'',ciudad:appState.currentSearch?.ciudad||'',enviados:data.enviados,company,user_email:email,has_sequence:followup,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})});localStorage.setItem('lf_campanas',JSON.stringify(campañas.slice(0,50)));saveCampaignToSupabase(campañas[0]);if(followup&&jobId){fetch(`${SCRAPER_API_URL}/sequences/start`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_subject:subject,user_email:email,max_emails:selectedLimit,leads:appState.currentLeads})});}closeCampaignModal();let msg=`✅ Campaña enviada: ${data.enviados} emails`;if(data.ya_contactados)msg+=` · ${data.ya_contactados} ya contactados anteriormente omitidos`;if(data.en_blacklist)msg+=` · ${data.en_blacklist} en blacklist omitidos`;if(data.filtrados)msg+=` · ${data.filtrados} emails inválidos filtrados`;if(followup)msg+=` · Secuencia activada 🚀`;resEl.className='campaign-result ok';resEl.style.display='block';resEl.textContent=msg;}else{resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ ${data.error||'No se pudo enviar.'}`;}}catch(err){btn.disabled=false;lbl.style.display='inline';spin.style.display='none';resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ Error: ${err.message||'No se pudo conectar con la API'}`;}
+  if(data.ok){localStorage.setItem('lf_campaign_data',JSON.stringify({name,company,product,subject,email}));addEmailsSent(data.enviados);updateStats();const followup=document.getElementById('camp-followup').checked;const campañas=JSON.parse(localStorage.getItem('lf_campanas')||'[]');campañas.unshift({id:Date.now(),tag:`lf_${jobId.slice(0,8)}`,job_id:jobId,sector:appState.currentSearch?.sector||'',ciudad:appState.currentSearch?.ciudad||'',enviados:data.enviados,company,user_email:email,has_sequence:followup,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})});localStorage.setItem('lf_campanas',JSON.stringify(campañas.slice(0,50)));saveCampaignToSupabase(campañas[0]);if(followup&&jobId){fetch(`${SCRAPER_API_URL}/sequences/start`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_subject:subject,user_email:email,max_emails:selectedLimit,leads:appState.currentLeads})});}closeCampaignModal();let msg=`✅ Campaña enviada: ${data.enviados} emails`;if(data.ya_contactados)msg+=` · ${data.ya_contactados} ya contactados anteriormente omitidos`;if(data.en_blacklist)msg+=` · ${data.en_blacklist} en blacklist omitidos`;if(data.filtrados)msg+=` · ${data.filtrados} emails inválidos filtrados`;if(followup)msg+=` · Secuencia activada 🚀`;resEl.className='campaign-result ok';resEl.style.display='block';resEl.textContent=msg;}else{resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ ${data.error||'No se pudo enviar.'}`;}}catch(err){btn.disabled=false;lbl.style.display='inline';spin.style.display='none';resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ Error: ${err.message||'No se pudo conectar con la API'}`;}
 }
 function _seqTouchLabel(touch,idx){const dias=[4,8,14];const dia=dias[idx]||'?';if(touch.sent>0)return`<span style="color:var(--green)">✅ Día ${dia} (${touch.sent} enviados)</span>`;const sch=touch.scheduled_at?new Date(touch.scheduled_at):null;const hoy=new Date();const diff=sch?Math.ceil((sch-hoy)/86400000):null;if(diff!==null&&diff>0)return`<span style="color:var(--text3)">⏳ Día ${dia} en ${diff}d</span>`;return`<span style="color:var(--yellow)">🔄 Día ${dia} procesando</span>`;}
 async function renderCampanas(){
