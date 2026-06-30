@@ -1772,7 +1772,7 @@ function selectNukeType(type){
 }
 
 function _onNukeMapHover(e){
-  if(!_nukeModeActive)return;
+  if(!_nukeModeActive||_nukeTargetLatLng)return;
   const t=NUKE_TYPES[_selectedNukeType];
   if(_hoverCircle){
     _hoverCircle.setLatLng(e.latlng);
@@ -1786,6 +1786,11 @@ function _onNukeMapHover(e){
 
 function _onNukeMapClick(e){
   if(!_nukeModeActive)return;
+  // Si ya hay objetivo fijado, este click lo cancela (vuelve a modo hover)
+  if(_nukeTargetLatLng){
+    cancelNuke();
+    return;
+  }
   if(_nukeRemaining(_selectedNukeType)<=0){
     showUpgradeModal(`Has agotado las nukes <strong>${NUKE_TYPES[_selectedNukeType].label}</strong> de este mes.<br><br>Selecciona otro tipo o actualiza tu plan.`);return;
   }
@@ -1793,6 +1798,8 @@ function _onNukeMapClick(e){
   const cities=_getCitiesInRadius(e.latlng.lat,e.latlng.lng,t.radiusKm);
   _nukeTargetLatLng=e.latlng;
   _nukeTargetCities=cities;
+  // Congelar el círculo en la posición fijada (aspecto sólido)
+  if(_hoverCircle)_hoverCircle.setStyle({dashArray:null,weight:2.5,fillOpacity:0.12,opacity:1});
 
   // Actualizar panel
   const panel=document.getElementById('nuke-confirm-panel');
@@ -1828,6 +1835,8 @@ function _onNukeMapClick(e){
 function cancelNuke(){
   document.getElementById('nuke-confirm-panel').style.display='none';
   _nukeTargetLatLng=null;_nukeTargetCities=[];
+  // Volver el círculo a modo hover (discontinuo, sigue al ratón)
+  if(_hoverCircle)_hoverCircle.setStyle({dashArray:'5,4',weight:1.5,fillOpacity:0.06,opacity:0.6});
 }
 
 async function confirmNukeLaunch(){
