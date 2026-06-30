@@ -925,6 +925,11 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
         <div id="blacklist-list" style="display:flex;flex-wrap:wrap;gap:8px;min-height:32px;"></div>
       </div>
       <div class="danger-zone" style="margin-top:20px;">
+        <div class="danger-title">Resetear leads contactados</div>
+        <div class="danger-sub">Elimina el historial de leads ya contactados. Los próximas campañas los volverán a considerar como nuevos.</div>
+        <button class="btn-danger" onclick="resetContactados()" id="btn-reset-contacted">Resetear contactados</button>
+      </div>
+      <div class="danger-zone" style="margin-top:12px;">
         <div class="danger-title">Cancelar suscripción</div>
         <div class="danger-sub">Al cancelar mantendrás el acceso hasta el final del período de facturación actual.</div>
         <button class="btn-danger" onclick="openCancelModal()">Cancelar suscripción</button>
@@ -1488,7 +1493,7 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
     addLog(`🏙️ Iniciando búsqueda en ${ciudad} (${i+1}/${ciudades.length})…`,'accent');
     const baseProgress=Math.round((i/ciudades.length)*100),cityProgressScale=1/ciudades.length;
     try{
-      const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources,max_leads:maxLeads,quick_mode:quickMode})});
+      const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources,max_leads:maxLeads,quick_mode:quickMode,user_id:appState.user?.id||''})});
       if(!lr.ok)throw new Error(`Error al lanzar: ${lr.status}`);
       const {job_id}=await lr.json();lastJobId=job_id;addLog(`✓ Job ${ciudad} iniciado (${job_id.slice(0,8)}…)`,'ok');
       let lastLog=0,errCount=0;
@@ -1548,7 +1553,7 @@ function _resetLiveStats(){
 async function runScrapingReal(sector,ciudad,cats,sources,maxLeads=1000){
   try{
     addLog('▶ Conectando con LeadForge API…','accent');
-    const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources,max_leads:maxLeads})});
+    const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources,max_leads:maxLeads,user_id:appState.user?.id||''})});
     if(!lr.ok)throw new Error(`Error al lanzar: ${lr.status}`);
     const {job_id}=await lr.json();appState.currentJobId=job_id;addLog(`✓ Job iniciado (${job_id.slice(0,8)}…)`,'ok');_resetLiveStats();
     let lastLog=0,errCount=0;
@@ -1755,9 +1760,9 @@ function initMap(){
    SCRAPING NUKE — Sistema completo
 ══════════════════════════════════════════════════════════ */
 const NUKE_TYPES={
-  tactical: {label:'Táctica',emoji:'💣',radiusKm:3,color:'#FFD93D',flashColor:'rgba(255,217,61,0.28)',missileDuration:1800,rings:3,ringMax:28,sound:'tactical'},
-  strategic:{label:'Estratégica',emoji:'🚀',radiusKm:8,color:'#FF7A00',flashColor:'rgba(255,122,0,0.28)',missileDuration:3000,rings:5,ringMax:50,sound:'strategic'},
-  moab:     {label:'MOAB',emoji:'☢️',radiusKm:15,color:'#FF3D5A',flashColor:'rgba(255,61,90,0.38)',missileDuration:5000,rings:7,ringMax:80,sound:'moab',shake:true},
+  tactical: {label:'Táctica',emoji:'💣',radiusKm:3,color:'#FFD93D',flashColor:'rgba(255,217,61,0.28)',missileDuration:1000,rings:3,ringMax:28,sound:'tactical'},
+  strategic:{label:'Estratégica',emoji:'🚀',radiusKm:8,color:'#FF7A00',flashColor:'rgba(255,122,0,0.28)',missileDuration:1800,rings:5,ringMax:50,sound:'strategic'},
+  moab:     {label:'MOAB',emoji:'☢️',radiusKm:15,color:'#FF3D5A',flashColor:'rgba(255,61,90,0.38)',missileDuration:3000,rings:7,ringMax:80,sound:'moab',shake:true},
 };
 const NUKE_LIMITS={
   demo:    {tactical:0,strategic:0,moab:0},
@@ -1910,6 +1915,11 @@ async function confirmNukeLaunch(){
   const sector=document.getElementById('nuke-sector-select').value;
   if(!sector){document.getElementById('nuke-sector-select').style.borderColor='#FF3D5A';return;}
   const type=_selectedNukeType,latlng=_nukeTargetLatLng,cities=[..._nukeTargetCities];
+  // Show city preview before MOAB — big investment, confirm target
+  if(type==='moab'&&cities.length){
+    const cityList=cities.slice(0,12).join(', ')+(cities.length>12?` y ${cities.length-12} más`:'');
+    if(!confirm(`MOAB: vas a atacar ${cities.length} ciudad${cities.length!==1?'es':''} en el radio:\n\n${cityList}\n\n¿Confirmar lanzamiento?`))return;
+  }
   cancelNuke();
   toggleNukeMode();
   _nukeIncrement(type);
@@ -1921,7 +1931,6 @@ async function _animateAndLaunch(type,latlng,cities,sector){
 
   // Sonido de lanzamiento
   _nukeLaunchSound(type);
-  if(type==='moab')_moabSiren(t.missileDuration);
 
   // Animación del misil
   const mapEl=document.getElementById('map-coverage');
@@ -2154,6 +2163,47 @@ function _renderPreviewTouch(n){
   document.getElementById('preview-iframe').srcdoc=html;
 }
 function closePreview(){document.getElementById('preview-overlay').classList.remove('open');}
+
+async function cancelSequence(jobId,userEmail,campId){
+  if(!confirm('¿Cancelar todos los follow-ups pendientes de esta campaña?'))return;
+  const btn=document.getElementById('camp-cancel-'+campId);
+  if(btn){btn.disabled=true;btn.textContent='Cancelando…';}
+  try{
+    const r=await fetch(`${SCRAPER_API_URL}/sequences/cancel`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_email:userEmail})});
+    const d=await r.json();
+    if(d.ok){
+      const seqEl=document.getElementById('camp-seq-'+campId);
+      if(seqEl)seqEl.innerHTML='<span style="color:var(--text3)">🛑 Secuencia cancelada</span>';
+      if(btn)btn.style.display='none';
+    }else{if(btn){btn.disabled=false;btn.textContent='Cancelar';}}
+  }catch(e){if(btn){btn.disabled=false;btn.textContent='Cancelar';}}
+}
+
+async function saveCampaignToSupabase(c){
+  if(!appState.user?.id)return;
+  try{
+    await sb.req('/rest/v1/campaigns',{method:'POST',headers:{'Prefer':'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify({user_id:appState.user.id,user_email:c.user_email||'',job_id:c.job_id||null,tag:c.tag||'',sector:c.sector||'',ciudad:c.ciudad||'',enviados:c.enviados||0,company:c.company||'',has_sequence:!!c.has_sequence})});
+  }catch(e){}
+}
+
+async function loadCampaignsFromSupabase(){
+  if(!appState.user?.id)return;
+  try{
+    const r=await sb.req(`/rest/v1/campaigns?user_id=eq.${appState.user.id}&order=created_at.desc&limit=50`);
+    if(!r.ok)return;
+    const remote=await r.json();
+    if(!Array.isArray(remote)||!remote.length)return;
+    const local=JSON.parse(localStorage.getItem('lf_campanas')||'[]');
+    const localTags=new Set(local.filter(c=>c.tag).map(c=>c.tag));
+    let added=0;
+    remote.forEach(c=>{
+      if(c.tag&&localTags.has(c.tag))return;
+      local.push({id:new Date(c.created_at).getTime()+Math.random(),tag:c.tag||'',job_id:c.job_id||null,sector:c.sector||'',ciudad:c.ciudad||'',enviados:c.enviados||0,company:c.company||'',user_email:c.user_email||'',has_sequence:!!c.has_sequence,date:new Date(c.created_at).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})});
+      added++;
+    });
+    if(added>0){local.sort((a,b)=>b.id-a.id);localStorage.setItem('lf_campanas',JSON.stringify(local.slice(0,50)));}
+  }catch(e){}
+}
 function showAlert(el,msg){el.textContent=msg;el.classList.add('show');}
 function delay(ms){return new Promise(r=>setTimeout(r,ms));}
 function openCampaignModal(){
@@ -2196,13 +2246,14 @@ async function sendCampaign(){
   const btn=document.getElementById('btn-send-campaign'),lbl=document.getElementById('camp-label'),spin=document.getElementById('camp-spinner'),resEl=document.getElementById('campaign-result');
   btn.disabled=true;lbl.style.display='none';spin.style.display='block';
   try{const r=await fetch(`${SCRAPER_API_URL}/send-campaign`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_email:email,user_id:appState.user?.id||'',max_emails:selectedLimit,leads:appState.currentLeads})});const data=await r.json();btn.disabled=false;lbl.style.display='inline';spin.style.display='none';
-  if(data.ok){localStorage.setItem('lf_campaign_data',JSON.stringify({name,company,product,email}));const prev=parseInt(localStorage.getItem('lf_emails_sent')||'0');localStorage.setItem('lf_emails_sent',prev+data.enviados);updateStats();const followup=document.getElementById('camp-followup').checked;const campañas=JSON.parse(localStorage.getItem('lf_campanas')||'[]');campañas.unshift({id:Date.now(),tag:`lf_${jobId.slice(0,8)}`,job_id:jobId,sector:appState.currentSearch?.sector||'',ciudad:appState.currentSearch?.ciudad||'',enviados:data.enviados,company,user_email:email,has_sequence:followup,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})});localStorage.setItem('lf_campanas',JSON.stringify(campañas.slice(0,50)));if(followup&&jobId){fetch(`${SCRAPER_API_URL}/sequences/start`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_email:email,max_emails:selectedLimit,leads:appState.currentLeads})});}closeCampaignModal();let msg=`✅ Campaña enviada: ${data.enviados} emails`;if(data.ya_contactados)msg+=` · ${data.ya_contactados} ya contactados anteriormente omitidos`;if(data.en_blacklist)msg+=` · ${data.en_blacklist} en blacklist omitidos`;if(data.filtrados)msg+=` · ${data.filtrados} emails inválidos filtrados`;if(followup)msg+=` · Secuencia activada 🚀`;resEl.className='campaign-result ok';resEl.style.display='block';resEl.textContent=msg;}else{resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ ${data.error||'No se pudo enviar.'}`;}}catch(err){btn.disabled=false;lbl.style.display='inline';spin.style.display='none';resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ Error: ${err.message||'No se pudo conectar con la API'}`;}
+  if(data.ok){localStorage.setItem('lf_campaign_data',JSON.stringify({name,company,product,email}));const prev=parseInt(localStorage.getItem('lf_emails_sent')||'0');localStorage.setItem('lf_emails_sent',prev+data.enviados);updateStats();const followup=document.getElementById('camp-followup').checked;const campañas=JSON.parse(localStorage.getItem('lf_campanas')||'[]');campañas.unshift({id:Date.now(),tag:`lf_${jobId.slice(0,8)}`,job_id:jobId,sector:appState.currentSearch?.sector||'',ciudad:appState.currentSearch?.ciudad||'',enviados:data.enviados,company,user_email:email,has_sequence:followup,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})});localStorage.setItem('lf_campanas',JSON.stringify(campañas.slice(0,50)));saveCampaignToSupabase(campañas[0]);if(followup&&jobId){fetch(`${SCRAPER_API_URL}/sequences/start`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({job_id:jobId,user_name:name,user_company:company,user_product:product,user_email:email,max_emails:selectedLimit,leads:appState.currentLeads})});}closeCampaignModal();let msg=`✅ Campaña enviada: ${data.enviados} emails`;if(data.ya_contactados)msg+=` · ${data.ya_contactados} ya contactados anteriormente omitidos`;if(data.en_blacklist)msg+=` · ${data.en_blacklist} en blacklist omitidos`;if(data.filtrados)msg+=` · ${data.filtrados} emails inválidos filtrados`;if(followup)msg+=` · Secuencia activada 🚀`;resEl.className='campaign-result ok';resEl.style.display='block';resEl.textContent=msg;}else{resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ ${data.error||'No se pudo enviar.'}`;}}catch(err){btn.disabled=false;lbl.style.display='inline';spin.style.display='none';resEl.className='campaign-result err';resEl.style.display='block';resEl.textContent=`❌ Error: ${err.message||'No se pudo conectar con la API'}`;}
 }
 function _seqTouchLabel(touch,idx){const dias=[4,8,14];const dia=dias[idx]||'?';if(touch.sent>0)return`<span style="color:var(--green)">✅ Día ${dia} (${touch.sent} enviados)</span>`;const sch=touch.scheduled_at?new Date(touch.scheduled_at):null;const hoy=new Date();const diff=sch?Math.ceil((sch-hoy)/86400000):null;if(diff!==null&&diff>0)return`<span style="color:var(--text3)">⏳ Día ${dia} en ${diff}d</span>`;return`<span style="color:var(--yellow)">🔄 Día ${dia} procesando</span>`;}
 async function renderCampanas(){
+  await loadCampaignsFromSupabase();
   const campañas=JSON.parse(localStorage.getItem('lf_campanas')||'[]'),list=document.getElementById('campanas-list');
   if(!campañas.length){list.innerHTML=`<div class="empty-state"><span class="emoji">📨</span><p>Aún no has enviado ninguna campaña.</p></div>`;return;}
-  list.innerHTML=campañas.map(c=>`<div class="camp-card" id="camp-${c.id}"><div class="camp-header"><div><div class="camp-title">📨 ${c.company||'Campaña'} — ${c.sector||''} ${c.ciudad?'· '+c.ciudad:''}</div><div class="camp-date">${c.date} · ${c.enviados} emails enviados${c.has_sequence?' · 🔁 Secuencia activa':''}</div></div><span class="camp-loading" id="camp-loading-${c.id}">Cargando stats…</span></div><div class="camp-stats" id="camp-stats-${c.id}" style="display:none"><div class="camp-stat enviados"><span class="n" id="cs-env-${c.id}">${c.enviados}</span><span class="l">Enviados</span></div><div class="camp-stat abiertos"><span class="n" id="cs-open-${c.id}">—</span><span class="l">Abiertos</span><div class="pct-bar-bg"><div class="pct-bar-fill" id="cs-open-bar-${c.id}" style="width:0%;background:var(--green)"></div></div></div><div class="camp-stat clics"><span class="n" id="cs-click-${c.id}">—</span><span class="l">Clics</span><div class="pct-bar-bg"><div class="pct-bar-fill" id="cs-click-bar-${c.id}" style="width:0%;background:var(--yellow)"></div></div></div><div class="camp-stat rebotes"><span class="n" id="cs-reb-${c.id}">—</span><span class="l">Rebotes</span></div></div>${c.has_sequence?`<div id="camp-seq-${c.id}" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;display:flex;gap:16px;flex-wrap:wrap;">Cargando secuencia…</div>`:''}
+  list.innerHTML=campañas.map(c=>`<div class="camp-card" id="camp-${c.id}"><div class="camp-header"><div><div class="camp-title">📨 ${c.company||'Campaña'} — ${c.sector||''} ${c.ciudad?'· '+c.ciudad:''}</div><div class="camp-date">${c.date} · ${c.enviados} emails enviados${c.has_sequence?' · 🔁 Secuencia activa':''}</div></div><span class="camp-loading" id="camp-loading-${c.id}">Cargando stats…</span></div><div class="camp-stats" id="camp-stats-${c.id}" style="display:none"><div class="camp-stat enviados"><span class="n" id="cs-env-${c.id}">${c.enviados}</span><span class="l">Enviados</span></div><div class="camp-stat abiertos"><span class="n" id="cs-open-${c.id}">—</span><span class="l">Abiertos</span><div class="pct-bar-bg"><div class="pct-bar-fill" id="cs-open-bar-${c.id}" style="width:0%;background:var(--green)"></div></div></div><div class="camp-stat clics"><span class="n" id="cs-click-${c.id}">—</span><span class="l">Clics</span><div class="pct-bar-bg"><div class="pct-bar-fill" id="cs-click-bar-${c.id}" style="width:0%;background:var(--yellow)"></div></div></div><div class="camp-stat rebotes"><span class="n" id="cs-reb-${c.id}">—</span><span class="l">Rebotes</span></div></div>${c.has_sequence?`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div id="camp-seq-${c.id}" style="font-size:12px;display:flex;gap:16px;flex-wrap:wrap;flex:1;">Cargando secuencia…</div><button onclick="cancelSequence('${c.job_id}','${c.user_email}',${c.id})" id="camp-cancel-${c.id}" style="font-size:11px;padding:4px 10px;background:transparent;border:1px solid rgba(255,61,90,0.3);border-radius:6px;color:rgba(255,61,90,0.7);cursor:pointer;white-space:nowrap;flex-shrink:0;">Cancelar</button></div>`:''}
 </div>`).join('');
   campañas.forEach(async c=>{
     try{const r=await fetch(`${SCRAPER_API_URL}/campaign-stats`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tag:c.tag})});const d=await r.json();const loadEl=document.getElementById(`camp-loading-${c.id}`),statsEl=document.getElementById(`camp-stats-${c.id}`);if(!loadEl||!statsEl)return;if(d.ok){loadEl.style.display='none';statsEl.style.display='grid';document.getElementById(`cs-open-${c.id}`).textContent=`${d.abiertos} (${d.pct_open}%)`;document.getElementById(`cs-click-${c.id}`).textContent=`${d.clics} (${d.pct_click}%)`;document.getElementById(`cs-reb-${c.id}`).textContent=d.rebotes;document.getElementById(`cs-open-bar-${c.id}`).style.width=Math.min(d.pct_open,100)+'%';document.getElementById(`cs-click-bar-${c.id}`).style.width=Math.min(d.pct_click,100)+'%';}else{loadEl.textContent='Stats no disponibles aún';}}catch(e){const loadEl=document.getElementById(`camp-loading-${c.id}`);if(loadEl)loadEl.textContent='Error al cargar stats';}
@@ -2369,6 +2420,19 @@ function checkOnboarding(){
 function dismissOnboarding(){document.getElementById('onboarding-banner').style.display='none';localStorage.setItem('lf_onboarding_done','1');}
 
 // ── BLACKLIST ────────────────────────────────────────────────
+async function resetContactados(){
+  if(!confirm('¿Seguro? Esto elimina el registro de todos los leads ya contactados.\nLas próximas campañas los tratarán como nuevos leads.'))return;
+  const btn=document.getElementById('btn-reset-contacted');
+  btn.disabled=true;btn.textContent='Reseteando…';
+  try{
+    const r=await fetch(`${SCRAPER_API_URL}/contacted/reset`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_email:appState.user?.email||'',user_id:appState.user?.id||''})});
+    const d=await r.json();
+    if(d.ok){alert('✅ Historial de contactados eliminado. Las próximas campañas empiezan de cero.');}
+    else{alert('Error al resetear. Inténtalo de nuevo.');}
+  }catch(e){alert('Error de conexión.');}
+  btn.disabled=false;btn.textContent='Resetear contactados';
+}
+
 async function loadBlacklist(){
   if(!appState.user?.id)return;
   const r=await sb.req(`/rest/v1/email_blacklist?select=email,id&user_id=eq.${appState.user.id}&order=created_at.desc`);
