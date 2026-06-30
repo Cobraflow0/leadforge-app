@@ -1638,12 +1638,19 @@ async function downloadExcel(){
 }
 async function downloadHistoryExcel(jobId){
   if(!jobId){alert('Esta búsqueda no tiene ID guardado.');return;}
-  const leads=_loadHistoryLeads(jobId);
-  if(!leads?.length){alert('Los leads de esta búsqueda ya no están guardados en este dispositivo.\n\nLas búsquedas se guardan localmente durante la sesión. Lanza una nueva búsqueda para descargar los leads.');return;}
   const s=appState.searches.find(x=>x.job_id===jobId);
   const btn=document.querySelector(`button[onclick="downloadHistoryExcel('${jobId}')"]`);
   if(btn){btn.disabled=true;btn.textContent='⏳';}
   try{
+    // Try localStorage first, then fallback to Supabase via API
+    let leads=_loadHistoryLeads(jobId);
+    if(!leads?.length){
+      const fr=await fetch(`${SCRAPER_API_URL}/result/${jobId}`);
+      if(!fr.ok)throw new Error('not_found');
+      const fd=await fr.json();
+      leads=fd.leads||[];
+    }
+    if(!leads?.length)throw new Error('empty');
     const r=await fetch(`${SCRAPER_API_URL}/export-excel`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({leads,sector:s?.sector||'leads',ciudad:s?.ciudad||'',job_id:jobId})});
     if(!r.ok)throw new Error();
     const blob=await r.blob();
@@ -1652,8 +1659,10 @@ async function downloadHistoryExcel(jobId){
     const fname=match?match[1]:`LeadForge_${(s?.sector||'leads').replace(/\s+/g,'_')}_${new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-')}.xlsx`;
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');a.href=url;a.download=fname;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-  }catch(e){_generateExcelClientSide(leads,s?.sector,s?.ciudad);}
-  finally{if(btn){btn.disabled=false;btn.textContent='📥 Excel';}}
+  }catch(e){
+    if(e.message==='not_found'||e.message==='empty')alert('No se encontraron leads para esta búsqueda. Puede que sea anterior al sistema de persistencia.');
+    else alert('Error al generar el Excel. Inténtalo de nuevo.');
+  }finally{if(btn){btn.disabled=false;btn.textContent='📥 Excel';}}
 }
 function newSearch(){showPage('dashboard');}
 function renderHistory(){
