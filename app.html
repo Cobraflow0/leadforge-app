@@ -405,6 +405,16 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 #nuke-cities-list{font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.6;background:rgba(255,255,255,0.03);border-radius:8px;padding:8px 10px;}
 #nuke-confirm-panel select{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px;font-size:13px;font-family:'Space Grotesk',sans-serif;color:var(--text);outline:none;margin-bottom:12px;}
 #nuke-confirm-panel select option{background:#090D18;}
+.nuke-section{margin-bottom:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);}
+.nuke-section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.nuke-section-hdr span{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);}
+.nuke-section-hdr button{font-size:10px;font-family:'Space Grotesk',sans-serif;background:none;border:none;color:var(--text3);cursor:pointer;padding:0;text-decoration:underline;}
+.nuke-section-hdr button:hover{color:var(--accent);}
+.nuke-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;border:1px solid var(--border);color:var(--text3);background:transparent;user-select:none;}
+.nuke-tag:hover{border-color:var(--border2);color:var(--text2);}
+.nuke-tag.selected{background:rgba(0,200,255,0.08);border-color:rgba(0,200,255,0.3);color:var(--accent);}
+.nuke-tag .ntag-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.nuke-tags-wrap{display:flex;flex-wrap:wrap;gap:5px;max-height:110px;overflow-y:auto;}
 .nuke-launch-btn{width:100%;padding:11px;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;letter-spacing:0.3px;margin-bottom:7px;transition:all 0.2s;}
 .nuke-launch-btn:hover{transform:translateY(-1px);}
 .nuke-cancel-btn{width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;font-family:'Space Grotesk',sans-serif;cursor:pointer;}
@@ -575,20 +585,20 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
             <option value="energia">☀️ Energía e Instalaciones</option>
             <option value="servicios_hogar">🔧 Servicios del Hogar</option>
           </select>
-          <div id="nuke-cats-wrap" style="display:none;margin-bottom:10px;">
-            <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">Subcategorías <button onclick="nukeToggleAllCats()" style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--text3);font-size:9px;padding:1px 6px;cursor:pointer;font-family:'Space Grotesk',sans-serif;margin-left:4px;">Todas</button></div>
-            <div id="nuke-cats-grid" style="display:flex;flex-wrap:wrap;gap:5px;max-height:120px;overflow-y:auto;"></div>
+          <div id="nuke-cats-wrap" class="nuke-section" style="display:none;">
+            <div class="nuke-section-hdr"><span>Subcategorías</span><button onclick="nukeToggleAllCats()">Todas / Ninguna</button></div>
+            <div id="nuke-cats-grid" class="nuke-tags-wrap"></div>
           </div>
-          <div style="margin-bottom:10px;">
-            <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;">Fuentes de datos</div>
-            <div style="display:flex;flex-wrap:wrap;gap:5px;">
-              <div class="source-pill selected" id="nuke-src-googlemaps" onclick="toggleNukeSrc('googlemaps',this)"><span class="source-dot"></span>Google Maps</div>
-              <div class="source-pill selected" id="nuke-src-habitissimo" onclick="toggleNukeSrc('habitissimo',this)"><span class="source-dot"></span>Habitissimo</div>
-              <div class="source-pill selected" id="nuke-src-sortlist" onclick="toggleNukeSrc('sortlist',this)"><span class="source-dot"></span>Sortlist</div>
-              <div class="source-pill selected" id="nuke-src-europages" onclick="toggleNukeSrc('europages',this)"><span class="source-dot"></span>Europages</div>
-              <div class="source-pill selected" id="nuke-src-webs" onclick="toggleNukeSrc('webs',this)"><span class="source-dot"></span>Webs propias</div>
-              <div class="source-pill" id="nuke-src-linkedin" onclick="toggleNukeSrc('linkedin',this)"><span class="source-dot"></span>LinkedIn <span style="font-size:9px;opacity:0.5;">beta</span></div>
-              <div class="source-pill" id="nuke-src-instagram" onclick="toggleNukeSrc('instagram',this)"><span class="source-dot"></span>Instagram <span style="font-size:9px;opacity:0.5;">beta</span></div>
+          <div class="nuke-section">
+            <div class="nuke-section-hdr"><span>Fuentes de datos</span></div>
+            <div class="nuke-tags-wrap" style="max-height:none;">
+              <div class="nuke-tag selected" id="nuke-src-googlemaps" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Google Maps</div>
+              <div class="nuke-tag selected" id="nuke-src-habitissimo" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Habitissimo</div>
+              <div class="nuke-tag selected" id="nuke-src-sortlist" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Sortlist</div>
+              <div class="nuke-tag selected" id="nuke-src-europages" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Europages</div>
+              <div class="nuke-tag selected" id="nuke-src-webs" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Webs propias</div>
+              <div class="nuke-tag" id="nuke-src-linkedin" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>LinkedIn <span style="opacity:0.45;font-size:9px;margin-left:2px;">beta</span></div>
+              <div class="nuke-tag" id="nuke-src-instagram" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Instagram <span style="opacity:0.45;font-size:9px;margin-left:2px;">beta</span></div>
             </div>
           </div>
           <button class="nuke-launch-btn" id="nuke-launch-btn" onclick="confirmNukeLaunch()">☢️ LANZAR NUKE</button>
@@ -2005,20 +2015,19 @@ function nukeSectorChanged(sector){
   if(!sector||!SECTORES[sector]){wrap.style.display='none';return;}
   wrap.style.display='block';
   SECTORES[sector].forEach(cat=>{
-    const pill=document.createElement('div');
-    pill.className='cat-pill selected';
-    pill.id='nuke-cat-'+cat.id;
-    pill.style.cssText='font-size:11px;padding:4px 8px;';
-    pill.innerHTML=`<div class="cat-check">✓</div><span>${cat.emoji} ${cat.label}</span>`;
-    pill.onclick=()=>{pill.classList.toggle('selected');pill.querySelector('.cat-check').textContent=pill.classList.contains('selected')?'✓':'';};
-    grid.appendChild(pill);
+    const tag=document.createElement('div');
+    tag.className='nuke-tag selected';
+    tag.id='nuke-cat-'+cat.id;
+    tag.innerHTML=`<span class="ntag-dot"></span>${cat.emoji} ${cat.label}`;
+    tag.onclick=()=>tag.classList.toggle('selected');
+    grid.appendChild(tag);
   });
 }
 function nukeToggleAllCats(){
   const sector=document.getElementById('nuke-sector-select').value;
   if(!sector||!SECTORES[sector])return;
   const allSel=SECTORES[sector].every(c=>document.getElementById('nuke-cat-'+c.id)?.classList.contains('selected'));
-  SECTORES[sector].forEach(c=>{const el=document.getElementById('nuke-cat-'+c.id);if(!el)return;if(allSel){el.classList.remove('selected');el.querySelector('.cat-check').textContent='';}else{el.classList.add('selected');el.querySelector('.cat-check').textContent='✓';}});
+  SECTORES[sector].forEach(c=>{const el=document.getElementById('nuke-cat-'+c.id);if(!el)return;allSel?el.classList.remove('selected'):el.classList.add('selected');});
 }
 function cancelNuke(){
   document.getElementById('nuke-confirm-panel').style.display='none';
