@@ -964,14 +964,13 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
     <div class="modal-field"><label>Tu nombre</label><input type="text" id="camp-name" placeholder="Ej: Carlos García"></div>
     <div class="modal-field"><label>Tu empresa</label><input type="text" id="camp-company" placeholder="Ej: Neopanels"></div>
     <div class="modal-field">
-      <label>¿En qué ayudáis? <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0;">(una frase corta)</span></label>
-      <textarea id="camp-product" rows="2" maxlength="150" oninput="updateProductCounter()" placeholder="Ej: ayudamos a tiendas a vender más con publicidad en redes sociales"></textarea>
-      <div style="text-align:right;font-size:11px;color:var(--text3);margin-top:4px;"><span id="product-counter">0</span>/150 caracteres</div>
+      <label>Asunto del email</label>
+      <input type="text" id="camp-subject" maxlength="80" placeholder="Ej: Una pregunta rápida">
     </div>
     <div class="modal-field">
-      <label>Asunto del email</label>
-      <input type="text" id="camp-subject" maxlength="80" placeholder="Ej: Una pregunta rápida sobre vuestro negocio">
-      <div style="font-size:11px;color:var(--text3);margin-top:5px;">Si lo dejas vacío usará el asunto por defecto.</div>
+      <label>Cuerpo del email</label>
+      <textarea id="camp-product" rows="7" placeholder="Escribe aquí el email completo tal como quieres que lo reciban.&#10;&#10;Puedes usar {{nombre}} para personalizar con el nombre del lead.&#10;&#10;Ej:&#10;Hola {{nombre}},&#10;&#10;Me llamo Carlos y te escribo desde Neopanels. Instalamos revestimientos para obras y reformas y creo que puede interesarte.&#10;&#10;¿Tenéis 10 minutos esta semana?"></textarea>
+      <div style="font-size:11px;color:var(--text3);margin-top:5px;">Usa <strong style="color:var(--accent)">{{nombre}}</strong> para insertar el nombre de cada empresa automáticamente.</div>
     </div>
     <div class="modal-field">
       <label>Email de respuesta</label>
@@ -2190,7 +2189,7 @@ function _renderPreviewTouch(n){
   const defaultSubject1=`¿Trabajamos juntos? — ${company}`;
   const subjects={1:subject||defaultSubject1,2:`Solo quería asegurarme — ${company}`,3:`Un último intento — ${company}`,4:`Cerramos el contacto — ${company}`};
   const bodies={
-    1:`<p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">Soy <strong>${name}</strong> de <strong>${company}</strong>. Te escribo porque <strong>${product}</strong>.</p><p style="margin:0 0 28px;font-size:15px;color:#4a5568;">¿Tendríais 10 minutos esta semana para una llamada rápida?</p>`,
+    1:product.split('\n').filter(l=>l.trim()).map(l=>`<p style="margin:0 0 14px;font-size:15px;color:#4a5568;line-height:1.7;">${l.replace(/\{\{nombre\}\}/g,'<strong>Empresa Ejemplo</strong>')}</p>`).join(''),
     2:`<p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">Te escribía hace unos días de <strong>${company}</strong> sobre <strong>${product}</strong>. Quería asegurarme de que te llegó mi mensaje.</p><p style="margin:0 0 28px;font-size:15px;color:#4a5568;">¿Tenéis un momento esta semana para una llamada rápida?</p>`,
     3:`<p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">Me he puesto en contacto un par de veces sobre <strong>${product}</strong>. Entiendo que puede no ser el momento adecuado.</p><p style="margin:0 0 28px;font-size:15px;color:#4a5568;">Si hay interés, estaré encantado de hablar. ¿15 minutos esta semana?</p>`,
     4:`<p style="margin:0 0 16px;font-size:15px;color:#4a5568;line-height:1.7;">No quiero molestarte más, así que este será mi último mensaje sobre <strong>${product}</strong>.</p><p style="margin:0 0 28px;font-size:15px;color:#4a5568;">Si en algún momento cambia la situación, aquí estamos.<br>¡Mucho éxito con tu negocio!</p>`,
