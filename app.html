@@ -1622,7 +1622,7 @@ async function runDemoScraping(sector, ciudad, cats){
 }
 async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000,quickMode=false){
   if(DEMO_MODE){await runDemoScraping(sector,ciudades[0],cats);return;}
-  let totalResult={total:0,alta:0,media:0,baja:0,leads:[]},lastJobId=null;_resetLiveStats();
+  let totalResult={total:0,alta:0,media:0,baja:0,raw_total:0,leads:[]},lastJobId=null;_resetLiveStats();
   for(let i=0;i<ciudades.length;i++){
     const ciudad=ciudades[i];
     if(ciudades.length>1){document.getElementById('multi-city-progress').style.display='flex';document.getElementById('mcp-current').textContent=i+1;document.getElementById('mcp-name').textContent=ciudad;}
@@ -1643,7 +1643,7 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
         const data=await sr.json();data.logs.slice(lastLog).forEach(line=>{const t=line.includes('✅')||line.includes('✓')?'ok':line.includes('❌')?'error':'info';addLog(line.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,''),t);});lastLog=data.logs.length;
         _updateLiveStats(data.logs.map(l=>l.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')));
         setProgress(Math.round(baseProgress+data.progress*cityProgressScale),`[${ciudad}] `+(data.logs.at(-1)?.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')||''));
-        if(data.status==='done'){const r=data.result;totalResult.total+=r.total;totalResult.alta+=r.alta;totalResult.media+=r.media;totalResult.baja+=r.baja;try{const lr2=await fetch(`${SCRAPER_API_URL}/result/${job_id}`);if(lr2.ok){const rd=await lr2.json();totalResult.leads.push(...(rd.leads||[]))}}catch(e){}addLog(`✅ ${ciudad}: ${r.total} leads encontrados`,'ok');break;}
+        if(data.status==='done'){const r=data.result;totalResult.total+=r.total;totalResult.alta+=r.alta;totalResult.media+=r.media;totalResult.baja+=r.baja;totalResult.raw_total+=(r.raw_total||r.total);try{const lr2=await fetch(`${SCRAPER_API_URL}/result/${job_id}`);if(lr2.ok){const rd=await lr2.json();totalResult.leads.push(...(rd.leads||[]))}}catch(e){}addLog(`✅ ${ciudad}: ${r.total} leads encontrados`,'ok');break;}
         if(data.status==='error'){addLog(`❌ Error en ${ciudad}: ${data.error}`,'error');break;}
       }
     }catch(err){addLog(`❌ ${ciudad}: ${err.message}`,'error');}
@@ -1652,7 +1652,10 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
   document.getElementById('res-total').textContent=totalResult.total;document.getElementById('res-alta').textContent=totalResult.alta;document.getElementById('res-media').textContent=totalResult.media;document.getElementById('res-baja').textContent=totalResult.baja;
   document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';
   const ciudadesStr=ciudades.length>1?ciudades.join(' + '):ciudades[0];
-  document.getElementById('results-sub').textContent=`${totalResult.total} leads en ${ciudadesStr}.`;document.getElementById('results-done').style.display='block';SnakeGame.hide();setProgress(100,'Completado');
+  const subMsg=(totalResult.raw_total>totalResult.total*1.3)
+    ? `Encontramos ${totalResult.raw_total} menciones en ${ciudadesStr} — muchas eran el mismo negocio repetido entre categorías o fuentes. Tras quitar duplicados y negocios sin contacto: ${totalResult.total} leads reales.`
+    : `${totalResult.total} leads en ${ciudadesStr}.`;
+  document.getElementById('results-sub').textContent=subMsg;document.getElementById('results-done').style.display='block';SnakeGame.hide();setProgress(100,'Completado');
   const entry={id:Date.now(),job_id:lastJobId,sector:appState.currentSearch?.sector||sector,ciudad:ciudadesStr,cats:cats.length,total:totalResult.total,alta:totalResult.alta,media:totalResult.media,baja:totalResult.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};
   appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);
   _saveHistoryLeads(lastJobId,totalResult.leads);
@@ -1703,7 +1706,7 @@ async function runScrapingReal(sector,ciudad,cats,sources,maxLeads=1000){
       const data=await sr.json();data.logs.slice(lastLog).forEach(line=>{const t=line.includes('✅')||line.includes('✓')?'ok':line.includes('❌')?'error':'info';addLog(line.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,''),t);});lastLog=data.logs.length;
       _updateLiveStats(data.logs.map(l=>l.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')));
       setProgress(data.progress,data.logs.at(-1)?.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')||'');
-      if(data.status==='done'){const r=data.result;document.getElementById('res-total').textContent=r.total;document.getElementById('res-alta').textContent=r.alta;document.getElementById('res-media').textContent=r.media;document.getElementById('res-baja').textContent=r.baja;document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';document.getElementById('results-sub').textContent=`${r.total} leads listos para descargar en Excel.`;document.getElementById('results-done').style.display='block';SnakeGame.hide();try{const lr2=await fetch(`${SCRAPER_API_URL}/result/${job_id}`);if(lr2.ok){const rd=await lr2.json();appState.currentLeads=rd.leads||[];}else{appState.currentLeads=[];}}catch(e){appState.currentLeads=[];}
+      if(data.status==='done'){const r=data.result;document.getElementById('res-total').textContent=r.total;document.getElementById('res-alta').textContent=r.alta;document.getElementById('res-media').textContent=r.media;document.getElementById('res-baja').textContent=r.baja;document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';const subMsgLibre=(r.raw_total&&r.raw_total>r.total*1.3)?`Encontramos ${r.raw_total} menciones — muchas eran el mismo negocio repetido entre fuentes. Tras quitar duplicados y negocios sin contacto: ${r.total} leads reales.`:`${r.total} leads listos para descargar en Excel.`;document.getElementById('results-sub').textContent=subMsgLibre;document.getElementById('results-done').style.display='block';SnakeGame.hide();try{const lr2=await fetch(`${SCRAPER_API_URL}/result/${job_id}`);if(lr2.ok){const rd=await lr2.json();appState.currentLeads=rd.leads||[];}else{appState.currentLeads=[];}}catch(e){appState.currentLeads=[];}
 _updateEmailStats(appState.currentLeads);_notifyScrapingDone(r.total,ciudad);const entry={id:Date.now(),job_id,sector:appState.currentSearch?.sector||sector,ciudad,cats:cats.length,total:r.total,alta:r.alta,media:r.media,baja:r.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);_saveHistoryLeads(job_id,appState.currentLeads);break;}
       if(data.status==='error'){addLog(`❌ Error: ${data.error}`,'error');setProgress(0,'Error — intenta de nuevo');break;}
     }
