@@ -763,6 +763,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
             <div class="source-pill" id="src-instagram" onclick="toggleSource('instagram')"><span class="source-dot"></span>Instagram <span style="font-size:10px;opacity:0.5;margin-left:3px">beta</span></div>
           </div>
           <div style="margin-top:10px;font-size:12px;color:var(--text3)">💡 LinkedIn e Instagram usan búsqueda vía Google — resultados limitados pero sin bloqueos.</div>
+          <div id="doctoralia-warning" style="display:none;margin-top:8px;font-size:12px;color:#E5A800;">⚠️</div>
         </div>
         <button class="btn-launch" id="btn-launch" onclick="launchScraping()" disabled>
           <span>⚡</span><span id="launch-label">Lanzar scraping</span><div class="spinner" id="launch-spinner"></div>
@@ -1371,9 +1372,21 @@ function _renderCityDropdown(){
   });
 }
 document.addEventListener('click',function(e){const dd=document.getElementById('city-dropdown');if(dd&&!dd.contains(e.target))dd.classList.remove('open');const sd=document.getElementById('sector-dropdown');if(sd&&!sd.contains(e.target))sd.classList.remove('open');});
+const DOCTORALIA_CATS=['clinicas','dentistas','fisioterapia','psicologia','estetica'];
+function _updateDoctoraliaWarning(){
+  const warn=document.getElementById('doctoralia-warning');if(!warn)return;
+  const sector=document.getElementById('select-sector')?.value;
+  const doctoraliaOn=document.getElementById('src-doctoralia')?.classList.contains('selected');
+  if(!doctoraliaOn||sector!=='salud'){warn.style.display='none';return;}
+  const cats=(SECTORES[sector]||[]).filter(c=>document.getElementById('cat-'+c.id)?.classList.contains('selected'));
+  const noAplica=cats.filter(c=>!DOCTORALIA_CATS.includes(c.id)).map(c=>c.label);
+  if(noAplica.length===0){warn.style.display='none';return;}
+  warn.style.display='block';
+  warn.textContent=`⚠️ Doctoralia no aplica a: ${noAplica.join(', ')} — para esas categorías se usarán solo las demás fuentes seleccionadas.`;
+}
 function updateCategories(){
   const sector=document.getElementById('select-sector').value,wrap=document.getElementById('cats-wrap'),grid=document.getElementById('cats-grid');
-  grid.innerHTML='';if(!sector||!SECTORES[sector]){wrap.style.display='none';document.getElementById('btn-launch').disabled=true;return;}
+  grid.innerHTML='';if(!sector||!SECTORES[sector]){wrap.style.display='none';document.getElementById('btn-launch').disabled=true;_updateDoctoraliaWarning();return;}
   wrap.style.display='block';
   SECTORES[sector].forEach((cat,i)=>{
     const pill=document.createElement('div');
@@ -1381,11 +1394,12 @@ function updateCategories(){
     pill.className='cat-pill'+(selected?' selected':'');
     pill.id='cat-'+cat.id;
     pill.innerHTML=`<div class="cat-check">${selected?'✓':''}</div><span>${cat.emoji} ${cat.label}</span>`;
-    pill.onclick=()=>toggleCat(cat.id);
+    pill.onclick=()=>{toggleCat(cat.id);_updateDoctoraliaWarning();};
     grid.appendChild(pill);
   });
   if(DEMO_MODE) document.getElementById('demo-cats-note').style.display='block';
   checkLaunchReady();
+  _updateDoctoraliaWarning();
 }
 function toggleCat(id){
   if(DEMO_MODE){
@@ -1402,7 +1416,7 @@ function toggleAllCats(){
   const sector=document.getElementById('select-sector').value;if(!sector||!SECTORES[sector])return;
   const cats=SECTORES[sector],allSelected=cats.every(c=>document.getElementById('cat-'+c.id)?.classList.contains('selected'));
   cats.forEach(c=>{const el=document.getElementById('cat-'+c.id);if(!el)return;if(allSelected){el.classList.remove('selected');el.querySelector('.cat-check').textContent='';}else{el.classList.add('selected');el.querySelector('.cat-check').textContent='✓';}});
-  checkLaunchReady();
+  checkLaunchReady();_updateDoctoraliaWarning();
 }
 function toggleSource(id){
   const el=document.getElementById('src-'+id);
@@ -1412,6 +1426,7 @@ function toggleSource(id){
     return;
   }
   el.classList.toggle('selected');
+  _updateDoctoraliaWarning();
 }
 let currentMode='sector';
 function setMode(mode){currentMode=mode;document.getElementById('mode-sector').classList.toggle('active',mode==='sector');document.getElementById('mode-libre').classList.toggle('active',mode==='libre');document.getElementById('wrap-sector').style.display=mode==='sector'?'block':'none';document.getElementById('wrap-libre').style.display=mode==='libre'?'block':'none';document.getElementById('btn-launch').disabled=true;checkLaunchReady();}
