@@ -775,7 +775,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
       <div class="page-header">
         <h1 class="page-title" id="results-title">Scraping <span>en curso</span></h1>
         <p class="page-sub" id="results-sub">Buscando leads en las fuentes seleccionadas…</p>
-        <p id="results-eta" style="font-size:13px;color:var(--text3);margin-top:4px;display:none;">⏱ Tiempo estimado: <span id="results-eta-val"></span></p>
+        <p id="results-eta" style="font-size:13px;color:var(--text3);margin-top:4px;display:none;">⏱ Tiempo estimado: <span id="results-eta-val"></span><br>✅ Puedes cerrar esta pestaña — el resultado te esperará en "Historial" cuando vuelvas.</p>
       </div>
       <div id="multi-city-progress" style="display:none;" class="multi-city-progress">
         <span>🏙️</span> Ciudad <strong id="mcp-current">1</strong> de <strong id="mcp-total">1</strong>: <strong id="mcp-name"></strong>
@@ -1323,6 +1323,7 @@ async function loadApp(user){
   checkOnboarding();
   loadBlacklist();
   updateCuentaPlanCard();
+  _checkPendingJob();
 }
 async function loadCRM(){crmLeads=await CRM.load();renderCRM();}
 function doLogout(){sb.signOut();crmLeads=[];selectedCities=[];appState={user:null,profile:null,searches:appState.searches,currentSearch:null,currentJobId:null,currentLeads:[]};showScreen('login');}
@@ -1646,7 +1647,7 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
     try{
       const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources,max_leads:maxLeads,quick_mode:quickMode,user_id:appState.user?.id||''})});
       if(!lr.ok)throw new Error(`Error al lanzar: ${lr.status}`);
-      const {job_id}=await lr.json();lastJobId=job_id;addLog(`✓ Job ${ciudad} iniciado (${job_id.slice(0,8)}…)`,'ok');
+      const {job_id}=await lr.json();lastJobId=job_id;addLog(`✓ Job ${ciudad} iniciado (${job_id.slice(0,8)}…)`,'ok');_savePendingJob(job_id,sector,ciudad);
       let lastLog=0,errCount=0;
       while(true){
         await delay(2000);
@@ -1674,6 +1675,7 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
   const entry={id:Date.now(),job_id:lastJobId,sector:appState.currentSearch?.sector||sector,ciudad:ciudadesStr,cats:cats.length,total:totalResult.total,alta:totalResult.alta,media:totalResult.media,baja:totalResult.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};
   appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);
   _saveHistoryLeads(lastJobId,totalResult.leads);
+  _clearPendingJob();
 }
 const SOURCE_ICONS={'Google Maps':'🗺️','Habitissimo':'🔨','Páginas Amarillas':'📒','Houzz':'🛋️','Sortlist':'📋','LinkedIn':'💼','Instagram':'📸','Europages':'🌍','Webs propias':'🌐'};
 function _updateLiveStats(allLogs){
@@ -1709,7 +1711,7 @@ async function runScrapingReal(sector,ciudad,cats,sources,maxLeads=1000){
     addLog('▶ Conectando con LeadForge API…','accent');
     const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources,max_leads:maxLeads,user_id:appState.user?.id||''})});
     if(!lr.ok)throw new Error(`Error al lanzar: ${lr.status}`);
-    const {job_id}=await lr.json();appState.currentJobId=job_id;addLog(`✓ Job iniciado (${job_id.slice(0,8)}…)`,'ok');_resetLiveStats();
+    const {job_id}=await lr.json();appState.currentJobId=job_id;addLog(`✓ Job iniciado (${job_id.slice(0,8)}…)`,'ok');_resetLiveStats();_savePendingJob(job_id,sector,ciudad);
     let lastLog=0,errCount=0;
     while(true){
       await delay(2000);
@@ -1722,7 +1724,7 @@ async function runScrapingReal(sector,ciudad,cats,sources,maxLeads=1000){
       _updateLiveStats(data.logs.map(l=>l.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')));
       setProgress(data.progress,data.logs.at(-1)?.replace(/\[\d{2}:\d{2}:\d{2}\]\s*/,'')||'');
       if(data.status==='done'){const r=data.result;document.getElementById('res-total').textContent=r.total;document.getElementById('res-alta').textContent=r.alta;document.getElementById('res-media').textContent=r.media;document.getElementById('res-baja').textContent=r.baja;document.getElementById('results-title').innerHTML='Scraping <span>completado</span>';const subMsgLibre=(r.raw_total&&r.raw_total>r.total*1.3)?`Encontramos ${r.raw_total} menciones — muchas eran el mismo negocio repetido entre fuentes. Tras quitar duplicados y negocios sin contacto: ${r.total} leads reales.`:`${r.total} leads listos para descargar en Excel.`;document.getElementById('results-sub').textContent=subMsgLibre;document.getElementById('results-done').style.display='block';SnakeGame.hide();try{const lr2=await fetch(`${SCRAPER_API_URL}/result/${job_id}`);if(lr2.ok){const rd=await lr2.json();appState.currentLeads=rd.leads||[];}else{appState.currentLeads=[];}}catch(e){appState.currentLeads=[];}
-_updateEmailStats(appState.currentLeads);_notifyScrapingDone(r.total,ciudad);const entry={id:Date.now(),job_id,sector:appState.currentSearch?.sector||sector,ciudad,cats:cats.length,total:r.total,alta:r.alta,media:r.media,baja:r.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);_saveHistoryLeads(job_id,appState.currentLeads);break;}
+_updateEmailStats(appState.currentLeads);_notifyScrapingDone(r.total,ciudad);const entry={id:Date.now(),job_id,sector:appState.currentSearch?.sector||sector,ciudad,cats:cats.length,total:r.total,alta:r.alta,media:r.media,baja:r.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);_saveHistoryLeads(job_id,appState.currentLeads);_clearPendingJob();break;}
       if(data.status==='error'){addLog(`❌ Error: ${data.error}`,'error');setProgress(0,'Error — intenta de nuevo');break;}
     }
   }catch(err){addLog(`❌ ${err.message}`,'error');setProgress(0,'Error de conexión');}
@@ -1762,6 +1764,36 @@ function _saveHistoryLeads(jobId,leads){
 }
 function _loadHistoryLeads(jobId){
   try{const d=localStorage.getItem('lf_leads_'+jobId);return d?JSON.parse(d):null;}catch(e){return null;}
+}
+// Permite cerrar la pestaña durante una búsqueda sin perder el resultado:
+// se guarda un marcador y, al volver a cargar la app, se recupera si terminó.
+function _savePendingJob(jobId,sector,ciudad){
+  try{localStorage.setItem('lf_pending_job',JSON.stringify({job_id:jobId,sector,ciudad,ts:Date.now()}));}catch(e){}
+}
+function _clearPendingJob(){
+  try{localStorage.removeItem('lf_pending_job');}catch(e){}
+}
+async function _checkPendingJob(){
+  let pending;
+  try{pending=JSON.parse(localStorage.getItem('lf_pending_job')||'null');}catch(e){pending=null;}
+  if(!pending||!pending.job_id)return;
+  if(Date.now()-pending.ts>6*60*60*1000){_clearPendingJob();return;} // marcador viejo, no perseguir jobs zombis
+  try{
+    const sr=await fetch(`${SCRAPER_API_URL}/status/${pending.job_id}`);
+    if(sr.status===404){_clearPendingJob();return;}
+    if(!sr.ok)return;
+    const data=await sr.json();
+    if(data.status==='done'){
+      const r=data.result;
+      const entry={id:Date.now(),job_id:pending.job_id,sector:pending.sector,ciudad:pending.ciudad,cats:0,total:r.total,alta:r.alta,media:r.media,baja:r.baja,date:new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})};
+      appState.searches.unshift(entry);localStorage.setItem('lf_history',JSON.stringify(appState.searches.slice(0,50)));updateStats();saveSearchToSupabase(entry);
+      try{const lr2=await fetch(`${SCRAPER_API_URL}/result/${pending.job_id}`);if(lr2.ok){const rd=await lr2.json();_saveHistoryLeads(pending.job_id,rd.leads||[]);}}catch(e){}
+      renderHistory();_clearPendingJob();
+      _notifyScrapingDone(r.total,pending.ciudad);
+    }else if(data.status==='error'){
+      _clearPendingJob();
+    }
+  }catch(e){}
 }
 async function downloadExcel(){
   if(DEMO_MODE){showDemoUpgrade('🔒 La descarga de Excel está disponible con cualquier plan de LeadForge.<br><br>Elige tu plan para descargar todos tus leads.');return;}
