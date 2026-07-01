@@ -1441,7 +1441,7 @@ async function launchScraping(){
     const fuentesLibre=sources.filter(s=>['google_maps','paginas_amarillas','linkedin','instagram','webs_propias','europages'].includes(s));
     const demoLeads=DEMO_MODE?DEMO_MAX_LEADS:limits.leads;
     appState.currentSearch={sector:termino,ciudad,cats:[termino],sources:fuentesLibre};appState.currentJobId=null;
-    const etaLibre=estimateScrapeTime(1,1,fuentesLibre.length||1);
+    const etaLibre=estimateScrapeTime(1,1,fuentesLibre.length||1,false);
     _initResults('Buscando "'+termino+'" en '+ciudad+'…', etaLibre);await runScrapingReal('libre',ciudad,[termino],fuentesLibre,demoLeads);
   }else{
     const sector=document.getElementById('select-sector').value;
@@ -1450,16 +1450,20 @@ async function launchScraping(){
     const ciudades=DEMO_MODE?[selectedCities[0]||'Madrid']:[...selectedCities];
     appState.currentSearch={sector,ciudad:ciudades.join(', '),cats,sources};appState.currentJobId=null;
     const subtext=ciudades.length>1?`Buscando leads en ${ciudades.length} ciudades…`:`Buscando leads en ${ciudades[0]}…`;
-    const eta=estimateScrapeTime(cats.length,ciudades.length,sources.length||1);
+    const eta=estimateScrapeTime(cats.length,ciudades.length,sources.length||1,false);
     _initResults(subtext, eta);
     const demoLeads=DEMO_MODE?DEMO_MAX_LEADS:limits.leads;
     await runScrapingMultiCiudad(sector,ciudades,cats,sources,demoLeads);
   }
 }
-function estimateScrapeTime(numCats, numCities, numSources){
+function estimateScrapeTime(numCats, numCities, numSources, quick){
   if(DEMO_MODE) return '~30-45 segundos';
-  const secsPerCat = 8 + (numSources - 1) * 6;
-  const total = numCats * numCities * secsPerCat;
+  // Calibrado con pruebas reales (jul 2026): modo rápido ~45s/categoría,
+  // modo normal ~110-130s/categoría (Google Maps + Europages pesan bastante más).
+  const secsPerCat = quick ? (10 + numSources * 4) : (15 + numSources * 12);
+  const scraping = numCats * numCities * secsPerCat;
+  const enrichment = numCats * numCities * 15; // enriquecimiento final con webs propias
+  const total = scraping + enrichment;
   if(total < 60) return `~${Math.max(20, Math.round(total/10)*10)} segundos`;
   const mins = Math.ceil(total / 60);
   if(mins === 1) return '~1 minuto';
@@ -2164,7 +2168,7 @@ async function _animateAndLaunch(type,latlng,cities,sector,nukeCats){
   const limits=getPlanLimits();
   const ciudadStr=targetCities.join(', ');
   appState.currentSearch={sector,ciudad:ciudadStr,cats,sources};appState.currentJobId=null;
-  _initResults(`${t.emoji} Nuke ${t.label} impactó — scrapeando ${targetCities.length} ciudad${targetCities.length>1?'es':''}…`,estimateScrapeTime(cats.length,targetCities.length,sources.length));
+  _initResults(`${t.emoji} Nuke ${t.label} impactó — scrapeando ${targetCities.length} ciudad${targetCities.length>1?'es':''}…`,estimateScrapeTime(cats.length,targetCities.length,sources.length,true));
   await runScrapingMultiCiudad(sector,targetCities,cats,sources,limits.leads,true);
 }
 
