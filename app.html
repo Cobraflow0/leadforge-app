@@ -1239,7 +1239,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 window.addEventListener('DOMContentLoaded',async()=>{
   const hash=window.location.hash;
-  if(hash.includes('access_token')&&hash.includes('type=recovery')){const params=new URLSearchParams(hash.slice(1));sb._token=params.get('access_token');showScreen('setpass');window.history.replaceState(null,'',window.location.pathname);return;}
+  if(hash.includes('access_token')&&(hash.includes('type=recovery')||hash.includes('type=invite'))){const params=new URLSearchParams(hash.slice(1));sb._token=params.get('access_token');showScreen('setpass');window.history.replaceState(null,'',window.location.pathname);return;}
 
   if(DEMO_MODE){
     loadDemoApp();
