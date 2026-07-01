@@ -1176,7 +1176,7 @@ const ADMIN_EMAIL='cobraflow0@gmail.com';
 const PLAN_LIMITS={
   basic:   {label:'Basic',   searches:10,       leads:300,  emails:200,  maxEmailBtns:[50,100,200],          cities:1,  sequences:false, alerts:false},
   pro:     {label:'Pro',     searches:30,       leads:600,  emails:500,  maxEmailBtns:[50,100,250,500],       cities:5,  sequences:true,  alerts:true},
-  business:{label:'Business',searches:Infinity, leads:1000, emails:1000, maxEmailBtns:[50,200,500,1000],      cities:10, sequences:true,  alerts:true},
+  business:{label:'Business',searches:Infinity, leads:2500, emails:1000, maxEmailBtns:[50,200,500,1000],      cities:10, sequences:true,  alerts:true},
 };
 const BASIC_SOURCES=['googlemaps','paginasamarillas','europages'];
 function getPlan(){const p=(appState.profile?.plan||'pro').toLowerCase();return PLAN_LIMITS[p]?p:'pro';}
