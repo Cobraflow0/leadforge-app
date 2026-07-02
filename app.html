@@ -751,10 +751,9 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
         <div>
           <label class="form-label">Fuentes de datos</label>
           <div class="sources-row">
-            <div class="source-pill selected" id="src-googlemaps" onclick="toggleSource('googlemaps')"><span class="source-dot"></span>Google Maps</div>
+            <div class="source-pill coming-soon" id="src-googlemaps"><span class="source-dot"></span>Google Maps <span class="pronto-badge">🔒 Desactivada</span></div>
             <div class="source-pill selected" id="src-habitissimo" onclick="toggleSource('habitissimo')"><span class="source-dot"></span>Habitissimo</div>
-            <div class="source-pill coming-soon" id="src-paginasamarillas"><span class="source-dot"></span>Páginas Amarillas <span class="pronto-badge">🔒 Pronto</span></div>
-            <div class="source-pill coming-soon" id="src-houzz"><span class="source-dot"></span>Houzz <span class="pronto-badge">🔒 Pronto</span></div>
+            <div class="source-pill selected" id="src-paginasamarillas" onclick="toggleSource('paginasamarillas')"><span class="source-dot"></span>Páginas Amarillas</div>
             <div class="source-pill selected" id="src-sortlist" onclick="toggleSource('sortlist')"><span class="source-dot"></span>Sortlist</div>
             <div class="source-pill selected" id="src-webs" onclick="toggleSource('webs')"><span class="source-dot"></span>Webs propias</div>
             <div class="source-pill selected" id="src-europages" onclick="toggleSource('europages')"><span class="source-dot"></span>Europages</div>
@@ -1449,7 +1448,7 @@ async function launchScraping(){
     showUpgradeModal(`Has usado las <strong>${limits.searches} búsquedas</strong> de tu plan ${limits.label} este mes.<br><br>Actualiza a <strong>Pro</strong> (30 búsquedas) o <strong>Business</strong> (ilimitadas) para seguir.`);
     return;
   }
-  const srcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','paginasamarillas':'paginas_amarillas','houzz':'houzz','sortlist':'sortlist','europages':'europages','doctoralia':'doctoralia','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
+  const srcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','paginasamarillas':'paginas_amarillas','sortlist':'sortlist','europages':'europages','doctoralia':'doctoralia','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
   let sources=DEMO_MODE?['google_maps']:Object.keys(srcMap).filter(s=>document.getElementById('src-'+s)?.classList.contains('selected')).map(s=>srcMap[s]);
   if(!DEMO_MODE&&getPlan()==='basic')sources=sources.filter(s=>['google_maps','paginas_amarillas','europages'].includes(s));
   if(currentMode==='libre'){
@@ -1677,7 +1676,7 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
   _saveHistoryLeads(lastJobId,totalResult.leads);
   _clearPendingJob();
 }
-const SOURCE_ICONS={'Google Maps':'🗺️','Habitissimo':'🔨','Páginas Amarillas':'📒','Houzz':'🛋️','Sortlist':'📋','LinkedIn':'💼','Instagram':'📸','Europages':'🌍','Webs propias':'🌐'};
+const SOURCE_ICONS={'Google Maps':'🗺️','Habitissimo':'🔨','Páginas Amarillas':'📒','Sortlist':'📋','LinkedIn':'💼','Instagram':'📸','Europages':'🌍','Webs propias':'🌐','OpenStreetMap':'🗺️','Doctoralia':'⚕️'};
 function _updateLiveStats(allLogs){
   const srcCounts={};let total=0,alta=0,media=0,baja=0,enriching=false,enrichDone=false;
   allLogs.forEach(line=>{
