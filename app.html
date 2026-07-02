@@ -602,6 +602,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
             <div class="nuke-tags-wrap" style="max-height:none;">
               <div class="nuke-tag selected" id="nuke-src-googlemaps" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Google Maps</div>
               <div class="nuke-tag selected" id="nuke-src-habitissimo" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Habitissimo</div>
+              <div class="nuke-tag selected" id="nuke-src-openstreetmap" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>OpenStreetMap</div>
               <div class="nuke-tag selected" id="nuke-src-sortlist" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Sortlist</div>
               <div class="nuke-tag selected" id="nuke-src-europages" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Europages</div>
               <div class="nuke-tag selected" id="nuke-src-doctoralia" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Doctoralia</div>
@@ -754,6 +755,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
             <div class="source-pill coming-soon" id="src-googlemaps"><span class="source-dot"></span>Google Maps <span class="pronto-badge">🔒 Desactivada</span></div>
             <div class="source-pill selected" id="src-habitissimo" onclick="toggleSource('habitissimo')"><span class="source-dot"></span>Habitissimo</div>
             <div class="source-pill selected" id="src-paginasamarillas" onclick="toggleSource('paginasamarillas')"><span class="source-dot"></span>Páginas Amarillas</div>
+            <div class="source-pill selected" id="src-openstreetmap" onclick="toggleSource('openstreetmap')"><span class="source-dot"></span>OpenStreetMap</div>
             <div class="source-pill selected" id="src-sortlist" onclick="toggleSource('sortlist')"><span class="source-dot"></span>Sortlist</div>
             <div class="source-pill selected" id="src-webs" onclick="toggleSource('webs')"><span class="source-dot"></span>Webs propias</div>
             <div class="source-pill selected" id="src-europages" onclick="toggleSource('europages')"><span class="source-dot"></span>Europages</div>
@@ -885,7 +887,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
           <div class="plan-price" id="cuenta-plan-price">49€ <span>/mes</span></div>
           <div class="plan-renewal">Próxima renovación: <span id="renewal-date">—</span></div>
           <ul class="plan-features" id="cuenta-plan-features">
-            <li>Búsquedas ilimitadas</li><li>Google Maps + 7 fuentes</li><li>Todos los sectores disponibles</li>
+            <li>Búsquedas ilimitadas</li><li>Google Maps + 8 fuentes</li><li>Todos los sectores disponibles</li>
             <li>Excel profesional con scoring</li><li>Campañas de email automatizadas</li>
             <li>CRM de seguimiento de leads</li><li>Follow-up automático a 3 días</li>
           </ul>
@@ -1178,7 +1180,7 @@ const PLAN_LIMITS={
   pro:     {label:'Pro',     searches:30,       leads:600,  emails:500,  maxEmailBtns:[50,100,250,500],       cities:5,  sequences:true,  alerts:true},
   business:{label:'Business',searches:Infinity, leads:2500, emails:1000, maxEmailBtns:[50,200,500,1000],      cities:10, sequences:true,  alerts:true},
 };
-const BASIC_SOURCES=['googlemaps','paginasamarillas','europages'];
+const BASIC_SOURCES=['googlemaps','paginasamarillas','europages','openstreetmap'];
 function getPlan(){const p=(appState.profile?.plan||'pro').toLowerCase();return PLAN_LIMITS[p]?p:'pro';}
 function getPlanLimits(){return PLAN_LIMITS[getPlan()];}
 function getSearchesThisMonth(){const cut=Date.now()-30*24*60*60*1000;return appState.searches.filter(s=>s.id>cut).length;}
@@ -1448,9 +1450,9 @@ async function launchScraping(){
     showUpgradeModal(`Has usado las <strong>${limits.searches} búsquedas</strong> de tu plan ${limits.label} este mes.<br><br>Actualiza a <strong>Pro</strong> (30 búsquedas) o <strong>Business</strong> (ilimitadas) para seguir.`);
     return;
   }
-  const srcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','paginasamarillas':'paginas_amarillas','sortlist':'sortlist','europages':'europages','doctoralia':'doctoralia','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
+  const srcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','paginasamarillas':'paginas_amarillas','openstreetmap':'openstreetmap','sortlist':'sortlist','europages':'europages','doctoralia':'doctoralia','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
   let sources=DEMO_MODE?['google_maps']:Object.keys(srcMap).filter(s=>document.getElementById('src-'+s)?.classList.contains('selected')).map(s=>srcMap[s]);
-  if(!DEMO_MODE&&getPlan()==='basic')sources=sources.filter(s=>['google_maps','paginas_amarillas','europages'].includes(s));
+  if(!DEMO_MODE&&getPlan()==='basic')sources=sources.filter(s=>['google_maps','paginas_amarillas','europages','openstreetmap'].includes(s));
   if(currentMode==='libre'){
     const termino=document.getElementById('input-libre').value.trim(),ciudad=document.getElementById('input-ciudad-libre').value.trim();
     const fuentesLibre=sources.filter(s=>['google_maps','paginas_amarillas','linkedin','instagram','webs_propias','europages'].includes(s));
@@ -2116,7 +2118,7 @@ function _onNukeMapClick(e){
   _leafletMap.off('mousemove',_onNukeMapHover);
 }
 
-const _nukeSrcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','sortlist':'sortlist','europages':'europages','doctoralia':'doctoralia','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
+const _nukeSrcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','openstreetmap':'openstreetmap','sortlist':'sortlist','europages':'europages','doctoralia':'doctoralia','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
 function toggleNukeSrc(id,el){el.classList.toggle('selected');}
 function _getNukeSources(){
   return Object.keys(_nukeSrcMap).filter(k=>document.getElementById('nuke-src-'+k)?.classList.contains('selected')).map(k=>_nukeSrcMap[k]);
@@ -2922,8 +2924,8 @@ function updateCuentaPlanCard(){
   const prices={basic:'19€',pro:'49€',business:'99€'};
   const features={
     basic:['10 búsquedas/mes','Hasta 300 leads','3 fuentes de datos','1 ciudad por búsqueda','50 emails de campaña'],
-    pro:['30 búsquedas/mes','Hasta 600 leads','8 fuentes de datos','Hasta 5 ciudades','150 emails · Follow-up · Alertas'],
-    business:['Búsquedas ilimitadas','Hasta 1.000 leads','8 fuentes de datos','Hasta 10 ciudades','300 emails · Follow-up · Alertas · Soporte prioritario'],
+    pro:['30 búsquedas/mes','Hasta 600 leads','9 fuentes de datos','Hasta 5 ciudades','150 emails · Follow-up · Alertas'],
+    business:['Búsquedas ilimitadas','Hasta 1.000 leads','9 fuentes de datos','Hasta 10 ciudades','300 emails · Follow-up · Alertas · Soporte prioritario'],
   };
   const nameEl=document.getElementById('cuenta-plan-name');
   const priceEl=document.getElementById('cuenta-plan-price');
