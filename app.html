@@ -606,6 +606,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
               <div class="nuke-tag selected" id="nuke-src-sortlist" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Sortlist</div>
               <div class="nuke-tag selected" id="nuke-src-europages" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Europages</div>
               <div class="nuke-tag selected" id="nuke-src-doctoralia" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Doctoralia</div>
+              <div class="nuke-tag selected" id="nuke-src-hotfrog" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Hotfrog</div>
               <div class="nuke-tag selected" id="nuke-src-webs" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Webs propias</div>
               <div class="nuke-tag" id="nuke-src-linkedin" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>LinkedIn <span style="opacity:0.45;font-size:9px;margin-left:2px;">beta</span></div>
               <div class="nuke-tag" id="nuke-src-instagram" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Instagram <span style="opacity:0.45;font-size:9px;margin-left:2px;">beta</span></div>
@@ -760,6 +761,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
             <div class="source-pill selected" id="src-webs" onclick="toggleSource('webs')"><span class="source-dot"></span>Webs propias</div>
             <div class="source-pill selected" id="src-europages" onclick="toggleSource('europages')"><span class="source-dot"></span>Europages</div>
             <div class="source-pill selected" id="src-doctoralia" onclick="toggleSource('doctoralia')"><span class="source-dot"></span>Doctoralia</div>
+            <div class="source-pill selected" id="src-hotfrog" onclick="toggleSource('hotfrog')"><span class="source-dot"></span>Hotfrog</div>
             <div class="source-pill" id="src-linkedin" onclick="toggleSource('linkedin')"><span class="source-dot"></span>LinkedIn <span style="font-size:10px;opacity:0.5;margin-left:3px">beta</span></div>
             <div class="source-pill" id="src-instagram" onclick="toggleSource('instagram')"><span class="source-dot"></span>Instagram <span style="font-size:10px;opacity:0.5;margin-left:3px">beta</span></div>
           </div>
@@ -1180,7 +1182,7 @@ const PLAN_LIMITS={
   pro:     {label:'Pro',     searches:30,       leads:600,  emails:500,  maxEmailBtns:[50,100,250,500],       cities:5,  sequences:true,  alerts:true},
   business:{label:'Business',searches:Infinity, leads:2500, emails:1000, maxEmailBtns:[50,200,500,1000],      cities:10, sequences:true,  alerts:true},
 };
-const BASIC_SOURCES=['googlemaps','paginasamarillas','europages','openstreetmap'];
+const BASIC_SOURCES=['googlemaps','paginasamarillas','europages','openstreetmap','hotfrog'];
 function getPlan(){const p=(appState.profile?.plan||'pro').toLowerCase();return PLAN_LIMITS[p]?p:'pro';}
 function getPlanLimits(){return PLAN_LIMITS[getPlan()];}
 function getSearchesThisMonth(){const cut=Date.now()-30*24*60*60*1000;return appState.searches.filter(s=>s.id>cut).length;}
@@ -1450,12 +1452,12 @@ async function launchScraping(){
     showUpgradeModal(`Has usado las <strong>${limits.searches} búsquedas</strong> de tu plan ${limits.label} este mes.<br><br>Actualiza a <strong>Pro</strong> (30 búsquedas) o <strong>Business</strong> (ilimitadas) para seguir.`);
     return;
   }
-  const srcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','paginasamarillas':'paginas_amarillas','openstreetmap':'openstreetmap','sortlist':'sortlist','europages':'europages','doctoralia':'doctoralia','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
+  const srcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','paginasamarillas':'paginas_amarillas','openstreetmap':'openstreetmap','sortlist':'sortlist','europages':'europages','doctoralia':'doctoralia','hotfrog':'hotfrog','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
   let sources=DEMO_MODE?['google_maps']:Object.keys(srcMap).filter(s=>document.getElementById('src-'+s)?.classList.contains('selected')).map(s=>srcMap[s]);
-  if(!DEMO_MODE&&getPlan()==='basic')sources=sources.filter(s=>['google_maps','paginas_amarillas','europages','openstreetmap'].includes(s));
+  if(!DEMO_MODE&&getPlan()==='basic')sources=sources.filter(s=>['google_maps','paginas_amarillas','europages','openstreetmap','hotfrog'].includes(s));
   if(currentMode==='libre'){
     const termino=document.getElementById('input-libre').value.trim(),ciudad=document.getElementById('input-ciudad-libre').value.trim();
-    const fuentesLibre=sources.filter(s=>['google_maps','paginas_amarillas','linkedin','instagram','webs_propias','europages'].includes(s));
+    const fuentesLibre=sources.filter(s=>['google_maps','paginas_amarillas','linkedin','instagram','webs_propias','europages','hotfrog'].includes(s));
     const demoLeads=DEMO_MODE?DEMO_MAX_LEADS:limits.leads;
     appState.currentSearch={sector:termino,ciudad,cats:[termino],sources:fuentesLibre};appState.currentJobId=null;
     const etaLibre=estimateScrapeTime(1,1,fuentesLibre.length||1,false);
@@ -1678,7 +1680,7 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
   _saveHistoryLeads(lastJobId,totalResult.leads);
   _clearPendingJob();
 }
-const SOURCE_ICONS={'Google Maps':'🗺️','Habitissimo':'🔨','Páginas Amarillas':'📒','Sortlist':'📋','LinkedIn':'💼','Instagram':'📸','Europages':'🌍','Webs propias':'🌐','OpenStreetMap':'🗺️','Doctoralia':'⚕️'};
+const SOURCE_ICONS={'Google Maps':'🗺️','Habitissimo':'🔨','Páginas Amarillas':'📒','Sortlist':'📋','LinkedIn':'💼','Instagram':'📸','Europages':'🌍','Webs propias':'🌐','OpenStreetMap':'🗺️','Doctoralia':'⚕️','Hotfrog':'🐸'};
 function _updateLiveStats(allLogs){
   const srcCounts={};let total=0,alta=0,media=0,baja=0,enriching=false,enrichDone=false;
   allLogs.forEach(line=>{
@@ -2118,7 +2120,7 @@ function _onNukeMapClick(e){
   _leafletMap.off('mousemove',_onNukeMapHover);
 }
 
-const _nukeSrcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','openstreetmap':'openstreetmap','sortlist':'sortlist','europages':'europages','doctoralia':'doctoralia','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
+const _nukeSrcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','openstreetmap':'openstreetmap','sortlist':'sortlist','europages':'europages','doctoralia':'doctoralia','hotfrog':'hotfrog','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
 function toggleNukeSrc(id,el){el.classList.toggle('selected');}
 function _getNukeSources(){
   return Object.keys(_nukeSrcMap).filter(k=>document.getElementById('nuke-src-'+k)?.classList.contains('selected')).map(k=>_nukeSrcMap[k]);
