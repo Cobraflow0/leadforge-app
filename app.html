@@ -1200,7 +1200,22 @@ const sb={
   loadSession(){const s=localStorage.getItem('lf_session');if(s){const d=JSON.parse(s);this._token=d.access_token;return d;}return null;}
 };
 const CRM={
-  async load(){const r=await sb.req('/rest/v1/crm_leads?select=*&order=created_at.desc');if(!r.ok)return[];return r.json();},
+  async load(){
+    // Supabase/PostgREST corta cada respuesta en 1000 filas por defecto —
+    // sin paginar, cualquier cuenta con más de 1000 leads (el plan Business
+    // permite hasta 2500) pierde el resto en silencio. Se pagina con el
+    // header Range hasta que una página vuelve incompleta.
+    const PAGE=1000;let offset=0,todos=[];
+    while(true){
+      const r=await sb.req('/rest/v1/crm_leads?select=*&order=created_at.desc',{headers:{'Range':`${offset}-${offset+PAGE-1}`}});
+      if(!r.ok)break;
+      const pagina=await r.json();
+      todos=todos.concat(pagina);
+      if(pagina.length<PAGE)break;
+      offset+=PAGE;
+    }
+    return todos;
+  },
   async insertMany(leads){const r=await sb.req('/rest/v1/crm_leads',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify(leads)});return r.ok;},
   async updateStatus(id,status){await sb.req(`/rest/v1/crm_leads?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({status})});},
   async updateNota(id,nota){await sb.req(`/rest/v1/crm_leads?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({nota})});},
