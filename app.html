@@ -1165,8 +1165,8 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
     <div class="cancel-step" id="cancel-step-3">
       <div style="text-align:center;padding:24px 0;">
         <div style="font-size:52px;margin-bottom:18px;">✅</div>
-        <h3 style="font-size:19px;font-weight:700;margin-bottom:8px;">Solicitud recibida</h3>
-        <p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:22px;">Hemos recibido tu solicitud de cancelación. Recibirás un email de confirmación en breve.<br><br>Mantienes acceso completo hasta el fin del período de facturación.</p>
+        <h3 style="font-size:19px;font-weight:700;margin-bottom:8px;">Suscripción cancelada</h3>
+        <p id="cancel-step-3-msg" style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:22px;">Mantienes acceso completo hasta el fin del período de facturación.</p>
         <button onclick="closeCancelModal()" style="padding:12px 30px;background:linear-gradient(135deg,var(--accent2),var(--accent));border:none;border-radius:10px;color:#05080F;font-size:14px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;">Cerrar</button>
       </div>
     </div>
@@ -1178,9 +1178,12 @@ const SUPABASE_ANON='sb_publishable_hScYuPWr3THMPToUzcLUmQ_ji64-g4Z';
 const SCRAPER_API_URL='https://web-production-e1dec.up.railway.app';
 const ADMIN_EMAIL='cobraflow0@gmail.com';
 const PLAN_LIMITS={
-  basic:   {label:'Basic',   searches:10,       leads:300,  emails:200,  maxEmailBtns:[50,100,200],          cities:1,  sequences:false, alerts:false},
-  pro:     {label:'Pro',     searches:30,       leads:600,  emails:500,  maxEmailBtns:[50,100,250,500],       cities:5,  sequences:true,  alerts:true},
-  business:{label:'Business',searches:Infinity, leads:2500, emails:1000, maxEmailBtns:[50,200,500,1000],      cities:10, sequences:true,  alerts:true},
+  basic:    {label:'Basic',    searches:10,       leads:300,  emails:200,  maxEmailBtns:[50,100,200],          cities:1,  sequences:false, alerts:false},
+  pro:      {label:'Pro',      searches:30,       leads:600,  emails:500,  maxEmailBtns:[50,100,250,500],       cities:5,  sequences:true,  alerts:true},
+  business: {label:'Business', searches:Infinity, leads:2500, emails:1000, maxEmailBtns:[50,200,500,1000],      cities:10, sequences:true,  alerts:true},
+  // Suscripción cancelada/finalizada en Stripe — sin esto, un plan
+  // desconocido caía por defecto en 'pro' (acceso completo gratis).
+  cancelado:{label:'Cancelado',searches:0,        leads:0,    emails:0,    maxEmailBtns:[],                     cities:0,  sequences:false, alerts:false},
 };
 const BASIC_SOURCES=['googlemaps','paginasamarillas','europages','openstreetmap','hotfrog'];
 function getPlan(){const p=(appState.profile?.plan||'pro').toLowerCase();return PLAN_LIMITS[p]?p:'pro';}
@@ -2725,7 +2728,7 @@ document.getElementById('modal-cancel').addEventListener('click',function(e){if(
 function selectCancelReason(btn,reason){document.querySelectorAll('.cancel-reason-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');cancelReason=reason;document.getElementById('cancel-reason-other').style.display=reason==='otro'?'block':'none';document.getElementById('btn-cancel-next').disabled=false;}
 function goToCancelStep2(){if(!cancelReason)return;document.querySelectorAll('.cancel-step').forEach(s=>s.classList.remove('active'));document.getElementById('cancel-step-2').classList.add('active');}
 function goBackCancelStep(){document.querySelectorAll('.cancel-step').forEach(s=>s.classList.remove('active'));document.getElementById('cancel-step-1').classList.add('active');}
-async function confirmCancellation(){const btn=document.getElementById('btn-confirm-cancel'),lbl=document.getElementById('cancel-btn-label'),spin=document.getElementById('cancel-spinner');btn.disabled=true;lbl.style.display='none';spin.style.display='block';const otherText=document.getElementById('cancel-other-text').value.trim(),motivo=cancelReason==='otro'?otherText||'otro':cancelReason,userEmail=appState.user?.email||'';try{await fetch(`${SCRAPER_API_URL}/cancel-subscription`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:userEmail,motivo})});}catch(e){}btn.disabled=false;lbl.style.display='inline';spin.style.display='none';document.querySelectorAll('.cancel-step').forEach(s=>s.classList.remove('active'));document.getElementById('cancel-step-3').classList.add('active');}
+async function confirmCancellation(){const btn=document.getElementById('btn-confirm-cancel'),lbl=document.getElementById('cancel-btn-label'),spin=document.getElementById('cancel-spinner');btn.disabled=true;lbl.style.display='none';spin.style.display='block';const otherText=document.getElementById('cancel-other-text').value.trim(),motivo=cancelReason==='otro'?otherText||'otro':cancelReason,userEmail=appState.user?.email||'';let ok=false,message='';try{const r=await fetch(`${SCRAPER_API_URL}/cancel-subscription`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:userEmail,motivo})});const d=await r.json();ok=!!d.ok;message=d.message||'';}catch(e){message='Error de conexión — inténtalo de nuevo o escribe a hola@leadforge.es.';}btn.disabled=false;lbl.style.display='inline';spin.style.display='none';document.querySelectorAll('.cancel-step').forEach(s=>s.classList.remove('active'));if(ok){document.getElementById('cancel-step-3').classList.add('active');const msgEl=document.getElementById('cancel-step-3-msg');if(msgEl)msgEl.textContent=message;}else{closeCancelModal();alert(message||'No se ha podido procesar la cancelación. Escribe a hola@leadforge.es.');}}
 
 /* ═══════════════════════════════════════
    PLAN LIMITS
