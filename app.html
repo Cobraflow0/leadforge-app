@@ -205,7 +205,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
 .empty-state .emoji{font-size:42px;margin-bottom:16px;display:block;}.empty-state p{font-size:14px;line-height:1.7;}
 .modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.80);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:24px;}
 .modal-overlay.open{display:flex;}
-.modal-box{width:100%;max-width:500px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-xl);padding:40px 40px 32px;box-shadow:0 0 0 1px rgba(0,200,255,0.05),0 30px 80px rgba(0,0,0,0.7),0 0 80px rgba(0,200,255,0.06);animation:modalIn 0.3s cubic-bezier(0.16,1,0.3,1) both;position:relative;}
+.modal-box{width:100%;max-width:500px;max-height:90vh;overflow-y:auto;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-xl);padding:40px 40px 32px;box-shadow:0 0 0 1px rgba(0,200,255,0.05),0 30px 80px rgba(0,0,0,0.7),0 0 80px rgba(0,200,255,0.06);animation:modalIn 0.3s cubic-bezier(0.16,1,0.3,1) both;position:relative;}
 .modal-box::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,255,0.4),transparent);}
 @keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 .modal-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;color:var(--text2);width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all 0.15s;}
