@@ -1249,6 +1249,25 @@ const SECTORES={
 /* ── DEMO MODE ── */
 const DEMO_MODE = new URLSearchParams(window.location.search).get('demo') === 'true';
 const DEMO_MAX_LEADS = 20;
+/* ── TRACKING DE CLICS DE CAPTACIÓN (prospector, WhatsApp, gremios...) ──
+   Antes no había forma de saber si alguien que recibía un email/mensaje
+   de captación llegaba a hacer clic — solo si Brevo decía que se abrió
+   el email. Se registra una vez por carga, en fire-and-forget (no bloquea
+   nada si falla o tarda). */
+(function trackAcquisitionClick(){
+  const params = new URLSearchParams(window.location.search);
+  const source = params.get('utm_source');
+  if (!source) return;
+  fetch(`${SCRAPER_API_URL}/track-click`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      source:       source,
+      lead_email:   params.get('lead') || '',
+      utm_campaign: params.get('utm_campaign') || '',
+    }),
+  }).catch(()=>{});
+})();
 function isDemoUsed(){return !!localStorage.getItem('lf_demo_used');}
 function markDemoUsed(){localStorage.setItem('lf_demo_used','1');}
 function showDemoUpgrade(msg){
