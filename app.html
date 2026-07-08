@@ -1032,6 +1032,14 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
       <div style="font-size:11px;color:var(--text3);margin-top:5px;">Elige una plantilla para rellenar el asunto y el cuerpo automáticamente — luego puedes editarlos como quieras.</div>
     </div>
     <div class="modal-field">
+      <label>¿No hay plantilla para tu sector? Descríbelo y genera una con IA</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="camp-ai-desc" placeholder="Ej: Instalo aire acondicionado en Valencia" style="flex:1;">
+        <button type="button" onclick="generateEmailWithAI()" id="btn-ai-generate" style="white-space:nowrap;padding:0 16px;border-radius:8px;border:1px solid var(--border);background:var(--accent);color:#fff;font-weight:600;cursor:pointer;">✨ Generar</button>
+      </div>
+      <div id="ai-generate-status" style="font-size:11px;margin-top:5px;"></div>
+    </div>
+    <div class="modal-field">
       <label>Cuerpo del email</label>
       <textarea id="camp-product" rows="7" placeholder="Escribe aquí el email completo tal como quieres que lo reciban.&#10;&#10;Puedes usar {{nombre}} para personalizar con el nombre del lead.&#10;&#10;Ej:&#10;Hola {{nombre}},&#10;&#10;Me llamo Carlos y te escribo desde Neopanels. Instalamos revestimientos para obras y reformas y creo que puede interesarte.&#10;&#10;¿Tenéis 10 minutos esta semana?"></textarea>
       <div style="font-size:11px;color:var(--text3);margin-top:5px;">Usa <strong style="color:var(--accent)">{{nombre}}</strong> para insertar el nombre de cada empresa automáticamente.</div>
@@ -2484,6 +2492,32 @@ function applyEmailTemplate(key){
   document.getElementById('camp-subject').value=tpl.subject;
   document.getElementById('camp-product').value=tpl.product;
   updateProductCounter();
+}
+async function generateEmailWithAI(){
+  const desc=document.getElementById('camp-ai-desc').value.trim();
+  const statusEl=document.getElementById('ai-generate-status');
+  const btn=document.getElementById('btn-ai-generate');
+  if(!desc){statusEl.textContent='Escribe primero una frase describiendo tu negocio.';statusEl.style.color='var(--red)';return;}
+  btn.disabled=true;btn.textContent='Generando…';statusEl.textContent='';statusEl.style.color='var(--text3)';
+  try{
+    const r=await fetch(`${SCRAPER_API_URL}/generate-email-copy`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({business_description:desc})});
+    const data=await r.json();
+    if(data.ok){
+      document.getElementById('camp-subject').value=data.subject;
+      document.getElementById('camp-product').value=data.product;
+      document.getElementById('camp-template').value='';
+      updateProductCounter();
+      statusEl.textContent='✅ Generado — revísalo y edítalo si quieres.';
+      statusEl.style.color='var(--green)';
+    }else{
+      statusEl.textContent=`❌ ${data.error||'No se pudo generar.'}`;
+      statusEl.style.color='var(--red)';
+    }
+  }catch(e){
+    statusEl.textContent=`❌ Error: ${e.message||'No se pudo conectar'}`;
+    statusEl.style.color='var(--red)';
+  }
+  btn.disabled=false;btn.textContent='✨ Generar';
 }
 function _suggestEmailTemplate(){
   const cats=appState.currentSearch?.cats||[];
