@@ -1020,6 +1020,18 @@ html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',san
       <input type="text" id="camp-subject" maxlength="80" placeholder="Ej: Una pregunta rápida">
     </div>
     <div class="modal-field">
+      <label>Plantilla (opcional)</label>
+      <select id="camp-template" onchange="applyEmailTemplate(this.value)">
+        <option value="">— Escribir el mío —</option>
+        <option value="reformistas">🔨 Reformas</option>
+        <option value="fontaneria">🚿 Fontanería</option>
+        <option value="electricidad">⚡ Electricidad</option>
+        <option value="cerrajeria">🔐 Cerrajería</option>
+        <option value="pintura">🎨 Pintura</option>
+      </select>
+      <div style="font-size:11px;color:var(--text3);margin-top:5px;">Elige una plantilla para rellenar el asunto y el cuerpo automáticamente — luego puedes editarlos como quieras.</div>
+    </div>
+    <div class="modal-field">
       <label>Cuerpo del email</label>
       <textarea id="camp-product" rows="7" placeholder="Escribe aquí el email completo tal como quieres que lo reciban.&#10;&#10;Puedes usar {{nombre}} para personalizar con el nombre del lead.&#10;&#10;Ej:&#10;Hola {{nombre}},&#10;&#10;Me llamo Carlos y te escribo desde Neopanels. Instalamos revestimientos para obras y reformas y creo que puede interesarte.&#10;&#10;¿Tenéis 10 minutos esta semana?"></textarea>
       <div style="font-size:11px;color:var(--text3);margin-top:5px;">Usa <strong style="color:var(--accent)">{{nombre}}</strong> para insertar el nombre de cada empresa automáticamente.</div>
@@ -2438,6 +2450,52 @@ async function checkSenderStatus(){const email=document.getElementById('sender-e
 let selectedLimit=50;
 function selectLimit(n){selectedLimit=n;document.querySelectorAll('.email-limit-btn').forEach(b=>b.classList.remove('selected'));document.getElementById('limit-'+n).classList.add('selected');}
 function updateProductCounter(){const el=document.getElementById('camp-product'),c=document.getElementById('product-counter');if(el&&c){const n=el.value.length;c.textContent=n;c.style.color=n>130?'var(--red)':n>100?'var(--yellow)':'var(--text3)';}}
+
+// Plantillas de email por oficio (vertical construcción/reformas — ver
+// memoria strategy_growth_plan_fable). Los IDs coinciden con las categorías
+// reales de SECTORES (construccion.reformistas, servicios_hogar.fontaneria/
+// electricidad/cerrajeria/pintura) para poder auto-sugerir la plantilla que
+// coincide con la búsqueda activa.
+const EMAIL_TEMPLATES={
+  reformistas:{
+    subject:'Reformas de confianza para tu negocio',
+    product:'Hola {{nombre}},\n\nOs escribo porque trabajamos con negocios como el vuestro haciendo reformas integrales — desde renovaciones puntuales hasta proyectos completos, cuidando siempre los plazos y el presupuesto acordado desde el primer día.\n\nSi tenéis algún proyecto de reforma pendiente, o simplemente queréis contar con una opción de confianza para cuando surja, me encantaría contaros cómo trabajamos.\n\n¿Tenéis 10 minutos esta semana para hablarlo?',
+  },
+  fontaneria:{
+    subject:'Fontanería de confianza para tu negocio',
+    product:'Hola {{nombre}},\n\nMe pongo en contacto porque damos servicio de fontanería a negocios como el vuestro — mantenimiento, averías urgentes e instalaciones nuevas, con tiempos de respuesta rápidos.\n\nSi buscáis un fontanero de confianza para el día a día o para proyectos puntuales, me encantaría contaros cómo trabajamos.\n\n¿Tenéis 10 minutos esta semana?',
+  },
+  electricidad:{
+    subject:'Electricistas de confianza para tu negocio',
+    product:'Hola {{nombre}},\n\nOs escribo porque damos servicio de electricidad a negocios como el vuestro — instalaciones, mantenimiento preventivo y averías urgentes, cumpliendo siempre la normativa vigente.\n\nSi en algún momento necesitáis un electricista de confianza, ya sea puntual o de forma recurrente, me encantaría contaros cómo trabajamos.\n\n¿Tenéis 10 minutos esta semana para hablarlo?',
+  },
+  cerrajeria:{
+    subject:'Cerrajería de confianza para tu negocio',
+    product:'Hola {{nombre}},\n\nMe pongo en contacto porque ofrecemos servicio de cerrajería a negocios como el vuestro — aperturas urgentes, instalación y mantenimiento de sistemas de seguridad, con respuesta rápida cuando más lo necesitáis.\n\nSi queréis contar con un cerrajero de confianza para el día a día del negocio, me encantaría contaros cómo trabajamos.\n\n¿Tenéis 10 minutos esta semana?',
+  },
+  pintura:{
+    subject:'Pintura profesional para tu negocio',
+    product:'Hola {{nombre}},\n\nOs escribo porque trabajamos con negocios como el vuestro dando servicio de pintura profesional — interiores, exteriores y mantenimiento, cuidando los plazos para que podáis seguir con la actividad cuanto antes.\n\nSi tenéis algún proyecto de pintura pendiente, o queréis contar con una opción de confianza para el futuro, me encantaría contaros cómo trabajamos.\n\n¿Tenéis 10 minutos esta semana?',
+  },
+};
+function applyEmailTemplate(key){
+  const tpl=EMAIL_TEMPLATES[key];
+  if(!tpl)return;
+  document.getElementById('camp-subject').value=tpl.subject;
+  document.getElementById('camp-product').value=tpl.product;
+  updateProductCounter();
+}
+function _suggestEmailTemplate(){
+  const cats=appState.currentSearch?.cats||[];
+  const match=cats.find(c=>EMAIL_TEMPLATES[c]);
+  const sel=document.getElementById('camp-template');
+  if(!match||!sel)return;
+  sel.value=match;
+  // Solo rellena el texto si no hay ya un borrador guardado — no pisar lo
+  // que el cliente ya haya escrito o guardado de una campaña anterior.
+  const productEl=document.getElementById('camp-product');
+  if(productEl&&!productEl.value.trim())applyEmailTemplate(match);
+}
 function _notifyScrapingDone(total, ciudad){
   document.title=`✅ ${total} leads — LeadForge`;
   setTimeout(()=>{document.title='LeadForge';},8000);
@@ -2551,6 +2609,7 @@ function openCampaignModal(){
   if(saved.product)document.getElementById('camp-product').value=saved.product;
   if(saved.subject)document.getElementById('camp-subject').value=saved.subject;
   if(saved.catalogUrl)document.getElementById('camp-catalog-url').value=saved.catalogUrl;
+  _suggestEmailTemplate();
   updateProductCounter();
   const se=localStorage.getItem('lf_sender_email')||saved.email||'';
   if(se)document.getElementById('camp-email').value=se;
