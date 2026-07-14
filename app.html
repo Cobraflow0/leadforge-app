@@ -1247,7 +1247,7 @@ body.nav-open{overflow:hidden;}
         <button class="btn-download" onclick="downloadExcel()"><span>📥</span> Descargar Excel de leads</button>
         <button class="btn-new" onclick="newSearch()">← Nueva búsqueda</button>
         <button class="btn-open-campaign" onclick="openCampaignModal()">✉️ Enviar campaña de emails a los mejores leads</button>
-        <button class="btn-import-crm" onclick="importLeadsToCRM()">🎯 Importar leads al CRM</button>
+        <button class="btn-import-crm" id="btn-import-crm" onclick="importLeadsToCRM()"><span id="import-crm-label">🎯 Importar leads al CRM</span><div class="campaign-spinner" id="import-crm-spinner" style="display:none;"></div></button>
         <div class="campaign-result" id="campaign-result"></div>
       </div>
     </div>
@@ -1463,9 +1463,14 @@ body.nav-open{overflow:hidden;}
       <div style="font-size:11px;color:var(--text3);margin-top:5px;">Las respuestas de los leads irán a este email.</div>
     </div>
     <div class="modal-field">
-      <label>Enlace a catálogo (opcional)</label>
-      <input type="url" id="camp-catalog-url" placeholder="https://tu-web.com/catalogo.pdf">
-      <div style="font-size:11px;color:var(--text3);margin-top:5px;">Si lo rellenas, se añade un botón "Ver catálogo" en el email. Usa un enlace (Drive, tu web...), no adjuntes el archivo — los adjuntos empeoran mucho la entrega en cold email.</div>
+      <label>Catálogo (opcional)</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="file" id="camp-catalog-file" accept="application/pdf" style="flex:1;" onchange="uploadCatalogFile()">
+        <div class="campaign-spinner" id="catalog-upload-spinner" style="display:none;width:16px;height:16px;flex-shrink:0;"></div>
+      </div>
+      <input type="url" id="camp-catalog-url" placeholder="https://tu-web.com/catalogo.pdf" style="margin-top:6px;">
+      <div id="catalog-upload-status" style="font-size:11px;margin-top:5px;"></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:5px;">Sube un PDF (máx. 10MB) y se añade un botón "Ver catálogo" en el email como enlace — nunca como adjunto, los adjuntos empeoran mucho la entrega en cold email. También puedes pegar un enlace directamente (Drive, tu web...) en vez de subir el archivo.</div>
     </div>
     <div class="modal-field">
       <label>Número de emails a enviar</label>
@@ -1797,6 +1802,7 @@ async function loadApp(user){
   if(ss)document.getElementById('sender-email-input').value=ss;if(sn)document.getElementById('sender-name-input').value=sn;
   loadCRM();
   loadSearchHistoryFromSupabase();
+  loadFullSearchStats();
   loadAlertaConfig();
   checkOnboarding();
   loadBlacklist();
@@ -2323,11 +2329,34 @@ async function downloadHistoryExcel(jobId){
   }finally{if(btn){btn.disabled=false;btn.textContent='📥 Excel';}}
 }
 function newSearch(){showPage('dashboard');}
+async function openCampaignFromHistory(jobId){
+  if(!jobId){alert('Esta búsqueda no tiene ID guardado.');return;}
+  const s=appState.searches.find(x=>x.job_id===jobId);
+  const btn=document.querySelector(`button[onclick="openCampaignFromHistory('${jobId}')"]`);
+  if(btn){btn.disabled=true;btn.textContent='⏳';}
+  try{
+    let leads=_loadHistoryLeads(jobId);
+    if(!leads?.length){
+      const fr=await fetch(`${SCRAPER_API_URL}/result/${jobId}`);
+      if(!fr.ok)throw new Error('not_found');
+      const fd=await fr.json();
+      leads=fd.leads||[];
+    }
+    if(!leads?.length)throw new Error('empty');
+    appState.currentJobId=jobId;
+    appState.currentLeads=leads;
+    appState.currentSearch={sector:s?.sector||'',ciudad:s?.ciudad||''};
+    openCampaignModal();
+  }catch(e){
+    if(e.message==='not_found'||e.message==='empty')alert('No se encontraron leads para esta búsqueda. Puede que sea anterior al sistema de persistencia.');
+    else alert('Error al cargar los leads. Inténtalo de nuevo.');
+  }finally{if(btn){btn.disabled=false;btn.textContent='✉️ Campaña';}}
+}
 function renderHistory(){
   const list=document.getElementById('history-list'),searches=appState.searches;
   if(!searches.length){list.innerHTML=`<div class="empty-state"><span class="emoji">📋</span><p>Aún no tienes búsquedas guardadas.<br>Lanza tu primera búsqueda para verla aquí.</p></div>`;return;}
   const icons={construccion:'🏗️',marketing:'📣',legal:'⚖️',tecnologia:'💻',salud:'🏥',restauracion:'🍽️',retail:'🛍️',pymes:'🏢',fincas:'🏠',energia:'⚡',servicios_hogar:'🔧',inmobiliaria:'🏘️',educacion:'📚',automocion:'🚗',eventos:'🎉',hosteleria_venues:'🏨'};
-  list.innerHTML=searches.map(s=>`<div class="history-item"><div class="history-icon">${icons[s.sector]||'📋'}</div><div class="history-info"><div class="history-name">${s.sector} — ${s.ciudad}</div><div class="history-meta">${s.cats} categorías · ${s.date}</div></div><div class="history-leads">${s.total} leads</div><button class="btn-redownload" onclick="downloadHistoryExcel('${s.job_id||''}')" ${!s.job_id?'disabled':''}>📥 Excel</button></div>`).join('');
+  list.innerHTML=searches.map(s=>`<div class="history-item"><div class="history-icon">${icons[s.sector]||'📋'}</div><div class="history-info"><div class="history-name">${s.sector} — ${s.ciudad}</div><div class="history-meta">${s.cats} categorías · ${s.date}</div></div><div class="history-leads">${s.total} leads</div><button class="btn-redownload" onclick="openCampaignFromHistory('${s.job_id||''}')" ${!s.job_id?'disabled':''}>✉️ Campaña</button><button class="btn-redownload" onclick="downloadHistoryExcel('${s.job_id||''}')" ${!s.job_id?'disabled':''}>📥 Excel</button></div>`).join('');
 }
 const CITY_COORDS={
   'Madrid':[40.4168,-3.7038],'Barcelona':[41.3851,2.1734],'Valencia':[39.4699,-0.3763],
@@ -2852,9 +2881,16 @@ function getEmailsSentThisMonth(){try{const d=JSON.parse(localStorage.getItem('l
 function addEmailsSent(n){const key=_getMonthKey();let d={month:key,count:0};try{const s=JSON.parse(localStorage.getItem('lf_emails_month')||'{}');d=s.month===key?s:{month:key,count:0};}catch(e){}d.count+=n;localStorage.setItem('lf_emails_month',JSON.stringify(d));}
 function updateStats(){
   const searches=appState.searches,thisMonth=searches.filter(s=>new Date(s.id)>new Date(Date.now()-30*24*60*60*1000));
-  const totalLeads=searches.reduce((a,s)=>a+(s.total||0),0);
+  // appState.searches viene de lf_history, que solo guarda las 50 búsquedas
+  // más recientes (ver loadSearchHistoryFromSupabase) — sirve de sobra para
+  // pintar el Historial, pero sumar leads/contar búsquedas ahí infravalora
+  // a cualquier cuenta con más de 50 búsquedas (ej. plan Business, límite
+  // infinito). loadFullSearchStats() calcula el total real sin ese tope y,
+  // en cuanto responde, sobreescribe estos dos números — hasta entonces se
+  // muestra esta cifra provisional para no dejar la pantalla en blanco.
+  const totalLeads=appState.statsOverride?.totalLeads??searches.reduce((a,s)=>a+(s.total||0),0);
   const limits=getPlanLimits();
-  const usedS=thisMonth.length,capS=limits.searches,capSStr=capS===Infinity?'∞':capS;
+  const usedS=appState.statsOverride?.searchesThisMonth??thisMonth.length,capS=limits.searches,capSStr=capS===Infinity?'∞':capS;
   const pctS=capS===Infinity?Math.min(usedS*3,100):Math.round(usedS/capS*100);
   const barS=pctS>=100?'full':pctS>=80?'warn':'ok';
   document.getElementById('stat-searches').innerHTML=`${usedS}<span> / ${capSStr} este mes</span><div class="limit-bar-wrap"><div class="limit-bar-fill ${barS}" style="width:${Math.min(pctS,100)}%"></div></div>`;
@@ -3123,6 +3159,21 @@ function _selectAllCampLeads(v){
 }
 function closeCampaignModal(){document.getElementById('modal-campaign').classList.remove('open');}
 document.getElementById('modal-campaign').addEventListener('click',function(e){if(e.target===this)closeCampaignModal();});
+async function uploadCatalogFile(){
+  const input=document.getElementById('camp-catalog-file'),file=input.files[0],statusEl=document.getElementById('catalog-upload-status'),spin=document.getElementById('catalog-upload-spinner');
+  if(!file)return;
+  if(file.type!=='application/pdf'&&!file.name.toLowerCase().endsWith('.pdf')){statusEl.style.color='var(--red)';statusEl.textContent='Solo se admiten PDF.';input.value='';return;}
+  if(file.size>10*1024*1024){statusEl.style.color='var(--red)';statusEl.textContent='El PDF pesa más de 10MB.';input.value='';return;}
+  spin.style.display='block';statusEl.style.color='var(--text3)';statusEl.textContent='Subiendo…';
+  const fd=new FormData();fd.append('file',file);fd.append('user_id',appState.user?.id||'');
+  try{
+    const r=await fetch(`${SCRAPER_API_URL}/upload-catalog`,{method:'POST',body:fd});
+    const data=await r.json();
+    spin.style.display='none';
+    if(data.ok){document.getElementById('camp-catalog-url').value=data.url;statusEl.style.color='var(--green)';statusEl.textContent=`✅ Subido: ${file.name}`;}
+    else{statusEl.style.color='var(--red)';statusEl.textContent=`❌ ${data.error||'No se pudo subir.'}`;input.value='';}
+  }catch(err){spin.style.display='none';statusEl.style.color='var(--red)';statusEl.textContent=`❌ Error: ${err.message||'No se pudo conectar con la API'}`;input.value='';}
+}
 async function sendCampaign(){
   const name=document.getElementById('camp-name').value.trim(),company=document.getElementById('camp-company').value.trim(),product=document.getElementById('camp-product').value.trim(),subject=document.getElementById('camp-subject').value.trim(),email=document.getElementById('camp-email').value.trim(),catalogUrl=document.getElementById('camp-catalog-url').value.trim(),jobId=appState.currentJobId;
   if(!name||!company||!product||!email){alert('Rellena todos los campos.');return;}if(!email.includes('@')){alert('Introduce un email válido.');return;}
@@ -3158,24 +3209,36 @@ const STATUS_LABELS={'sin-contactar':'⬜ Sin contactar','contactado':'✉️ Co
 async function importLeadsToCRM(){
   const leads=appState.currentLeads;
   if(!leads||!leads.length){alert('No hay leads en el scraping actual. Lanza una búsqueda primero.');return;}
-  const claveDedup=l=>`${(l.nombre||'').toLowerCase()}|${(l.ciudad||'').toLowerCase()}`;
-  const existingNames=new Set(crmLeads.map(claveDedup));
-  const userId=appState.user?.id,nuevos=[];
-  leads.forEach(lead=>{
-    const clave=claveDedup(lead);
-    if(!(lead.nombre||'').trim()||existingNames.has(clave))return;
-    nuevos.push({user_id:userId,nombre:lead.nombre||'',email:lead.email||'',telefono:lead.telefono||'',web:lead.web||'',ciudad:lead.ciudad||'',fuente:lead.fuente||'',calidad:lead.calidad||'',score:Math.round(lead.score)||0,status:'sin-contactar',nota:'',fecha:new Date().toLocaleDateString('es-ES')});
-    existingNames.add(clave);
-  });
-  if(!nuevos.length){alert('Todos los leads ya están en el CRM.');return;}
-  // Insert in batches of 50 to avoid Supabase request size limits
-  const BATCH=50;let errored=false;
-  for(let i=0;i<nuevos.length;i+=BATCH){
-    const ok=await CRM.insertMany(nuevos.slice(i,i+BATCH));
-    if(!ok){errored=true;break;}
+  const btn=document.getElementById('btn-import-crm'),lbl=document.getElementById('import-crm-label'),spin=document.getElementById('import-crm-spinner');
+  if(btn){btn.disabled=true;}
+  if(lbl){lbl.style.display='none';}
+  if(spin){spin.style.display='block';}
+  try{
+    const claveDedup=l=>`${(l.nombre||'').toLowerCase()}|${(l.ciudad||'').toLowerCase()}`;
+    const existingNames=new Set(crmLeads.map(claveDedup));
+    const userId=appState.user?.id,nuevos=[];
+    leads.forEach(lead=>{
+      const clave=claveDedup(lead);
+      if(!(lead.nombre||'').trim()||existingNames.has(clave))return;
+      nuevos.push({user_id:userId,nombre:lead.nombre||'',email:lead.email||'',telefono:lead.telefono||'',web:lead.web||'',ciudad:lead.ciudad||'',fuente:lead.fuente||'',calidad:lead.calidad||'',score:Math.round(lead.score)||0,status:'sin-contactar',nota:'',fecha:new Date().toLocaleDateString('es-ES')});
+      existingNames.add(clave);
+    });
+    if(!nuevos.length){alert('Todos los leads ya están en el CRM.');return;}
+    // Insert in batches of 50 to avoid Supabase request size limits
+    const BATCH=50;let errored=false;
+    for(let i=0;i<nuevos.length;i+=BATCH){
+      const ok=await CRM.insertMany(nuevos.slice(i,i+BATCH));
+      if(!ok){errored=true;break;}
+    }
+    if(!errored){alert(`✅ ${nuevos.length} leads importados al CRM.`);await loadCRM();showPage('crm');}
+    else{alert('Error al importar leads (Supabase rechazó la petición). Inténtalo de nuevo.');}
+  }catch(err){
+    alert(`❌ Error al importar: ${err.message||'No se pudo conectar con Supabase'}`);
+  }finally{
+    if(btn){btn.disabled=false;}
+    if(lbl){lbl.style.display='inline';}
+    if(spin){spin.style.display='none';}
   }
-  if(!errored){alert(`✅ ${nuevos.length} leads importados al CRM.`);await loadCRM();showPage('crm');}
-  else{alert('Error al importar leads. Inténtalo de nuevo.');}
 }
 function setCRMFilter(f){crmFilter=f;document.querySelectorAll('.crm-filter-btn').forEach(b=>b.classList.remove('active'));document.getElementById('crm-f-'+f)?.classList.add('active');renderCRM();}
 async function updateCRMStatus(id,newStatus){
@@ -3325,6 +3388,30 @@ async function saveSearchToSupabase(entry){
   if(!appState.user?.id)return;
   try{
     await sb.req('/rest/v1/search_history',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({user_id:appState.user.id,user_email:appState.user.email||'',sector:entry.sector||'',ciudad:entry.ciudad||'',cats:entry.cats||0,total:entry.total||0,alta:entry.alta||0,media:entry.media||0,baja:entry.baja||0,job_id:entry.job_id||null})});
+  }catch(e){}
+}
+async function loadFullSearchStats(){
+  if(!appState.user?.id)return;
+  try{
+    // Igual que CRM.load(): pagina con Range en vez de limit=50, para que
+    // "Leads generados" y "Búsquedas este mes" reflejen el total real y no
+    // solo la ventana de 50 que guarda lf_history.
+    const PAGE=1000;let offset=0,todos=[];
+    while(true){
+      const r=await sb.req(`/rest/v1/search_history?user_id=eq.${appState.user.id}&select=total,created_at`,{headers:{'Range':`${offset}-${offset+PAGE-1}`}});
+      if(!r.ok)break;
+      const pagina=await r.json();
+      todos=todos.concat(pagina);
+      if(pagina.length<PAGE)break;
+      offset+=PAGE;
+    }
+    if(!todos.length)return;
+    const cutoff=Date.now()-30*24*60*60*1000;
+    appState.statsOverride={
+      totalLeads: todos.reduce((a,s)=>a+(s.total||0),0),
+      searchesThisMonth: todos.filter(s=>new Date(s.created_at).getTime()>cutoff).length,
+    };
+    updateStats();
   }catch(e){}
 }
 async function loadSearchHistoryFromSupabase(){
