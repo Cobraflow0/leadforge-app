@@ -3072,10 +3072,19 @@ async function saveCampaignToSupabase(c){
 async function loadCampaignsFromSupabase(){
   if(!appState.user?.id)return;
   try{
-    const r=await sb.req(`/rest/v1/campaigns?user_id=eq.${appState.user.id}&order=created_at.desc&limit=50`);
-    if(!r.ok)return;
-    const remote=await r.json();
-    if(!Array.isArray(remote)||!remote.length)return;
+    // Igual que CRM.load()/loadFullSearchStats(): pagina con Range en vez
+    // de limit=50, para que ninguna campaña antigua desaparezca de la
+    // lista con el tiempo (2026-07-14).
+    const PAGE=1000;let offset=0,remote=[];
+    while(true){
+      const r=await sb.req(`/rest/v1/campaigns?user_id=eq.${appState.user.id}&order=created_at.desc`,{headers:{'Range':`${offset}-${offset+PAGE-1}`}});
+      if(!r.ok)break;
+      const pagina=await r.json();
+      remote=remote.concat(pagina);
+      if(pagina.length<PAGE)break;
+      offset+=PAGE;
+    }
+    if(!remote.length)return;
     const local=JSON.parse(localStorage.getItem('lf_campanas')||'[]');
     const localTags=new Set(local.filter(c=>c.tag).map(c=>c.tag));
     let added=0;
@@ -3084,7 +3093,7 @@ async function loadCampaignsFromSupabase(){
       local.push({id:new Date(c.created_at).getTime()+Math.random(),tag:c.tag||'',job_id:c.job_id||null,sector:c.sector||'',ciudad:c.ciudad||'',enviados:c.enviados||0,company:c.company||'',user_email:c.user_email||'',has_sequence:!!c.has_sequence,date:new Date(c.created_at).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})});
       added++;
     });
-    if(added>0){local.sort((a,b)=>b.id-a.id);localStorage.setItem('lf_campanas',JSON.stringify(local.slice(0,50)));}
+    if(added>0){local.sort((a,b)=>b.id-a.id);localStorage.setItem('lf_campanas',JSON.stringify(local));}
   }catch(e){}
 }
 function showAlert(el,msg){el.textContent=msg;el.classList.add('show');}
