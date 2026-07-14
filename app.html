@@ -1663,11 +1663,14 @@ const CRM={
     return todos;
   },
   async insertMany(leads){const r=await sb.req('/rest/v1/crm_leads',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify(leads)});return r.ok;},
-  async updateStatus(id,status){await sb.req(`/rest/v1/crm_leads?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({status})});},
-  async updateNota(id,nota){await sb.req(`/rest/v1/crm_leads?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({nota})});},
+  // Antes ninguno de estos 4 devolvía si la petición fue bien — el que
+  // llamaba no tenía forma de saber si de verdad se guardó/borró, así que
+  // no podía avisar de un fallo real (ver auditoría 2026-07-14).
+  async updateStatus(id,status){const r=await sb.req(`/rest/v1/crm_leads?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({status})});return r.ok;},
+  async updateNota(id,nota){const r=await sb.req(`/rest/v1/crm_leads?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({nota})});return r.ok;},
   async update(id,fields){const r=await sb.req(`/rest/v1/crm_leads?id=eq.${id}`,{method:'PATCH',body:JSON.stringify(fields)});return r.ok;},
-  async delete(id){await sb.req(`/rest/v1/crm_leads?id=eq.${id}`,{method:'DELETE'});},
-  async deleteAll(userId){await sb.req(`/rest/v1/crm_leads?user_id=eq.${userId}`,{method:'DELETE'});}
+  async delete(id){const r=await sb.req(`/rest/v1/crm_leads?id=eq.${id}`,{method:'DELETE'});return r.ok;},
+  async deleteAll(userId){const r=await sb.req(`/rest/v1/crm_leads?user_id=eq.${userId}`,{method:'DELETE'});return r.ok;}
 };
 let appState={user:null,profile:null,searches:JSON.parse(localStorage.getItem('lf_history')||'[]'),currentSearch:null,currentJobId:null,currentLeads:[]};
 let crmLeads=[],crmFilter='todos',selectedCities=[],cancelReason='';
@@ -3249,23 +3252,53 @@ function setCRMFilter(f){crmFilter=f;document.querySelectorAll('.crm-filter-btn'
 async function updateCRMStatus(id,newStatus){
   const lead=crmLeads.find(l=>l.id===id);
   if(!lead)return;
-  if(newStatus==='descartado'&&lead.email){
-    if(!confirm(`Al descartar a "${lead.nombre||lead.email}" no volverá a recibir emails de tus campañas.\n\n¿Continuar?`))return;
-    const r=await sb.req('/rest/v1/email_blacklist',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({user_id:appState.user.id,user_email:appState.user.email,email:lead.email.toLowerCase(),source:'crm'})});
-    if(!(r.ok||r.status===201)){alert('Error al descartar. Inténtalo de nuevo.');return;}
+  try{
+    if(newStatus==='descartado'&&lead.email){
+      if(!confirm(`Al descartar a "${lead.nombre||lead.email}" no volverá a recibir emails de tus campañas.\n\n¿Continuar?`))return;
+      const r=await sb.req('/rest/v1/email_blacklist',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({user_id:appState.user.id,user_email:appState.user.email,email:lead.email.toLowerCase(),source:'crm'})});
+      if(!(r.ok||r.status===201)){alert('Error al descartar. Inténtalo de nuevo.');return;}
+    }
+    const ok=await CRM.updateStatus(id,newStatus);
+    if(!ok)throw new Error('Supabase rechazó la petición');
+    lead.status=newStatus;renderCRM();
+  }catch(err){
+    alert(`❌ Error al cambiar el estado: ${err.message||'No se pudo conectar'}`);
+    renderCRM(); // revierte el <select> a lo que hay realmente guardado
   }
-  lead.status=newStatus;renderCRM();await CRM.updateStatus(id,newStatus);
 }
-async function updateCRMNote(id,nota){const lead=crmLeads.find(l=>l.id===id);if(lead)lead.nota=nota;await CRM.updateNota(id,nota);}
-async function deleteCRMLead(id){crmLeads=crmLeads.filter(l=>l.id!==id);renderCRM();await CRM.delete(id);}
+async function updateCRMNote(id,nota){
+  const lead=crmLeads.find(l=>l.id===id);
+  try{
+    const ok=await CRM.updateNota(id,nota);
+    if(!ok)throw new Error('Supabase rechazó la petición');
+    if(lead)lead.nota=nota;
+  }catch(err){
+    alert(`❌ No se pudo guardar la nota: ${err.message||'No se pudo conectar'}`);
+    renderCRM();
+  }
+}
+async function deleteCRMLead(id){
+  if(!confirm('¿Eliminar este lead del CRM? No se puede deshacer.'))return;
+  try{
+    const ok=await CRM.delete(id);
+    if(!ok)throw new Error('Supabase rechazó la petición');
+    crmLeads=crmLeads.filter(l=>l.id!==id);renderCRM();
+  }catch(err){
+    alert(`❌ Error al eliminar: ${err.message||'No se pudo conectar'}`);
+  }
+}
 async function blacklistCRMLead(id,email,nombre){
   if(!confirm(`¿Añadir "${nombre||email}" a la blacklist?\n\nNo recibirá más emails de tus campañas.`))return;
-  const r=await sb.req('/rest/v1/email_blacklist',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({user_id:appState.user.id,user_email:appState.user.email,email:email.toLowerCase(),source:'crm'})});
-  if(r.ok||r.status===201){
-    await CRM.update(id,{status:'descartado',nota:'No contactar — blacklist'});
+  try{
+    const r=await sb.req('/rest/v1/email_blacklist',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({user_id:appState.user.id,user_email:appState.user.email,email:email.toLowerCase(),source:'crm'})});
+    if(!(r.ok||r.status===201))throw new Error('No se pudo añadir a la blacklist');
+    const ok=await CRM.update(id,{status:'descartado',nota:'No contactar — blacklist'});
+    if(!ok)throw new Error('Se añadió a la blacklist pero no se pudo actualizar el CRM');
     crmLeads=crmLeads.map(l=>l.id===id?{...l,status:'descartado',nota:'No contactar — blacklist'}:l);
     renderCRM();
-  }else{alert('Error al añadir a la blacklist.');}
+  }catch(err){
+    alert(`❌ ${err.message||'Error al añadir a la blacklist.'}`);
+  }
 }
 let _editLeadId=null;
 function openEditLead(id){
@@ -3304,14 +3337,30 @@ async function saveEditLead(){
   if(!_editLeadId)return;
   const btn=document.getElementById('btn-save-lead'),lbl=document.getElementById('edit-lead-label'),spin=document.getElementById('edit-lead-spinner');
   btn.disabled=true;lbl.style.display='none';spin.style.display='block';
-  const fields={nombre:document.getElementById('edit-nombre').value.trim(),email:document.getElementById('edit-email').value.trim(),telefono:document.getElementById('edit-telefono').value.trim(),web:document.getElementById('edit-web').value.trim(),ciudad:document.getElementById('edit-ciudad').value.trim()};
-  const lead=crmLeads.find(l=>l.id===_editLeadId);
-  if(lead)Object.assign(lead,fields);
-  await CRM.update(_editLeadId,fields);
-  renderCRM();closeEditLead();
-  btn.disabled=false;lbl.style.display='inline';spin.style.display='none';
+  try{
+    const fields={nombre:document.getElementById('edit-nombre').value.trim(),email:document.getElementById('edit-email').value.trim(),telefono:document.getElementById('edit-telefono').value.trim(),web:document.getElementById('edit-web').value.trim(),ciudad:document.getElementById('edit-ciudad').value.trim()};
+    const ok=await CRM.update(_editLeadId,fields);
+    if(!ok)throw new Error('Supabase rechazó la petición');
+    const lead=crmLeads.find(l=>l.id===_editLeadId);
+    if(lead)Object.assign(lead,fields);
+    renderCRM();closeEditLead();
+  }catch(err){
+    alert(`❌ Error al guardar: ${err.message||'No se pudo conectar'}`);
+  }finally{
+    btn.disabled=false;lbl.style.display='inline';spin.style.display='none';
+  }
 }
-async function clearCRM(){if(!confirm('¿Vaciar todo el CRM? Esta acción no se puede deshacer.'))return;const userId=appState.user?.id;crmLeads=[];renderCRM();await CRM.deleteAll(userId);}
+async function clearCRM(){
+  if(!confirm('¿Vaciar todo el CRM? Esta acción no se puede deshacer.'))return;
+  const userId=appState.user?.id;
+  try{
+    const ok=await CRM.deleteAll(userId);
+    if(!ok)throw new Error('Supabase rechazó la petición');
+    crmLeads=[];renderCRM();
+  }catch(err){
+    alert(`❌ Error al vaciar el CRM: ${err.message||'No se pudo conectar'}. Los leads siguen ahí, no se han borrado.`);
+  }
+}
 function exportCRMToExcel(){const filtered=crmFilter==='todos'?crmLeads:crmLeads.filter(l=>l.status===crmFilter);if(!filtered.length){alert('No hay leads para exportar.');return;}const STATUS_ES={'sin-contactar':'Sin contactar','contactado':'Contactado','interesado':'Interesado','cerrado':'Cerrado','descartado':'Descartado'};const rows=filtered.map(l=>({'Empresa':l.nombre||'','Email':l.email||'','Teléfono':l.telefono||'','Web':l.web||'','Ciudad':l.ciudad||'','Fuente':l.fuente||'','Calidad':l.calidad||'','Score':l.score||0,'Estado':STATUS_ES[l.status]||l.status||'','Nota':l.nota||'','Fecha':l.fecha||''}));const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=[{wch:30},{wch:28},{wch:16},{wch:30},{wch:14},{wch:16},{wch:10},{wch:8},{wch:16},{wch:30},{wch:12}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Leads CRM');const fecha=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');XLSX.writeFile(wb,`LeadForge_CRM_${crmFilter==='todos'?'todos':crmFilter}_${fecha}.xlsx`);}
 function escapeHtml(str){return String(str==null?'':str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function escJsAttr(str){return String(str==null?'':str).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
@@ -3558,12 +3607,22 @@ async function addToBlacklist(){
   const input=document.getElementById('blacklist-input'),email=input.value.trim().toLowerCase();
   if(!email||!email.includes('@')){alert('Introduce un email válido.');return;}
   if(!appState.user?.id)return;
-  const r=await sb.req('/rest/v1/email_blacklist',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({user_id:appState.user.id,user_email:appState.user.email,email})});
-  if(r.ok||r.status===201){input.value='';await loadBlacklist();}else{alert('Error al añadir. ¿Ya está en la lista?');}
+  try{
+    const r=await sb.req('/rest/v1/email_blacklist',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({user_id:appState.user.id,user_email:appState.user.email,email})});
+    if(r.ok||r.status===201){input.value='';await loadBlacklist();}else{alert('Error al añadir. ¿Ya está en la lista?');}
+  }catch(err){
+    alert(`❌ Error de conexión: ${err.message||'No se pudo conectar'}`);
+  }
 }
 async function removeFromBlacklist(id){
-  await sb.req(`/rest/v1/email_blacklist?id=eq.${id}`,{method:'DELETE'});
-  await loadBlacklist();
+  if(!confirm('¿Quitar este email de la blacklist? Volverá a poder recibir campañas.'))return;
+  try{
+    const r=await sb.req(`/rest/v1/email_blacklist?id=eq.${id}`,{method:'DELETE'});
+    if(!r.ok)throw new Error('Supabase rechazó la petición');
+    await loadBlacklist();
+  }catch(err){
+    alert(`❌ Error al quitar de la blacklist: ${err.message||'No se pudo conectar'}`);
+  }
 }
 
 // ── PORTAL STRIPE ────────────────────────────────────────────
