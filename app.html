@@ -2123,7 +2123,7 @@ async function runDemoScraping(sector, ciudad, cats){
   appState.currentLeads=DEMO_LEADS_DATA;_updateEmailStats(DEMO_LEADS_DATA);_notifyScrapingDone(DEMO_LEADS_DATA.length,'demo');
   appState.currentJobId='demo-job';
 }
-async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000,quickMode=false){
+async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000,quickMode=false,zone=null){
   if(DEMO_MODE){await runDemoScraping(sector,ciudades[0],cats);return;}
   let totalResult={total:0,alta:0,media:0,baja:0,raw_total:0,leads:[]},lastJobId=null;_resetLiveStats();
   for(let i=0;i<ciudades.length;i++){
@@ -2131,8 +2131,15 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
     if(ciudades.length>1){document.getElementById('multi-city-progress').style.display='flex';document.getElementById('mcp-current').textContent=i+1;document.getElementById('mcp-name').textContent=ciudad;}
     addLog(`🏙️ Iniciando búsqueda en ${ciudad} (${i+1}/${ciudades.length})…`,'accent');
     const baseProgress=Math.round((i/ciudades.length)*100),cityProgressScale=1/ciudades.length;
+    // El radio de zona (Nuke Mode) solo se aplica una vez, en la primera
+    // ciudad — si se mandara en cada ciudad, OpenStreetMap devolvería el
+    // mismo resultado (el radio no depende del nombre de ciudad) repetido
+    // tantas veces como ciudades haya en rango.
+    const citySources=(zone&&i>0)?sources.filter(s=>s!=='openstreetmap'):sources;
+    const body={sector,ciudad,categorias:cats,fuentes:citySources,max_leads:maxLeads,quick_mode:quickMode,user_id:appState.user?.id||''};
+    if(zone&&i===0){body.zone_lat=zone.lat;body.zone_lng=zone.lng;body.zone_radius_km=zone.radiusKm;}
     try{
-      const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sector,ciudad,categorias:cats,fuentes:sources,max_leads:maxLeads,quick_mode:quickMode,user_id:appState.user?.id||''})});
+      const lr=await fetch(`${SCRAPER_API_URL}/scrape`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
       if(!lr.ok)throw new Error(`Error al lanzar: ${lr.status}`);
       const {job_id}=await lr.json();lastJobId=job_id;addLog(`✓ Job ${ciudad} iniciado (${job_id.slice(0,8)}…)`,'ok');_savePendingJob(job_id,sector,ciudad);
       let lastLog=0,errCount=0;
@@ -2364,7 +2371,7 @@ function renderHistory(){
 const CITY_COORDS={
   'Madrid':[40.4168,-3.7038],'Barcelona':[41.3851,2.1734],'Valencia':[39.4699,-0.3763],
   'Sevilla':[37.3891,-5.9845],'Bilbao':[43.2630,-2.9350],'Málaga':[36.7213,-4.4214],
-  'Zaragoza':[41.6488,-0.8891],'Murcia':[37.9922,-1.1307],'Palma de Mallorca':[39.5696,2.6502],
+  'Zaragoza':[41.6488,-0.8891],'Murcia':[37.9922,-1.1307],
   'Alicante':[38.3452,-0.4810],'Granada':[37.1773,-3.5986],'Córdoba':[37.8882,-4.7794],
   'Valladolid':[41.6523,-4.7245],'A Coruña':[43.3623,-8.4115],'San Sebastián':[43.3183,-1.9812],
   'Santander':[43.4623,-3.8099],'Salamanca':[40.9701,-5.6635],'Toledo':[39.8628,-4.0273],
@@ -2476,9 +2483,9 @@ function initMap(){
    SCRAPING NUKE — Sistema completo
 ══════════════════════════════════════════════════════════ */
 const NUKE_TYPES={
-  tactical: {label:'Táctica',emoji:'💣',radiusKm:1.5,color:'#FFD93D',flashColor:'rgba(255,217,61,0.28)',missileDuration:1000,rings:3,ringMax:28,sound:'tactical'},
-  strategic:{label:'Estratégica',emoji:'🚀',radiusKm:4,color:'#FF7A00',flashColor:'rgba(255,122,0,0.28)',missileDuration:1800,rings:5,ringMax:50,sound:'strategic'},
-  moab:     {label:'MOAB',emoji:'☢️',radiusKm:7.5,color:'#FF3D5A',flashColor:'rgba(255,61,90,0.38)',missileDuration:3000,rings:7,ringMax:80,sound:'moab',shake:true},
+  tactical: {label:'Táctica',emoji:'💣',radiusKm:4.5,color:'#FFD93D',flashColor:'rgba(255,217,61,0.28)',missileDuration:1000,rings:3,ringMax:28,sound:'tactical'},
+  strategic:{label:'Estratégica',emoji:'🚀',radiusKm:12,color:'#FF7A00',flashColor:'rgba(255,122,0,0.28)',missileDuration:1800,rings:5,ringMax:50,sound:'strategic'},
+  moab:     {label:'MOAB',emoji:'☢️',radiusKm:22.5,color:'#FF3D5A',flashColor:'rgba(255,61,90,0.38)',missileDuration:3000,rings:7,ringMax:80,sound:'moab',shake:true},
 };
 const NUKE_LIMITS={
   demo:    {tactical:0,strategic:0,moab:0},
@@ -2599,14 +2606,15 @@ function _onNukeMapClick(e){
   launchBtn.textContent=`${t.emoji} LANZAR NUKE`;
 
   const targetEl=document.getElementById('nuke-target-city');
-  targetEl.textContent=cities.length>0?`📍 ${cities.slice(0,2).join(' + ')}${cities.length>2?` +${cities.length-2} más`:''}`:' Zona sin ciudades registradas';
-
   const listEl=document.getElementById('nuke-cities-list');
   if(cities.length>0){
+    targetEl.textContent=`📍 ${cities.slice(0,2).join(' + ')}${cities.length>2?` +${cities.length-2} más`:''}`;
     const shown=cities.slice(0,5);
-    listEl.innerHTML=`<strong style="color:${t.color}">${cities.length} ciudad${cities.length>1?'es':''} en rango:</strong><br>${shown.join(' · ')}${cities.length>5?` <em style="color:var(--text3)">+${cities.length-5} más</em>`:''}`;
+    listEl.innerHTML=`<strong style="color:${t.color}">${cities.length} ciudad${cities.length>1?'es':''} en rango:</strong><br>${shown.join(' · ')}${cities.length>5?` <em style="color:var(--text3)">+${cities.length-5} más</em>`:''}<br><span style="color:var(--text3)">OpenStreetMap buscará por el radio exacto del clic; el resto de fuentes buscan la ciudad completa.</span>`;
   }else{
-    listEl.innerHTML=`<span style="color:var(--text3)">Sin ciudades guardadas en este radio. Amplía el rango o lanza igual.</span>`;
+    const {city:nearCity,dist:nearDist}=_findNearestCityWithDist(e.latlng.lat,e.latlng.lng);
+    targetEl.textContent=`⚠️ Sin ciudad en rango — más cercana: ${nearCity} (${nearDist.toFixed(0)}km)`;
+    listEl.innerHTML=`<span style="color:var(--text3)">Ninguna ciudad guardada en este radio. OpenStreetMap sí buscará el punto exacto, pero el resto de fuentes (Habitissimo, Páginas Amarillas...) buscarán la ciudad completa de <strong>${nearCity}</strong>, a ${nearDist.toFixed(0)}km de aquí — se te pedirá confirmación al lanzar.</span>`;
   }
 
   // Posicionar panel
@@ -2672,7 +2680,10 @@ async function confirmNukeLaunch(){
   const nukeCats=(SECTORES[sector]||[]).filter(c=>document.getElementById('nuke-cat-'+c.id)?.classList.contains('selected')).map(c=>c.id);
   if(nukeCats.length===0){alert('Selecciona al menos una subcategoría.');return;}
   const type=_selectedNukeType,latlng=_nukeTargetLatLng,cities=[..._nukeTargetCities];
-  if(type==='moab'&&cities.length){
+  if(cities.length===0){
+    const {city:nearCity,dist:nearDist}=_findNearestCityWithDist(latlng.lat,latlng.lng);
+    if(!confirm(`No hay ninguna ciudad guardada en este radio.\n\nOpenStreetMap buscará el punto exacto, pero el resto de fuentes buscarán la ciudad completa más cercana: ${nearCity}, a ${nearDist.toFixed(0)}km de donde has clicado.\n\n¿Lanzar de todos modos?`))return;
+  }else if(type==='moab'&&cities.length>1){
     const cityList=cities.slice(0,12).join(', ')+(cities.length>12?` y ${cities.length-12} más`:'');
     if(!confirm(`MOAB: vas a atacar ${cities.length} ciudad${cities.length!==1?'es':''} en el radio:\n\n${cityList}\n\n¿Confirmar lanzamiento?`))return;
   }
@@ -2727,18 +2738,25 @@ async function _animateAndLaunch(type,latlng,cities,sector,nukeCats){
   const sources=_getNukeSources().length>0?_getNukeSources():['google_maps','webs_propias'];
   const limits=getPlanLimits();
   const ciudadStr=targetCities.join(', ');
+  // El radio real (t.radiusKm) solo lo aplica OpenStreetMap (única fuente con
+  // búsqueda geográfica nativa) — el resto de fuentes siguen por ciudad
+  // completa para no perder volumen, ver runScrapingMultiCiudad.
+  const zone={lat:latlng.lat,lng:latlng.lng,radiusKm:t.radiusKm};
   appState.currentSearch={sector,ciudad:ciudadStr,cats,sources};appState.currentJobId=null;
   _initResults(`${t.emoji} Nuke ${t.label} impactó — scrapeando ${targetCities.length} ciudad${targetCities.length>1?'es':''}…`,estimateScrapeTime(cats.length,targetCities.length,sources.length,true));
-  await runScrapingMultiCiudad(sector,targetCities,cats,sources,limits.leads,true);
+  await runScrapingMultiCiudad(sector,targetCities,cats,sources,limits.leads,true,zone);
 }
 
-function _findNearestCity(lat,lng){
+function _findNearestCityWithDist(lat,lng){
   let best=null,bestDist=Infinity;
   Object.entries(CITY_COORDS).forEach(([city,[clat,clng]])=>{
     const d=_haversineDist(lat,lng,clat,clng);
     if(d<bestDist){bestDist=d;best=city;}
   });
-  return best;
+  return {city:best,dist:bestDist};
+}
+function _findNearestCity(lat,lng){
+  return _findNearestCityWithDist(lat,lng).city;
 }
 
 function _shakeMap(){
