@@ -1288,6 +1288,12 @@ body.nav-open{overflow:hidden;}
         <button class="crm-filter-btn" id="crm-f-cerrado" onclick="setCRMFilter('cerrado')">Cerrados</button>
         <button class="crm-filter-btn" id="crm-f-descartado" onclick="setCRMFilter('descartado')">Descartados</button>
       </div>
+      <div class="crm-filters" style="margin-top:8px;">
+        <button class="crm-filter-btn active" id="crm-q-todas" onclick="setCRMCalidad('todas')">Todas las calidades</button>
+        <button class="crm-filter-btn" id="crm-q-alta" onclick="setCRMCalidad('Alta')">🟢 Solo Alta</button>
+        <button class="crm-filter-btn" id="crm-q-media" onclick="setCRMCalidad('Media')">🟡 Solo Media</button>
+        <button class="crm-filter-btn" id="crm-q-baja" onclick="setCRMCalidad('Baja')">🔴 Solo Baja</button>
+      </div>
       <div id="map-city-filter-chip" style="display:none;margin:8px 0 16px;">
         <span class="map-city-chip">📍 <span id="map-city-chip-label"></span><button onclick="clearMapCityFilter()">×</button></span>
       </div>
@@ -1673,7 +1679,7 @@ const CRM={
   async deleteAll(userId){const r=await sb.req(`/rest/v1/crm_leads?user_id=eq.${userId}`,{method:'DELETE'});return r.ok;}
 };
 let appState={user:null,profile:null,searches:JSON.parse(localStorage.getItem('lf_history')||'[]'),currentSearch:null,currentJobId:null,currentLeads:[]};
-let crmLeads=[],crmFilter='todos',selectedCities=[],cancelReason='';
+let crmLeads=[],crmFilter='todos',crmCalidad='todas',selectedCities=[],cancelReason='';
 const SECTORES={
   construccion:[{id:'reformistas',emoji:'🔨',label:'Reformistas'},{id:'constructoras',emoji:'🏗️',label:'Constructoras'},{id:'arquitectos',emoji:'📐',label:'Arquitectos'},{id:'interioristas',emoji:'🛋️',label:'Interioristas'},{id:'decoradores',emoji:'🎨',label:'Decoradores'},{id:'materiales',emoji:'🏪',label:'Tiendas materiales'},{id:'coliving',emoji:'🏢',label:'Co-living'},{id:'gimnasios',emoji:'💪',label:'Gimnasios'},{id:'hosteleria',emoji:'🍽️',label:'Hoteles / Bares'}],
   salud:[{id:'clinicas',emoji:'🏥',label:'Clínicas'},{id:'dentistas',emoji:'🦷',label:'Dentistas'},{id:'fisioterapia',emoji:'💆',label:'Fisioterapia'},{id:'psicologia',emoji:'🧠',label:'Psicología'},{id:'veterinaria',emoji:'🐾',label:'Veterinaria'},{id:'opticas',emoji:'👓',label:'Ópticas'},{id:'farmacias',emoji:'💊',label:'Farmacias'},{id:'estetica',emoji:'💅',label:'Estética'}],
@@ -3288,6 +3294,7 @@ async function importLeadsToCRM(){
   }
 }
 function setCRMFilter(f){crmFilter=f;document.querySelectorAll('.crm-filter-btn').forEach(b=>b.classList.remove('active'));document.getElementById('crm-f-'+f)?.classList.add('active');renderCRM();}
+function setCRMCalidad(q){crmCalidad=q;['todas','Alta','Media','Baja'].forEach(v=>document.getElementById('crm-q-'+v.toLowerCase())?.classList.remove('active'));document.getElementById('crm-q-'+q.toLowerCase())?.classList.add('active');renderCRM();}
 async function updateCRMStatus(id,newStatus){
   const lead=crmLeads.find(l=>l.id===id);
   if(!lead)return;
@@ -3400,7 +3407,7 @@ async function clearCRM(){
     alert(`❌ Error al vaciar el CRM: ${err.message||'No se pudo conectar'}. Los leads siguen ahí, no se han borrado.`);
   }
 }
-function exportCRMToExcel(){const filtered=crmFilter==='todos'?crmLeads:crmLeads.filter(l=>l.status===crmFilter);if(!filtered.length){alert('No hay leads para exportar.');return;}const STATUS_ES={'sin-contactar':'Sin contactar','contactado':'Contactado','interesado':'Interesado','cerrado':'Cerrado','descartado':'Descartado'};const rows=filtered.map(l=>({'Empresa':l.nombre||'','Email':l.email||'','Teléfono':l.telefono||'','Web':l.web||'','Ciudad':l.ciudad||'','Fuente':l.fuente||'','Calidad':l.calidad||'','Score':l.score||0,'Estado':STATUS_ES[l.status]||l.status||'','Nota':l.nota||'','Fecha':l.fecha||''}));const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=[{wch:30},{wch:28},{wch:16},{wch:30},{wch:14},{wch:16},{wch:10},{wch:8},{wch:16},{wch:30},{wch:12}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Leads CRM');const fecha=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');XLSX.writeFile(wb,`LeadForge_CRM_${crmFilter==='todos'?'todos':crmFilter}_${fecha}.xlsx`);}
+function exportCRMToExcel(){let filtered=crmFilter==='todos'?crmLeads:crmLeads.filter(l=>l.status===crmFilter);if(crmCalidad!=='todas')filtered=filtered.filter(l=>l.calidad===crmCalidad);if(!filtered.length){alert('No hay leads para exportar.');return;}const STATUS_ES={'sin-contactar':'Sin contactar','contactado':'Contactado','interesado':'Interesado','cerrado':'Cerrado','descartado':'Descartado'};const rows=filtered.map(l=>({'Empresa':l.nombre||'','Email':l.email||'','Teléfono':l.telefono||'','Web':l.web||'','Ciudad':l.ciudad||'','Fuente':l.fuente||'','Calidad':l.calidad||'','Score':l.score||0,'Estado':STATUS_ES[l.status]||l.status||'','Nota':l.nota||'','Fecha':l.fecha||''}));const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=[{wch:30},{wch:28},{wch:16},{wch:30},{wch:14},{wch:16},{wch:10},{wch:8},{wch:16},{wch:30},{wch:12}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Leads CRM');const fecha=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');const sufijo=(crmFilter==='todos'?'todos':crmFilter)+(crmCalidad==='todas'?'':`_${crmCalidad}`);XLSX.writeFile(wb,`LeadForge_CRM_${sufijo}_${fecha}.xlsx`);}
 function escapeHtml(str){return String(str==null?'':str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function escJsAttr(str){return String(str==null?'':str).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 function renderCRM(){
@@ -3408,9 +3415,10 @@ function renderCRM(){
   document.getElementById('crm-stat-total').textContent=counts.total;document.getElementById('crm-stat-contactado').textContent=counts.contactado;document.getElementById('crm-stat-interesado').textContent=counts.interesado;document.getElementById('crm-stat-cerrado').textContent=counts.cerrado;document.getElementById('crm-stat-descartado').textContent=counts.descartado;
   const wrap=document.getElementById('crm-table-wrap');
   let filtered=crmFilter==='todos'?crmLeads:crmLeads.filter(l=>l.status===crmFilter);
+  if(crmCalidad!=='todas')filtered=filtered.filter(l=>l.calidad===crmCalidad);
   if(_mapCityFilter)filtered=filtered.filter(l=>l.ciudad&&l.ciudad.toLowerCase().includes(_mapCityFilter.toLowerCase()));
   if(!crmLeads.length){wrap.innerHTML=`<div class="crm-empty"><div class="emoji">🎯</div><p>Aún no tienes leads en el CRM.<br>Lanza una búsqueda y pulsa <strong>"Importar leads al CRM"</strong>.</p></div>`;return;}
-  if(!filtered.length){wrap.innerHTML=`<div class="crm-empty"><div class="emoji">🔍</div><p>No hay leads con este estado.</p></div>`;return;}
+  if(!filtered.length){wrap.innerHTML=`<div class="crm-empty"><div class="emoji">🔍</div><p>No hay leads con este filtro.</p></div>`;return;}
   const rows=filtered.map(lead=>{const esAutomatico=lead.status==='sin-contactar'||lead.status==='contactado';const badge=esAutomatico?`<div style="font-size:11px;color:var(--text3);margin-bottom:5px;">${STATUS_LABELS[lead.status]}</div>`:'';const opts=STATUS_ORDER.map(s=>`<option value="${s}" ${lead.status===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('');const placeholder=esAutomatico?'<option value="" selected disabled>— Marcar —</option>':'';const select=`<select class="status-select ${esAutomatico?'':lead.status}" onchange="updateCRMStatus(${lead.id},this.value);this.className='status-select '+this.value;">${placeholder}${opts}</select>`;return `<tr><td><div class="crm-name">${escapeHtml(lead.nombre||'—')}</div><div class="crm-meta">${escapeHtml(lead.ciudad||'')} · ${escapeHtml(lead.fuente||'')} · ${escapeHtml(lead.fecha||'')}</div></td><td style="color:var(--text2);font-size:12px;">${lead.email?`<div>✉️ ${escapeHtml(lead.email)}</div>`:''}${lead.telefono?`<div>📞 ${escapeHtml(lead.telefono)}</div>`:''}${lead.web?`<div><a href="${escapeHtml(lead.web)}" target="_blank" style="color:var(--accent);font-size:11px;">🌐 web</a></div>`:''}</td><td>${badge}${select}</td><td><input class="crm-note-input" placeholder="Añadir nota…" value="${escapeHtml(lead.nota||'')}" onblur="updateCRMNote(${lead.id},this.value)" onkeydown="if(event.key==='Enter'){updateCRMNote(${lead.id},this.value);this.blur();}"></td><td style="display:flex;gap:4px;">${lead.email?`<button onclick="openEmailHistory('${escJsAttr(lead.email)}','${escJsAttr(lead.nombre||'')}')\" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'" title="Historial emails">📧</button>`:''}<button onclick="openEditLead(${lead.id})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'" title="Editar">✏️</button>${lead.email?`<button onclick="blacklistCRMLead(${lead.id},'${escJsAttr(lead.email)}','${escJsAttr(lead.nombre||'')}')\" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;" onmouseover="this.style.color='var(--yellow)'" onmouseout="this.style.color='var(--text3)'" title="No contactar más">🚫</button>`:''}<button onclick="deleteCRMLead(${lead.id})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'" title="Eliminar">🗑</button></td></tr>`;}).join('');
   wrap.innerHTML=`<table class="crm-table"><thead><tr><th>Empresa</th><th>Contacto</th><th>Estado</th><th>Nota</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
 }
