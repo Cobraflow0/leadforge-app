@@ -1476,7 +1476,7 @@ body.nav-open{overflow:hidden;}
       </div>
       <input type="url" id="camp-catalog-url" placeholder="https://tu-web.com/catalogo.pdf" style="margin-top:6px;">
       <div id="catalog-upload-status" style="font-size:11px;margin-top:5px;"></div>
-      <div style="font-size:11px;color:var(--text3);margin-top:5px;">Sube un PDF (máx. 10MB) y se añade un botón "Ver catálogo" en el email como enlace — nunca como adjunto, los adjuntos empeoran mucho la entrega en cold email. También puedes pegar un enlace directamente (Drive, tu web...) en vez de subir el archivo.</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:5px;">Sube un PDF (máx. 50MB) y se añade un botón "Ver catálogo" en el email como enlace — nunca como adjunto, los adjuntos empeoran mucho la entrega en cold email. También puedes pegar un enlace directamente (Drive, tu web...) en vez de subir el archivo.</div>
     </div>
     <div class="modal-field">
       <label>Número de emails a enviar</label>
@@ -3216,7 +3216,7 @@ async function uploadCatalogFile(){
   const input=document.getElementById('camp-catalog-file'),file=input.files[0],statusEl=document.getElementById('catalog-upload-status'),spin=document.getElementById('catalog-upload-spinner');
   if(!file)return;
   if(file.type!=='application/pdf'&&!file.name.toLowerCase().endsWith('.pdf')){statusEl.style.color='var(--red)';statusEl.textContent='Solo se admiten PDF.';input.value='';return;}
-  if(file.size>10*1024*1024){statusEl.style.color='var(--red)';statusEl.textContent='El PDF pesa más de 10MB.';input.value='';return;}
+  if(file.size>50*1024*1024){statusEl.style.color='var(--red)';statusEl.textContent='El PDF pesa más de 50MB.';input.value='';return;}
   spin.style.display='block';statusEl.style.color='var(--text3)';statusEl.textContent='Subiendo…';
   const fd=new FormData();fd.append('file',file);fd.append('user_id',appState.user?.id||'');
   try{
