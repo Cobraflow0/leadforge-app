@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LeadForge — Leads de empresas españolas, con teléfono y email, en un Excel</title>
-<meta name="description" content="LeadForge cruza 9 fuentes de datos públicas y te entrega leads B2B españoles con teléfono, email y web, puntuados y listos para vender. Demo gratis sin tarjeta. Desde 49€/mes.">
+<meta name="description" content="LeadForge cruza 9 fuentes de datos públicas y te entrega leads B2B españoles con teléfono, email y web, puntuados y listos para vender. Demo gratis sin tarjeta. Desde 19€/mes.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -18,29 +18,29 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --paper:   #F5F5F2;   /* fondo general — papel */
-  --paper-2: #FFFFFF;   /* tarjetas */
-  --paper-3: #EDEDE9;   /* bandas alternas */
-  --ink:     #1A1D23;   /* texto principal — tinta grafito */
-  --steel:   #626873;   /* texto secundario */
-  --line:    rgba(26,29,35,0.09);  /* hairlines */
-  --line-2:  rgba(26,29,35,0.16);  /* hairlines fuertes */
-  --ember:   #1B47B0;   /* acento azul blueprint */
-  --ember-d: #163A93;   /* acento hover */
-  --ember-t: rgba(27,71,176,0.08);
-  --on-accent: #FFFFFF; /* texto sobre botones acento */
+  --paper:   #0A0B0E;   /* fondo general — casi negro, estilo Linear */
+  --paper-2: #15171C;   /* tarjetas — ligeramente más claras (elevadas) */
+  --paper-3: #101216;   /* bandas alternas */
+  --ink:     #F2F3F5;   /* texto principal — casi blanco */
+  --steel:   #A8AFBB;   /* texto secundario — más contraste */
+  --line:    rgba(255,255,255,0.08);  /* hairlines */
+  --line-2:  rgba(255,255,255,0.16);  /* hairlines fuertes */
+  --ember:   #6E9BFF;   /* acento azul */
+  --ember-d: #8FB4FF;   /* acento hover — más claro sobre fondo oscuro */
+  --ember-t: rgba(110,155,255,0.14);
+  --on-accent: #06070A; /* texto oscuro sobre botones acento claro */
 
-  /* consola (oscura a propósito, instrumento) */
-  --console:      #171A21;
-  --console-2:    #1F232C;
-  --console-line: rgba(255,255,255,0.09);
+  /* consola (instrumento aún más oscuro, con borde teñido de acento) */
+  --console:      #08090C;
+  --console-2:    #0F1116;
+  --console-line: rgba(110,155,255,0.14);
   --console-text: #EAECEF;
-  --console-mut:  #949AA6;
+  --console-mut:  #9CA3B0;
 
-  /* scoring sobrio sobre claro */
-  --alta:  #167C4A;  --alta-bg:  rgba(22,124,74,0.10);
-  --media: #B7791F;  --media-bg: rgba(183,121,31,0.12);
-  --baja:  #C43D35;  --baja-bg:  rgba(196,61,53,0.10);
+  /* scoring — colores brillantes para leerse sobre fondo oscuro */
+  --alta:  #45C08A;  --alta-bg:  rgba(69,192,138,0.15);
+  --media: #E0B255;  --media-bg: rgba(224,178,85,0.15);
+  --baja:  #EC6A63;  --baja-bg:  rgba(236,106,99,0.15);
   --alta-dk: #45C08A; --media-dk: #E0B255; --baja-dk: #EC6A63;
 
   --font-display: 'Bricolage Grotesque', sans-serif;
@@ -62,7 +62,7 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
-::selection { background: rgba(27,71,176,0.25); }
+::selection { background: rgba(110,155,255,0.35); }
 
 a { color: inherit; }
 button { font-family: inherit; }
@@ -78,7 +78,7 @@ button { font-family: inherit; }
 }
 header.nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(245, 245, 242, 0.82);
+  background: rgba(10, 11, 14, 0.72);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid transparent;
   transition: border-color 0.3s;
@@ -118,12 +118,13 @@ header.nav.scrolled { border-bottom-color: var(--line); }
 }
 .btn-ember {
   background: var(--ember); color: var(--on-accent);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 8px 24px -10px rgba(110,155,255,0.5);
 }
 .btn-ember:hover { background: var(--ember-d); transform: translateY(-1px); }
 .btn-ghost {
-  background: transparent; color: var(--ink); border-color: var(--line-2);
+  background: rgba(255,255,255,0.03); color: var(--ink); border-color: var(--line-2);
 }
-.btn-ghost:hover { border-color: var(--ink); }
+.btn-ghost:hover { border-color: var(--ink); background: rgba(255,255,255,0.06); }
 .btn-sm { padding: 9px 18px; font-size: 14px; border-radius: 9px; }
 .nav .btn { margin-left: 8px; }
 
@@ -143,7 +144,14 @@ header.nav.scrolled { border-bottom-color: var(--line); }
   mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 85%);
   -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 85%);
 }
-.hero .wrap { position: relative; }
+.hero::after {
+  /* resplandor superior, estilo "aurora" */
+  content: ''; position: absolute; top: -220px; left: 50%; z-index: 0;
+  width: 1100px; height: 640px; transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(110,155,255,0.20), transparent 70%);
+  filter: blur(10px); pointer-events: none;
+}
+.hero .wrap { position: relative; z-index: 1; }
 .hero-eyebrow {
   display: inline-flex; align-items: center; gap: 10px;
   font-family: var(--font-mono); font-size: 12.5px; font-weight: 500;
@@ -211,7 +219,7 @@ h1 .h1-data {
   background: var(--console);
   border-radius: 16px;
   border: 1px solid var(--console-line);
-  box-shadow: 0 30px 80px -20px rgba(26, 29, 35, 0.35), 0 1px 2px rgba(26, 29, 35, 0.04);
+  box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255,255,255,0.06);
   overflow: hidden;
   color: var(--console-text);
 }
@@ -381,7 +389,7 @@ h2 em { font-style: normal; color: var(--ember); }
   padding: 34px 30px; position: relative;
   transition: transform 0.3s var(--ease), box-shadow 0.3s;
 }
-.step:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -18px rgba(26, 29, 35, 0.22); }
+.step:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--ember-t); }
 .step-k {
   font-family: var(--font-mono); font-size: 12px; font-weight: 600;
   color: var(--ember); letter-spacing: 1px; margin-bottom: 18px; display: block;
@@ -436,7 +444,7 @@ h2 em { font-style: normal; color: var(--ember); }
 }
 .score-sim {
   background: var(--paper-2); border: 1px solid var(--line); border-radius: 14px;
-  padding: 28px; box-shadow: 0 24px 60px -30px rgba(26, 29, 35, 0.18);
+  padding: 28px; box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 .score-sim-title {
   font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 1.5px;
@@ -569,7 +577,7 @@ input[type="range"]::-moz-range-thumb {
 .plan-calc {
   max-width: 760px; margin: 48px auto 0;
   background: var(--paper-2); border: 1px solid var(--line); border-radius: 14px;
-  padding: 28px; box-shadow: 0 24px 60px -30px rgba(26, 29, 35, 0.18);
+  padding: 28px; box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 .plan-calc-title {
   font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 1.5px;
@@ -605,8 +613,8 @@ input[type="range"]::-moz-range-thumb {
   padding: 34px 30px; display: flex; flex-direction: column; position: relative;
   transition: border-color 0.3s, transform 0.3s var(--ease), box-shadow 0.3s;
 }
-.plan:hover { transform: translateY(-4px); box-shadow: 0 10px 30px -18px rgba(26, 29, 35, 0.18); }
-.plan.featured { border-color: var(--ember); box-shadow: 0 10px 30px -18px rgba(26, 29, 35, 0.18); }
+.plan:hover { transform: translateY(-4px); box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--ember-t); }
+.plan.featured { border-color: var(--ember); box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--ember-t); }
 .plan.reco { border-color: var(--ember); box-shadow: 0 0 0 3px var(--ember-t); }
 .plan-flag {
   position: absolute; top: -13px; left: 30px;
@@ -708,7 +716,7 @@ footer a:hover { color: var(--ember); }
 .mobile-cta {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
-  background: rgba(245, 245, 242, 0.82); backdrop-filter: blur(12px);
+  background: rgba(10, 11, 14, 0.85); backdrop-filter: blur(12px);
   border-top: 1px solid var(--line);
   display: none; transform: translateY(110%); transition: transform 0.4s var(--ease);
 }
@@ -744,25 +752,25 @@ footer a:hover { color: var(--ember); }
 }
 
 /* ---------- MODO RADAR (mini demo) ---------- */
-.nuke { background: var(--paper-3); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.nuke-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 56px; align-items: start; }
-.nuke-copy .feature-list { list-style: none; margin-top: 26px; }
-.nuke-copy .feature-list li { display: flex; gap: 12px; padding: 9px 0; font-size: 15.5px; color: var(--steel); align-items: baseline; }
-.nuke-copy .feature-list li::before { content: '→'; color: var(--ember); font-weight: 700; font-family: var(--font-mono); }
-.nuke-copy .feature-list strong { color: var(--ink); font-weight: 600; }
-.nuke-plans-note { margin-top: 22px; font-size: 13.5px; color: var(--steel); border-left: 2px solid var(--line-2); padding-left: 14px; line-height: 1.7; }
-.nuke-plans-note b { color: var(--ink); font-weight: 600; }
+.radar { background: var(--paper-3); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.radar-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 56px; align-items: start; }
+.radar-copy .feature-list { list-style: none; margin-top: 26px; }
+.radar-copy .feature-list li { display: flex; gap: 12px; padding: 9px 0; font-size: 15.5px; color: var(--steel); align-items: baseline; }
+.radar-copy .feature-list li::before { content: '→'; color: var(--ember); font-weight: 700; font-family: var(--font-mono); }
+.radar-copy .feature-list strong { color: var(--ink); font-weight: 600; }
+.radar-plans-note { margin-top: 22px; font-size: 13.5px; color: var(--steel); border-left: 2px solid var(--line-2); padding-left: 14px; line-height: 1.7; }
+.radar-plans-note b { color: var(--ink); font-weight: 600; }
 
-.nuke-card {
+.radar-card {
   background: var(--console); border: 1px solid var(--console-line); border-radius: 16px;
   overflow: hidden; color: var(--console-text);
-  box-shadow: 0 30px 80px -20px rgba(26, 29, 35, 0.35), 0 1px 2px rgba(26, 29, 35, 0.04);
+  box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255,255,255,0.06);
 }
-.nuke-top {
+.radar-top {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   padding: 14px 16px; background: var(--console-2); border-bottom: 1px solid var(--console-line);
 }
-.nuke-top .sim-badge {
+.radar-top .sim-badge {
   font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
   color: var(--media-dk); border: 1px solid rgba(255, 217, 61, 0.35);
   padding: 3px 10px; border-radius: 100px; margin-right: auto;
@@ -777,39 +785,57 @@ footer a:hover { color: var(--ember); }
 .ntype .nt-km { font-family: var(--font-mono); font-size: 10.5px; opacity: 0.7; }
 .ntype.on-tactical, .ntype.on-strategic, .ntype.on-moab { border-color: #6E9BFF; color: #6E9BFF; }
 
-.nuke-map-wrap { position: relative; background: #060A12; }
-#nuke-map { display: block; width: 100%; height: auto; cursor: crosshair; touch-action: manipulation; }
-#nuke-map .coast { fill: rgba(120,150,220,0.05); stroke: rgba(120,150,220,0.30); stroke-width: 1.4; stroke-linejoin: round; }
-#nuke-map .grid-line { stroke: rgba(120,150,220,0.06); stroke-width: 1; }
-#nuke-map .city-dot { fill: var(--ember); opacity: 0.85; }
-#nuke-map .city-dot.hit { fill: #6E9BFF; }
-#nuke-map .city-lbl {
+.radar-map-wrap { position: relative; background: #060A12; }
+#radar-map { display: block; width: 100%; height: auto; cursor: crosshair; touch-action: manipulation; }
+#radar-map .coast { fill: rgba(120,150,220,0.05); stroke: rgba(120,150,220,0.30); stroke-width: 1.4; stroke-linejoin: round; }
+#radar-map .grid-line { stroke: rgba(120,150,220,0.06); stroke-width: 1; }
+#radar-map .city-dot { fill: var(--steel); opacity: 0.65; }
+#radar-map .city-dot.hit { fill: #6E9BFF; }
+#radar-map .town-dot { fill: var(--steel); opacity: 0.45; }
+#radar-map .town-dot.hit { fill: var(--alta-dk); opacity: 0.95; }
+#radar-map .city-lbl, #radar-map .town-lbl {
   font-family: var(--font-mono); font-size: 10.5px; fill: var(--console-mut);
   pointer-events: none; user-select: none;
 }
-#nuke-map .aim { fill-opacity: 0.06; stroke-dasharray: 6 5; stroke-width: 1.5; opacity: 0; transition: opacity 0.2s; }
+#radar-map .town-lbl { font-size: 9px; }
+#radar-map .aim { fill-opacity: 0.06; stroke-dasharray: 6 5; stroke-width: 1.5; opacity: 0; transition: opacity 0.2s; }
+#radar-map .aim-fixed { fill-opacity: 0.08; stroke-width: 1.5; }
+#radar-map .center-x { stroke: #6E9BFF; stroke-width: 1.5; }
+#radar-map .scale-line { stroke: var(--console-mut); stroke-width: 1.5; }
+#radar-map .scale-lbl { font-family: var(--font-mono); font-size: 10px; fill: var(--console-mut); }
 @keyframes cityHit { 0% { r: 3.2; } 40% { r: 8; } 100% { r: 4.2; } }
-#nuke-map .city-dot.hit { animation: cityHit 0.7s ease-out forwards; }
+#radar-map .city-dot.hit { animation: cityHit 0.7s ease-out forwards; }
+#radar-map .town-dot.hit { animation: cityHit 0.7s ease-out forwards; }
 
-.nuke-status {
+.radar-back {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(8, 10, 14, 0.75); border: 1px solid var(--console-line); border-radius: 8px;
+  color: var(--console-text); font-family: var(--font-body); font-size: 12.5px; font-weight: 600;
+  padding: 7px 12px; cursor: pointer; backdrop-filter: blur(6px);
+  transition: border-color 0.2s;
+}
+.radar-back:hover { border-color: #6E9BFF; }
+.radar-back[hidden] { display: none; }
+
+.radar-status {
   padding: 13px 18px; border-top: 1px solid var(--console-line);
   font-family: var(--font-mono); font-size: 12.5px; color: var(--console-mut);
   min-height: 46px; display: flex; align-items: center; gap: 8px;
 }
-.nuke-status .ok { color: var(--alta-dk); }
-.nuke-result {
+.radar-status .ok { color: var(--alta-dk); }
+.radar-result {
   display: none; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
   padding: 14px 18px; border-top: 1px solid var(--console-line);
   background: rgba(110, 155, 255, 0.06); font-size: 13.5px; color: var(--console-mut);
 }
-.nuke-result.show { display: flex; animation: fadeUp 0.5s var(--ease); }
-.nuke-result strong { color: var(--console-text); font-weight: 600; }
-.nuke-result a { color: #6E9BFF; font-weight: 600; text-decoration: none; white-space: nowrap; }
-.nuke-result a:hover { text-decoration: underline; }
-.nuke-foot { padding: 0 18px 14px; font-size: 11.5px; color: var(--console-mut); }
+.radar-result.show { display: flex; animation: fadeUp 0.5s var(--ease); }
+.radar-result strong { color: var(--console-text); font-weight: 600; }
+.radar-result a { color: #6E9BFF; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.radar-result a:hover { text-decoration: underline; }
+.radar-foot { padding: 0 18px 14px; font-size: 11.5px; color: var(--console-mut); }
 
 @media (max-width: 980px) {
-  .nuke-grid { grid-template-columns: 1fr; gap: 40px; }
+  .radar-grid { grid-template-columns: 1fr; gap: 40px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -864,7 +890,7 @@ footer a:hover { color: var(--ember); }
     <div class="hero-trust">
       <span><b class="tick">✓</b> Sin tarjeta para la demo</span>
       <span><b class="tick">✓</b> Sin permanencia</span>
-      <span><b class="tick">✓</b> Desde 49€/mes</span>
+      <span><b class="tick">✓</b> Desde 19€/mes</span>
     </div>
   </div>
 
@@ -948,7 +974,7 @@ footer a:hover { color: var(--ember); }
       <div class="number"><b class="mono" data-count="9">0</b><span>fuentes de datos cruzadas</span></div>
       <div class="number"><b class="mono" data-count="15">0</b><span>sectores cubiertos</span></div>
       <div class="number"><b class="mono" data-count="90" data-prefix="~">0</b><span>categorías de negocio</span></div>
-      <div class="number"><b class="mono" data-count="49" data-suffix="€">0</b><span>al mes, sin permanencia</span></div>
+      <div class="number"><b class="mono" data-count="19" data-suffix="€">0</b><span>al mes, sin permanencia</span></div>
     </div>
   </div>
 </section>
@@ -1138,37 +1164,38 @@ footer a:hover { color: var(--ember); }
 
 
 <!-- ============ MODO RADAR (demo) ============ -->
-<section class="nuke" id="radar">
+<section class="radar" id="radar">
   <div class="wrap">
-    <div class="nuke-grid">
-      <div class="nuke-copy reveal">
+    <div class="radar-grid">
+      <div class="radar-copy reveal">
         <div class="eyebrow">Modo Radar</div>
         <h2>¿Toda una zona de golpe? <em>Barre el mapa.</em></h2>
-        <p class="section-sub">Haz clic en cualquier punto del mapa y LeadForge rastrea de una sola vez todas las ciudades dentro del radio. Una búsqueda, toda un área.</p>
+        <p class="section-sub">Haz clic en cualquier punto del mapa: LeadForge hace zoom y rastrea de una sola vez todos los negocios dentro del radio, a escala real. Una búsqueda, toda un área.</p>
         <ul class="feature-list">
-          <li><strong>Cercano</strong> — 6 km, un objetivo concreto y su entorno.</li>
-          <li><strong>Ciudad</strong> — 16 km, una ciudad y su cinturón.</li>
-          <li><strong>Metropolitano</strong> — 30 km, un área metropolitana entera.</li>
+          <li><strong>Cercano</strong> — 4,5 km, un objetivo concreto y su entorno.</li>
+          <li><strong>Ciudad</strong> — 12 km, una ciudad y su cinturón.</li>
+          <li><strong>Metropolitano</strong> — 22,5 km, un área metropolitana entera.</li>
         </ul>
-        <p class="nuke-plans-note">Incluido en los planes de pago: <b>Starter</b> 5 barridos Cercano al mes · <b>Pro</b> Cercano y Ciudad ilimitados + 10 Metropolitano · <b>Premium</b> todo ilimitado.</p>
+        <p class="radar-plans-note">Incluido en los planes de pago: <b>Basic</b> 3 Cercano + 1 Ciudad al mes · <b>Pro</b> 10 Cercano + 5 Ciudad + 2 Metropolitano · <b>Business</b> 20 Cercano + 10 Ciudad + 5 Metropolitano.</p>
       </div>
       <div class="reveal">
-        <div class="nuke-card" id="nuke-card" role="group" aria-label="Simulación del Modo Radar">
-          <div class="nuke-top">
+        <div class="radar-card" id="radar-card" role="group" aria-label="Simulación del Modo Radar">
+          <div class="radar-top">
             <span class="sim-badge">Simulación · pruébalo</span>
-            <button class="ntype on-tactical" id="nk-tactical" data-type="tactical">Cercano <span class="nt-km">6 km</span></button>
-            <button class="ntype" id="nk-strategic" data-type="strategic">Ciudad <span class="nt-km">16 km</span></button>
-            <button class="ntype" id="nk-moab" data-type="moab">Metropolitano <span class="nt-km">30 km</span></button>
+            <button class="ntype on-tactical" id="rd-tactical" data-type="tactical">Cercano <span class="nt-km">4,5 km</span></button>
+            <button class="ntype" id="rd-strategic" data-type="strategic">Ciudad <span class="nt-km">12 km</span></button>
+            <button class="ntype" id="rd-moab" data-type="moab">Metropolitano <span class="nt-km">22,5 km</span></button>
           </div>
-          <div class="nuke-map-wrap" id="nuke-map-wrap">
-            <svg id="nuke-map" viewBox="0 0 640 520" xmlns="http://www.w3.org/2000/svg" aria-label="Mapa simulado de España — haz clic para lanzar"></svg>
+          <div class="radar-map-wrap" id="radar-map-wrap">
+            <svg id="radar-map" viewBox="0 0 640 520" xmlns="http://www.w3.org/2000/svg" aria-label="Mapa simulado de España — haz clic para hacer zoom y lanzar"></svg>
+            <button class="radar-back" id="radar-back" type="button" hidden>← Ver toda España</button>
           </div>
-          <div class="nuke-status" id="nk-status">Elige un radio y haz clic (o toca) en el mapa.</div>
-          <div class="nuke-result" id="nk-result">
-            <span id="nk-result-text"></span>
+          <div class="radar-status" id="rd-status">Elige un radio y haz clic (o toca) en el mapa para hacer zoom.</div>
+          <div class="radar-result" id="rd-result">
+            <span id="rd-result-text"></span>
             <a href="#precios">Modo Radar en los planes de pago →</a>
           </div>
-          <div class="nuke-foot">Radio a escala del mapa. En la app el radio real es de 6, 16 o 30 km sobre un mapa con zoom. Cifras de leads simuladas.</div>
+          <div class="radar-foot">Zoom a escala real: los radios de 4,5, 12 y 22,5 km están dibujados a tamaño proporcional (barra de escala en el mapa). Pueblos y cifras de leads simulados.</div>
         </div>
       </div>
     </div>
@@ -1218,7 +1245,7 @@ footer a:hover { color: var(--ember); }
       <div class="plan-calc-grid">
         <div class="pc-field">
           <label for="pc-searches">Búsquedas al mes <output id="pc-searches-out" class="mono">10</output></label>
-          <input type="range" id="pc-searches" min="1" max="60" value="10" step="1">
+          <input type="range" id="pc-searches" min="1" max="40" value="10" step="1">
         </div>
         <div class="pc-field">
           <label id="pc-cities-label">Ciudades por búsqueda</label>
@@ -1234,30 +1261,29 @@ footer a:hover { color: var(--ember); }
         </label>
       </div>
       <div class="plan-calc-out">
-        <span class="pco-plan mono" id="pco-plan">PLAN STARTER · 49€/mes</span>
-        <span class="pco-why" id="pco-why">Con 10 búsquedas en 1 ciudad, Starter te cubre de sobra.</span>
+        <span class="pco-plan mono" id="pco-plan">PLAN BASIC · 19€/mes</span>
+        <span class="pco-why" id="pco-why">Con 10 búsquedas en 1 ciudad, Basic te cubre de sobra.</span>
       </div>
     </div>
 
-    <!-- TODO: generar los 3 nuevos payment links en Stripe -->
     <div class="pricing-grid reveal" id="pricing-grid">
-      <!-- STARTER -->
-      <div class="plan" data-plan="starter">
+      <!-- BASIC -->
+      <div class="plan" data-plan="basic">
         <span class="plan-flag-reco">Recomendado para ti</span>
-        <div class="plan-name">Starter</div>
-        <div class="plan-price"><b class="mono">49€</b><span>/ mes</span></div>
+        <div class="plan-name">Basic</div>
+        <div class="plan-price"><b class="mono">19€</b><span>/ mes</span></div>
         <div class="plan-per">Sin permanencia · cancela cuando quieras</div>
         <ul>
-          <li><strong>15 búsquedas</strong> al mes</li>
-          <li>Hasta <strong>400 leads</strong> por búsqueda</li>
+          <li><strong>10 búsquedas</strong> al mes</li>
+          <li>Hasta <strong>300 leads</strong> por búsqueda</li>
           <li><strong>1 ciudad</strong> por búsqueda</li>
-          <li><strong>9 fuentes</strong> de datos en paralelo</li>
+          <li>5 fuentes de datos (Maps, Amarillas, Europages, OpenStreetMap, Hotfrog)</li>
           <li>Excel con scoring automático</li>
           <li>CRM integrado e historial</li>
-          <li>100 emails de campaña</li>
+          <li>200 emails de campaña</li>
           <li>Modo Radar — Cercano</li>
         </ul>
-        <a href="https://buy.stripe.com/TODO-starter-49" class="btn btn-ghost">Empezar con Starter</a>
+        <a href="https://buy.stripe.com/fZudR9bbhfXOey7bxObV606" class="btn btn-ghost">Empezar con Basic</a>
       </div>
 
       <!-- PRO -->
@@ -1265,44 +1291,43 @@ footer a:hover { color: var(--ember); }
         <span class="plan-flag">Más popular</span>
         <span class="plan-flag-reco">Recomendado para ti</span>
         <div class="plan-name">Pro</div>
-        <div class="plan-price"><b class="mono">99€</b><span>/ mes</span></div>
+        <div class="plan-price"><b class="mono">49€</b><span>/ mes</span></div>
         <div class="plan-per">Sin permanencia · cancela cuando quieras</div>
         <ul>
-          <li><strong>40 búsquedas</strong> al mes</li>
-          <li>Hasta <strong>700 leads</strong> por búsqueda</li>
+          <li><strong>30 búsquedas</strong> al mes</li>
+          <li>Hasta <strong>600 leads</strong> por búsqueda</li>
           <li>Hasta <strong>5 ciudades</strong> por búsqueda</li>
           <li><strong>9 fuentes</strong> de datos en paralelo</li>
           <li>Excel con scoring automático</li>
           <li>CRM integrado e historial</li>
-          <li>250 emails de campaña</li>
+          <li>500 emails de campaña</li>
           <li><strong>Secuencias multi-touch</strong> automáticas</li>
           <li><strong>Alertas semanales</strong> de nuevos leads</li>
           <li>Modo Radar — Cercano y Ciudad</li>
         </ul>
-        <a href="https://buy.stripe.com/TODO-pro-99" class="btn btn-ember">Empezar con Pro</a>
+        <a href="https://buy.stripe.com/8x29AT0wD3b2ahR31ibV607" class="btn btn-ember">Empezar con Pro</a>
       </div>
 
-      <!-- PREMIUM -->
-      <div class="plan" data-plan="premium">
+      <!-- BUSINESS -->
+      <div class="plan" data-plan="business">
         <span class="plan-flag-reco">Recomendado para ti</span>
-        <div class="plan-name">Premium</div>
-        <div class="plan-price"><b class="mono">179€</b><span>/ mes</span></div>
+        <div class="plan-name">Business</div>
+        <div class="plan-price"><b class="mono">99€</b><span>/ mes</span></div>
         <div class="plan-per">Sin permanencia · cancela cuando quieras</div>
         <ul>
           <li><strong>Búsquedas ilimitadas</strong></li>
-          <li>Hasta <strong>1.200 leads</strong> por búsqueda</li>
+          <li>Hasta <strong>2.500 leads</strong> por búsqueda</li>
           <li>Hasta <strong>10 ciudades</strong> por búsqueda</li>
           <li><strong>9 fuentes</strong> de datos en paralelo</li>
           <li>Excel con scoring automático</li>
           <li>CRM integrado e historial</li>
-          <li>500 emails de campaña</li>
+          <li>1.000 emails de campaña</li>
           <li>Secuencias multi-touch automáticas</li>
           <li>Alertas semanales de nuevos leads</li>
-          <li><strong>Señales de intención BORME</strong></li>
           <li><strong>Soporte prioritario</strong></li>
           <li>Modo Radar completo</li>
         </ul>
-        <a href="https://buy.stripe.com/TODO-premium-179" class="btn btn-ghost">Empezar con Premium</a>
+        <a href="https://buy.stripe.com/8x27sL4MT6neblVdFWbV608" class="btn btn-ghost">Empezar con Business</a>
       </div>
     </div>
 
@@ -1314,22 +1339,21 @@ footer a:hover { color: var(--ember); }
         <div class="compare-scroll">
           <table class="compare">
             <thead>
-              <tr><th>Característica</th><th>Starter</th><th class="col-pro">Pro</th><th>Premium</th></tr>
+              <tr><th>Característica</th><th>Basic</th><th class="col-pro">Pro</th><th>Business</th></tr>
             </thead>
             <tbody>
-              <tr><td>Precio</td><td class="mono">49€/mes</td><td class="mono col-pro">99€/mes</td><td class="mono">179€/mes</td></tr>
-              <tr><td>Búsquedas al mes</td><td class="mono">15</td><td class="mono col-pro">40</td><td class="mono">Ilimitadas</td></tr>
-              <tr><td>Leads por búsqueda</td><td class="mono">400</td><td class="mono col-pro">700</td><td class="mono">1.200</td></tr>
+              <tr><td>Precio</td><td class="mono">19€/mes</td><td class="mono col-pro">49€/mes</td><td class="mono">99€/mes</td></tr>
+              <tr><td>Búsquedas al mes</td><td class="mono">10</td><td class="mono col-pro">30</td><td class="mono">Ilimitadas</td></tr>
+              <tr><td>Leads por búsqueda</td><td class="mono">300</td><td class="mono col-pro">600</td><td class="mono">2.500</td></tr>
               <tr><td>Ciudades por búsqueda</td><td class="mono">1</td><td class="mono col-pro">5</td><td class="mono">10</td></tr>
-              <tr><td>Fuentes de datos</td><td class="mono">9</td><td class="mono col-pro">9</td><td class="mono">9</td></tr>
+              <tr><td>Fuentes de datos</td><td class="mono">5</td><td class="mono col-pro">9</td><td class="mono">9</td></tr>
               <tr><td>Excel con scoring</td><td><span class="yes">✓</span></td><td class="col-pro"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
               <tr><td>CRM integrado</td><td><span class="yes">✓</span></td><td class="col-pro"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
               <tr><td>Historial de búsquedas</td><td><span class="yes">✓</span></td><td class="col-pro"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
-              <tr><td>Emails de campaña</td><td class="mono">100</td><td class="mono col-pro">250</td><td class="mono">500</td></tr>
+              <tr><td>Emails de campaña</td><td class="mono">200</td><td class="mono col-pro">500</td><td class="mono">1.000</td></tr>
               <tr><td>Secuencias multi-touch</td><td><span class="no">—</span></td><td class="col-pro"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
               <tr><td>Alertas semanales</td><td><span class="no">—</span></td><td class="col-pro"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
               <tr><td>Modo Radar</td><td class="mono">Cercano</td><td class="mono col-pro">Cercano + Ciudad</td><td class="mono">Completo</td></tr>
-              <tr><td>Señales de intención BORME</td><td><span class="no">—</span></td><td class="col-pro"><span class="no">—</span></td><td><span class="yes">✓</span></td></tr>
               <tr><td>Soporte prioritario</td><td><span class="no">—</span></td><td class="col-pro"><span class="no">—</span></td><td><span class="yes">✓</span></td></tr>
             </tbody>
           </table>
@@ -1363,7 +1387,7 @@ footer a:hover { color: var(--ember); }
       </div>
       <div class="faq-item">
         <button class="faq-q" aria-expanded="false">¿Cómo funciona el envío de emails?<span class="plus">+</span></button>
-        <div class="faq-a-wrap"><div class="faq-a"><div>Tras generar los leads, puedes lanzar una campaña a los de mejor puntuación. Rellenas tu nombre, empresa y propuesta, ves una vista previa, y LeadForge envía un email personalizado a cada empresa con tu firma. En los planes Pro y Premium puedes activar el seguimiento multi-touch automático para quienes no respondan.</div></div></div>
+        <div class="faq-a-wrap"><div class="faq-a"><div>Tras generar los leads, puedes lanzar una campaña a los de mejor puntuación. Rellenas tu nombre, empresa y propuesta, ves una vista previa, y LeadForge envía un email personalizado a cada empresa con tu firma. En los planes Pro y Business puedes activar el seguimiento multi-touch automático para quienes no respondan.</div></div></div>
       </div>
       <div class="faq-item">
         <button class="faq-q" aria-expanded="false">¿De dónde salen los datos? ¿Es legal?<span class="plus">+</span></button>
@@ -1375,7 +1399,7 @@ footer a:hover { color: var(--ember); }
       </div>
       <div class="faq-item">
         <button class="faq-q" aria-expanded="false">¿Cuántos leads salen por búsqueda?<span class="plus">+</span></button>
-        <div class="faq-a-wrap"><div class="faq-a"><div>Depende del sector, la ciudad y tu plan: hasta 400 leads por búsqueda en Starter, 700 en Pro y 1.200 en Premium. En ciudades grandes y sectores densos es habitual llegar al límite del plan; en nichos pequeños saldrán menos, porque no inventamos empresas que no existen.</div></div></div>
+        <div class="faq-a-wrap"><div class="faq-a"><div>Depende del sector, la ciudad y tu plan: hasta 300 leads por búsqueda en Basic, 600 en Pro y 2.500 en Business. En ciudades grandes y sectores densos es habitual llegar al límite del plan; en nichos pequeños saldrán menos, porque no inventamos empresas que no existen.</div></div></div>
       </div>
     </div>
   </div>
@@ -1634,32 +1658,32 @@ footer a:hover { color: var(--ember); }
   let pcCities = 1;
 
   const PLANS = {
-    starter: { label: 'PLAN STARTER · 49€/mes' },
-    pro:     { label: 'PLAN PRO · 99€/mes' },
-    premium: { label: 'PLAN PREMIUM · 179€/mes' }
+    basic:    { label: 'PLAN BASIC · 19€/mes' },
+    pro:      { label: 'PLAN PRO · 49€/mes' },
+    business: { label: 'PLAN BUSINESS · 99€/mes' }
   };
 
   function updateCalc() {
     const searches = +pcSearches.value;
-    $('#pc-searches-out').textContent = searches >= 60 ? '60+' : searches;
+    $('#pc-searches-out').textContent = searches >= 40 ? '40+' : searches;
     const wantsSeq = pcSeq.checked;
 
     let plan, why;
-    if (searches > 40 || pcCities > 5) {
-      plan = 'premium';
-      why = searches > 40
-        ? 'Con más de 40 búsquedas al mes necesitas búsquedas ilimitadas.'
-        : 'Buscar en más de 5 ciudades a la vez requiere el plan Premium.';
-    } else if (searches > 15 || pcCities > 1 || wantsSeq) {
+    if (searches > 30 || pcCities > 5) {
+      plan = 'business';
+      why = searches > 30
+        ? 'Con más de 30 búsquedas al mes necesitas búsquedas ilimitadas.'
+        : 'Buscar en más de 5 ciudades a la vez requiere el plan Business.';
+    } else if (searches > 10 || pcCities > 1 || wantsSeq) {
       plan = 'pro';
-      why = searches > 15
-        ? 'Más de 15 búsquedas al mes: Pro te da 40, con las 9 fuentes y 5 ciudades.'
+      why = searches > 10
+        ? 'Más de 10 búsquedas al mes: Pro te da 30, con las 9 fuentes y 5 ciudades.'
         : (pcCities > 1
           ? 'Buscar en varias ciudades a la vez está incluido en Pro (hasta 5).'
           : 'Las secuencias automáticas y las alertas semanales empiezan en Pro.');
     } else {
-      plan = 'starter';
-      why = 'Con ' + searches + ' búsqueda' + (searches === 1 ? '' : 's') + ' al mes en 1 ciudad, Starter te cubre de sobra.';
+      plan = 'basic';
+      why = 'Con ' + searches + ' búsqueda' + (searches === 1 ? '' : 's') + ' al mes en 1 ciudad, Basic te cubre de sobra.';
     }
     pcPlan.textContent = PLANS[plan].label;
     pcWhy.textContent = why;
@@ -1699,14 +1723,20 @@ footer a:hover { color: var(--ember); }
     }
   }));
 
-  /* ===== 10. NUKE MODE — mini demo del mapa ===== */
-  (function nukeDemo() {
-    const svg = $('#nuke-map');
+  /* ===== 10. RADAR MODE — mini demo del mapa, con zoom a escala real ===== */
+  (function radarDemo() {
+    const svg = $('#radar-map');
     if (!svg) return;
     const NS = 'http://www.w3.org/2000/svg';
     const VW = 640, VH = 520;
     const LNG0 = -9.6, LNG1 = 3.5, LAT0 = 35.7, LAT1 = 44.0;
+    const KM_LAT = 111.32; // km por grado de latitud
+    const kmLng = lat => KM_LAT * Math.cos(lat * Math.PI / 180); // km por grado de longitud a esa latitud
+    const ZOOM_PXKM = 7; // px por km en la vista con zoom — misma escala en los dos ejes
+
+    // proyección de la vista general (estilizada, solo para elegir zona)
     const px = (lat, lng) => [ (lng - LNG0) / (LNG1 - LNG0) * VW, (LAT1 - lat) / (LAT1 - LAT0) * VH ];
+    const latLngFromPx = (x, y) => [ LAT1 - (y / VH) * (LAT1 - LAT0), LNG0 + (x / VW) * (LNG1 - LNG0) ];
 
     // Contorno estilizado de la España peninsular
     const COAST = [[43.5,-8.9],[43.7,-7.9],[43.6,-7.0],[43.5,-5.8],[43.5,-4.5],[43.4,-3.8],[43.4,-2.9],[43.4,-1.8],[42.8,-0.5],[42.7,0.7],[42.4,3.2],[41.9,3.2],[41.4,2.2],[41.1,1.2],[40.5,0.5],[39.5,-0.3],[38.8,0.2],[38.3,-0.5],[37.6,-0.7],[36.9,-1.9],[36.7,-2.5],[36.5,-4.6],[36.0,-5.4],[36.1,-5.9],[36.5,-6.3],[37.0,-6.6],[37.2,-7.4],[37.5,-7.4],[38.2,-7.1],[39.0,-7.2],[39.7,-6.9],[40.3,-6.8],[41.0,-6.8],[41.6,-6.5],[41.9,-7.6],[42.0,-8.2],[41.9,-8.87],[42.5,-8.9],[43.0,-9.3]];
@@ -1738,73 +1768,175 @@ footer a:hover { color: var(--ember); }
       { n: 'Logroño', lat: 42.465, lng: -2.4456, w: 100 }
     ];
     const TYPES = {
-      tactical:  { label: 'Cercano',       r: 26, km: 6,  color: '#6E9BFF' },
-      strategic: { label: 'Ciudad',        r: 54, km: 16, color: '#6E9BFF' },
-      moab:      { label: 'Metropolitano', r: 92, km: 30, color: '#6E9BFF' }
+      tactical:  { label: 'Cercano',       km: 4.5,  color: '#6E9BFF' },
+      strategic: { label: 'Ciudad',        km: 12,   color: '#6E9BFF' },
+      moab:      { label: 'Metropolitano', km: 22.5, color: '#6E9BFF' }
     };
 
     const el = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+    const fmtKm = km => (km % 1 === 0 ? String(km) : km.toString().replace('.', ','));
 
-    // rejilla + costa
-    for (let x = 64; x < VW; x += 64) svg.appendChild(el('line', { x1: x, y1: 0, x2: x, y2: VH, class: 'grid-line' }));
-    for (let y = 65; y < VH; y += 65) svg.appendChild(el('line', { x1: 0, y1: y, x2: VW, y2: y, class: 'grid-line' }));
-    const pts = COAST.map(([la, lo]) => px(la, lo).map(v => v.toFixed(1)).join(',')).join(' ');
-    svg.appendChild(el('polygon', { points: pts, class: 'coast' }));
+    let type = 'tactical', firing = false, mode = 'overview', center = null, fxLayer = null;
+    const status = $('#rd-status'), result = $('#rd-result'), resultText = $('#rd-result-text');
+    const backBtn = $('#radar-back');
 
-    // ciudades
-    CITIES.forEach(c => {
-      const [x, y] = px(c.lat, c.lng);
-      c.x = x; c.y = y;
-      c.dot = el('circle', { cx: x, cy: y, r: 3.2, class: 'city-dot' });
-      svg.appendChild(c.dot);
-      if (c.lbl) {
-        const t = el('text', { x: x + 7, y: y + 3.5, class: 'city-lbl' });
-        t.textContent = c.n;
-        svg.appendChild(t);
-      }
-    });
-
-    // círculo de puntería + capa de efectos
-    const aim = el('circle', { cx: -100, cy: -100, r: TYPES.tactical.r, class: 'aim', stroke: TYPES.tactical.color, fill: TYPES.tactical.color });
-    svg.appendChild(aim);
-    const fx = el('g', {});
-    svg.appendChild(fx);
-
-    let type = 'tactical', firing = false;
-    const status = $('#nk-status'), result = $('#nk-result'), resultText = $('#nk-result-text');
-
-    function setType(t) {
-      type = t;
-      $$('.ntype').forEach(b => b.className = 'ntype' + (b.dataset.type === t ? ' on-' + t : ''));
-      aim.setAttribute('r', TYPES[t].r);
-      aim.setAttribute('stroke', TYPES[t].color);
-      aim.setAttribute('fill', TYPES[t].color);
+    /* --- generador determinista de "pueblos" alrededor de un punto --- */
+    function mulberry32(seed) {
+      return function () {
+        seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+        let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
     }
-    $$('.ntype').forEach(b => b.addEventListener('click', () => setType(b.dataset.type)));
+    function townsAround(lat, lng) {
+      const rnd = mulberry32((Math.round(lat * 977) ^ Math.round(lng * 733)) | 0);
+      const NAMES = ['Villa', 'Fuente', 'Pozo', 'Campo', 'Monte', 'Valle', 'Río', 'Casar', 'Puebla', 'Aldea', 'Sotillo', 'Robledo', 'Cardeña', 'Nava', 'Encina'];
+      const SUF = ['nueva', 'vieja', 'del Rey', 'de Arriba', 'Alta', 'Baja', 'del Monte', 'Real', 'de la Sierra', ''];
+      const n = 26 + Math.floor(rnd() * 14); // 26–40 núcleos en la ventana visible, densidad orientativa de OSM
+      const towns = [];
+      for (let i = 0; i < n; i++) {
+        const ang = rnd() * Math.PI * 2;
+        const dist = Math.pow(rnd(), 0.7) * 48; // más denso cerca del centro, hasta ~48 km
+        const dLat = (dist * Math.cos(ang)) / KM_LAT;
+        const dLng = (dist * Math.sin(ang)) / kmLng(lat);
+        towns.push({
+          lat: lat + dLat, lng: lng + dLng,
+          n: (NAMES[Math.floor(rnd() * NAMES.length)] + ' ' + SUF[Math.floor(rnd() * SUF.length)]).trim(),
+          w: 6 + Math.floor(rnd() * 26)
+        });
+      }
+      return towns;
+    }
 
-    const toView = e => {
-      const r = svg.getBoundingClientRect();
-      return [ (e.clientX - r.left) / r.width * VW, (e.clientY - r.top) / r.height * VH ];
-    };
-    if (window.matchMedia('(pointer: fine)').matches) {
-      svg.addEventListener('pointermove', e => {
-        if (firing) return;
-        const [x, y] = toView(e);
-        aim.setAttribute('cx', x); aim.setAttribute('cy', y);
-        aim.style.opacity = '0.7';
+    /* --- vista general de España: elegir zona --- */
+    function renderOverview() {
+      mode = 'overview'; center = null; firing = false;
+      svg.innerHTML = '';
+      svg.style.cursor = 'crosshair';
+      backBtn.hidden = true;
+      for (let x = 64; x < VW; x += 64) svg.appendChild(el('line', { x1: x, y1: 0, x2: x, y2: VH, class: 'grid-line' }));
+      for (let y = 65; y < VH; y += 65) svg.appendChild(el('line', { x1: 0, y1: y, x2: VW, y2: y, class: 'grid-line' }));
+      const pts = COAST.map(([la, lo]) => px(la, lo).map(v => v.toFixed(1)).join(',')).join(' ');
+      svg.appendChild(el('polygon', { points: pts, class: 'coast' }));
+
+      CITIES.forEach(c => {
+        const [x, y] = px(c.lat, c.lng);
+        const dot = el('circle', { cx: x, cy: y, r: 3.2, class: 'city-dot' });
+        svg.appendChild(dot);
+        if (c.lbl) {
+          const t = el('text', { x: x + 7, y: y + 3.5, class: 'city-lbl' });
+          t.textContent = c.n;
+          svg.appendChild(t);
+        }
       });
-      svg.addEventListener('pointerleave', () => { aim.style.opacity = '0'; });
+
+      const hover = el('circle', { cx: -100, cy: -100, r: 6, class: 'aim', stroke: '#6E9BFF', fill: '#6E9BFF' });
+      svg.appendChild(hover);
+
+      const toView = e => {
+        const r = svg.getBoundingClientRect();
+        return [ (e.clientX - r.left) / r.width * VW, (e.clientY - r.top) / r.height * VH ];
+      };
+      if (window.matchMedia('(pointer: fine)').matches) {
+        svg.onpointermove = e => {
+          const [x, y] = toView(e);
+          hover.setAttribute('cx', x); hover.setAttribute('cy', y);
+          hover.style.opacity = '0.7';
+        };
+        svg.onpointerleave = () => { hover.style.opacity = '0'; };
+      }
+      svg.onclick = e => {
+        const [x, y] = toView(e);
+        const [lat, lng] = latLngFromPx(x, y);
+        renderZoom(lat, lng);
+      };
+      status.innerHTML = 'Elige un radio y haz clic (o toca) en el mapa para hacer zoom.';
+      result.classList.remove('show');
+    }
+
+    /* --- entra en modo zoom sobre el punto elegido, a escala real --- */
+    function renderZoom(lat, lng) {
+      mode = 'zoomed';
+      center = { lat, lng };
+      svg.style.cursor = 'default';
+      svg.onclick = null; svg.onpointermove = null; svg.onpointerleave = null;
+      backBtn.hidden = false;
+      backBtn.onclick = renderOverview;
+      fireAt();
+    }
+
+    /* --- dibuja el mapa zoomeado (rejilla, escala, pueblos, ciudades, radio) --- */
+    function draw() {
+      svg.innerHTML = '';
+      const { lat, lng } = center;
+      const kmPerDegLng = kmLng(lat);
+      const zpx = (la, lo) => [
+        VW / 2 + (lo - lng) * kmPerDegLng * ZOOM_PXKM,
+        VH / 2 - (la - lat) * KM_LAT * ZOOM_PXKM
+      ];
+
+      const stepPx = 10 * ZOOM_PXKM; // rejilla cada 10 km reales
+      for (let x = (VW / 2) % stepPx; x < VW; x += stepPx) svg.appendChild(el('line', { x1: x, y1: 0, x2: x, y2: VH, class: 'grid-line' }));
+      for (let y = (VH / 2) % stepPx; y < VH; y += stepPx) svg.appendChild(el('line', { x1: 0, y1: y, x2: VW, y2: y, class: 'grid-line' }));
+
+      // barra de escala
+      const sx = 20, sy = VH - 20;
+      svg.appendChild(el('line', { x1: sx, y1: sy, x2: sx + stepPx, y2: sy, class: 'scale-line' }));
+      svg.appendChild(el('line', { x1: sx, y1: sy - 5, x2: sx, y2: sy + 5, class: 'scale-line' }));
+      svg.appendChild(el('line', { x1: sx + stepPx, y1: sy - 5, x2: sx + stepPx, y2: sy + 5, class: 'scale-line' }));
+      const slbl = el('text', { x: sx, y: sy - 10, class: 'scale-lbl' });
+      slbl.textContent = '10 km — escala real';
+      svg.appendChild(slbl);
+
+      // pueblos simulados + ciudades reales dentro de la ventana visible
+      const towns = townsAround(lat, lng);
+      const marginKm = (VW / 2) / ZOOM_PXKM + 15;
+      const nearCities = CITIES.filter(c => Math.hypot((c.lat - lat) * KM_LAT, (c.lng - lng) * kmPerDegLng) <= marginKm);
+
+      const allPoints = [];
+      towns.forEach(tw => {
+        const [x, y] = zpx(tw.lat, tw.lng);
+        if (x < -10 || x > VW + 10 || y < -10 || y > VH + 10) return;
+        const distKm = Math.hypot((tw.lat - lat) * KM_LAT, (tw.lng - lng) * kmPerDegLng);
+        const dot = el('circle', { cx: x, cy: y, r: 2.4, class: 'town-dot' });
+        svg.appendChild(dot);
+        allPoints.push({ dot, w: tw.w, distKm, n: tw.n });
+      });
+      nearCities.forEach(c => {
+        const [x, y] = zpx(c.lat, c.lng);
+        if (x < -10 || x > VW + 10 || y < -10 || y > VH + 10) return;
+        const distKm = Math.hypot((c.lat - lat) * KM_LAT, (c.lng - lng) * kmPerDegLng);
+        const dot = el('circle', { cx: x, cy: y, r: 4, class: 'city-dot' });
+        svg.appendChild(dot);
+        const lbl = el('text', { x: x + 7, y: y + 3.5, class: 'city-lbl' });
+        lbl.textContent = c.n;
+        svg.appendChild(lbl);
+        allPoints.push({ dot, w: c.w / 8, distKm, n: c.n, isCity: true });
+      });
+
+      // círculo de radio a tamaño real + marca central
+      const t = TYPES[type];
+      const rPx = t.km * ZOOM_PXKM;
+      svg.appendChild(el('circle', { cx: VW / 2, cy: VH / 2, r: rPx, class: 'aim aim-fixed', stroke: t.color, fill: t.color, style: 'opacity:1' }));
+      svg.appendChild(el('line', { x1: VW / 2 - 8, y1: VH / 2, x2: VW / 2 + 8, y2: VH / 2, class: 'center-x' }));
+      svg.appendChild(el('line', { x1: VW / 2, y1: VH / 2 - 8, x2: VW / 2, y2: VH / 2 + 8, class: 'center-x' }));
+
+      fxLayer = el('g', {});
+      svg.appendChild(fxLayer);
+
+      return { allPoints, rPx };
     }
 
     /* --- ping de radar: anillos concéntricos que se desvanecen --- */
-    function ping(x, y, t) {
+    function ping(x, y, rPx) {
       for (let i = 0; i < 3; i++) {
         setTimeout(() => {
           const ring = el('circle', { cx: x, cy: y, r: 4, fill: 'none', stroke: '#6E9BFF', 'stroke-width': 1.5, 'stroke-opacity': 0.75 });
-          fx.appendChild(ring);
+          fxLayer.appendChild(ring);
           let rad = 4, op = 0.75;
           const iv = setInterval(() => {
-            rad += t.r / 16; op -= 0.03;
+            rad += rPx / 16; op -= 0.03;
             if (op <= 0) { clearInterval(iv); ring.remove(); return; }
             ring.setAttribute('r', rad);
             ring.setAttribute('stroke-opacity', op);
@@ -1813,39 +1945,43 @@ footer a:hover { color: var(--ember); }
       }
     }
 
-    async function fire(e) {
+    /* --- lanza (o relanza, al cambiar de radio) la búsqueda sobre el punto ya elegido --- */
+    function fireAt() {
       if (firing) return;
       firing = true;
       const t = TYPES[type];
-      const [x, y] = toView(e);
-      aim.setAttribute('cx', x); aim.setAttribute('cy', y);
-      aim.style.opacity = '1';
       result.classList.remove('show');
-      status.innerHTML = 'Rastreando radio ' + t.label.toLowerCase() + '…';
+      status.innerHTML = 'Rastreando radio ' + t.label.toLowerCase() + ' (' + fmtKm(t.km) + ' km reales)…';
 
-      if (!reducedMotion) ping(x, y, t);
+      const { allPoints, rPx } = draw();
+      if (!reducedMotion) ping(VW / 2, VH / 2, rPx);
 
-      // ciudades dentro del radio
-      const hits = CITIES.filter(c => Math.hypot(c.x - x, c.y - y) <= t.r);
-      CITIES.forEach(c => c.dot.classList.remove('hit'));
-      hits.forEach((c, i) => setTimeout(() => c.dot.classList.add('hit'), reducedMotion ? 0 : 200 + i * 100));
+      const hits = allPoints.filter(p => p.distKm <= t.km);
+      hits.forEach((p, i) => setTimeout(() => p.dot.classList.add('hit'), reducedMotion ? 0 : 150 + i * 60));
 
       setTimeout(() => {
         if (hits.length === 0) {
-          status.innerHTML = 'Sin ciudades en el radio — prueba más cerca de un núcleo urbano.';
+          status.innerHTML = 'Sin negocios en el radio — prueba más cerca de un núcleo urbano o amplía el radio.';
         } else {
-          const leads = hits.reduce((a, c) => a + c.w + Math.floor(Math.random() * 60), 0);
-          const names = hits.map(c => c.n);
+          const leads = hits.reduce((a, p) => a + p.w + Math.floor(Math.random() * 12), 0);
+          const names = hits.slice().sort((a, b) => b.w - a.w).map(h => h.n);
           const shown = names.slice(0, 3).join(' + ') + (names.length > 3 ? ' +' + (names.length - 3) + ' más' : '');
-          status.innerHTML = '<span class="ok">✓ Cobertura confirmada.</span>&nbsp;' + hits.length + ' ciudad' + (hits.length > 1 ? 'es' : '') + ' en el radio.';
+          status.innerHTML = '<span class="ok">✓ Cobertura confirmada.</span>&nbsp;' + hits.length + ' núcleo' + (hits.length > 1 ? 's' : '') + ' de población en el radio.';
           resultText.innerHTML = '<strong>' + shown + '</strong> → una sola búsqueda, ≈ <strong>' + leads.toLocaleString('es-ES') + ' leads</strong> <span style="opacity:0.7">(simulación)</span>';
           result.classList.add('show');
         }
-        aim.style.opacity = '0';
         firing = false;
-      }, reducedMotion ? 100 : 550);
+      }, reducedMotion ? 100 : 500);
     }
-    svg.addEventListener('click', fire);
+
+    function setType(newType) {
+      type = newType;
+      $$('.ntype').forEach(b => b.className = 'ntype' + (b.dataset.type === newType ? ' on-' + newType : ''));
+      if (mode === 'zoomed' && center) fireAt();
+    }
+    $$('.ntype').forEach(b => b.addEventListener('click', () => setType(b.dataset.type)));
+
+    renderOverview();
   })();
 
 })();
