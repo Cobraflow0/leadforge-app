@@ -1010,7 +1010,6 @@ body.nav-open{overflow:hidden;}
           <div class="nuke-section">
             <div class="nuke-section-hdr"><span>Fuentes de datos</span></div>
             <div class="nuke-tags-wrap" style="max-height:none;">
-              <div class="nuke-tag selected" id="nuke-src-googlemaps" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Google Maps</div>
               <div class="nuke-tag selected" id="nuke-src-habitissimo" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Habitissimo</div>
               <div class="nuke-tag selected" id="nuke-src-openstreetmap" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>OpenStreetMap</div>
               <div class="nuke-tag selected" id="nuke-src-sortlist" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Sortlist</div>
@@ -1018,8 +1017,6 @@ body.nav-open{overflow:hidden;}
               <div class="nuke-tag selected" id="nuke-src-doctoralia" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Doctoralia</div>
               <div class="nuke-tag selected" id="nuke-src-hotfrog" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Hotfrog</div>
               <div class="nuke-tag selected" id="nuke-src-webs" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Webs propias</div>
-              <div class="nuke-tag" id="nuke-src-linkedin" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>LinkedIn <span style="opacity:0.45;font-size:9px;margin-left:2px;">beta</span></div>
-              <div class="nuke-tag" id="nuke-src-instagram" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Instagram <span style="opacity:0.45;font-size:9px;margin-left:2px;">beta</span></div>
             </div>
           </div>
           <button class="nuke-launch-btn" id="nuke-launch-btn" onclick="confirmNukeLaunch()">📡 ESCANEAR ZONA</button>
@@ -1145,8 +1142,8 @@ body.nav-open{overflow:hidden;}
             </div>
             <div class="categories-grid" id="cats-grid"></div>
             <div id="demo-cats-note" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(0,102,255,0.08);border:1px solid rgba(0,102,255,0.2);border-radius:8px;font-size:12px;color:var(--text2);line-height:1.5;">
-              🔒 <strong>Demo:</strong> 1 categoría · 1 ciudad · 20 leads · Solo Google Maps<br>
-              <span style="color:var(--accent);">Con planes de pago:</span> todas las categorías, hasta 5 ciudades, 1.000+ leads y 9 fuentes de datos.
+              🔒 <strong>Demo:</strong> 1 categoría · 1 ciudad · 20 leads · Solo OpenStreetMap<br>
+              <span style="color:var(--accent);">Con planes de pago:</span> todas las categorías, hasta 5 ciudades, 1.000+ leads y 7 fuentes de datos.
             </div>
           </div>
         </div>
@@ -1161,7 +1158,6 @@ body.nav-open{overflow:hidden;}
         <div>
           <label class="form-label">Fuentes de datos</label>
           <div class="sources-row">
-            <div class="source-pill coming-soon" id="src-googlemaps"><span class="source-dot"></span>Google Maps <span class="pronto-badge">🔒 Desactivada</span></div>
             <div class="source-pill selected" id="src-habitissimo" onclick="toggleSource('habitissimo')"><span class="source-dot"></span>Habitissimo</div>
             <div class="source-pill selected" id="src-paginasamarillas" onclick="toggleSource('paginasamarillas')"><span class="source-dot"></span>Páginas Amarillas</div>
             <div class="source-pill selected" id="src-openstreetmap" onclick="toggleSource('openstreetmap')"><span class="source-dot"></span>OpenStreetMap</div>
@@ -1170,10 +1166,7 @@ body.nav-open{overflow:hidden;}
             <div class="source-pill selected" id="src-europages" onclick="toggleSource('europages')"><span class="source-dot"></span>Europages</div>
             <div class="source-pill selected" id="src-doctoralia" onclick="toggleSource('doctoralia')"><span class="source-dot"></span>Doctoralia</div>
             <div class="source-pill selected" id="src-hotfrog" onclick="toggleSource('hotfrog')"><span class="source-dot"></span>Hotfrog</div>
-            <div class="source-pill" id="src-linkedin" onclick="toggleSource('linkedin')"><span class="source-dot"></span>LinkedIn <span style="font-size:10px;opacity:0.5;margin-left:3px">beta</span></div>
-            <div class="source-pill" id="src-instagram" onclick="toggleSource('instagram')"><span class="source-dot"></span>Instagram <span style="font-size:10px;opacity:0.5;margin-left:3px">beta</span></div>
           </div>
-          <div style="margin-top:10px;font-size:12px;color:var(--text3)">💡 LinkedIn e Instagram usan búsqueda vía Google — resultados limitados pero sin bloqueos.</div>
           <div id="doctoralia-warning" style="display:none;margin-top:8px;font-size:12px;color:#E5A800;">⚠️</div>
         </div>
         <button class="btn-launch" id="btn-launch" onclick="launchScraping()" disabled>
@@ -1306,7 +1299,7 @@ body.nav-open{overflow:hidden;}
           <div class="plan-price" id="cuenta-plan-price">49€ <span>/mes</span></div>
           <div class="plan-renewal">Próxima renovación: <span id="renewal-date">—</span></div>
           <ul class="plan-features" id="cuenta-plan-features">
-            <li>Búsquedas ilimitadas</li><li>Google Maps + 8 fuentes</li><li>Todos los sectores disponibles</li>
+            <li>Búsquedas ilimitadas</li><li>7 fuentes de datos en paralelo</li><li>Todos los sectores disponibles</li>
             <li>Excel profesional con scoring</li><li>Campañas de email automatizadas</li>
             <li>CRM de seguimiento de leads</li><li>Follow-up automático a 3 días</li>
           </ul>
@@ -1632,7 +1625,7 @@ const PLAN_LIMITS={
   // desconocido caía por defecto en 'pro' (acceso completo gratis).
   cancelado:{label:'Cancelado',searches:0,        leads:0,    emails:0,    maxEmailBtns:[],                     cities:0,  sequences:false, alerts:false},
 };
-const BASIC_SOURCES=['googlemaps','paginasamarillas','europages','openstreetmap','hotfrog'];
+const BASIC_SOURCES=['paginasamarillas','europages','openstreetmap','hotfrog'];
 function getPlan(){const p=(appState.profile?.plan||'pro').toLowerCase();return PLAN_LIMITS[p]?p:'pro';}
 function getPlanLimits(){return PLAN_LIMITS[getPlan()];}
 function getSearchesThisMonth(){const cut=Date.now()-30*24*60*60*1000;return appState.searches.filter(s=>s.id>cut).length;}
@@ -1940,12 +1933,12 @@ async function launchScraping(){
     showUpgradeModal(`Has usado las <strong>${limits.searches} búsquedas</strong> de tu plan ${limits.label} este mes.<br><br>Actualiza a <strong>Pro</strong> (30 búsquedas) o <strong>Business</strong> (ilimitadas) para seguir.`);
     return;
   }
-  const srcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','paginasamarillas':'paginas_amarillas','openstreetmap':'openstreetmap','sortlist':'sortlist','europages':'europages','doctoralia':'doctoralia','hotfrog':'hotfrog','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
-  let sources=DEMO_MODE?['google_maps']:Object.keys(srcMap).filter(s=>document.getElementById('src-'+s)?.classList.contains('selected')).map(s=>srcMap[s]);
-  if(!DEMO_MODE&&getPlan()==='basic')sources=sources.filter(s=>['google_maps','paginas_amarillas','europages','openstreetmap','hotfrog'].includes(s));
+  const srcMap={'habitissimo':'habitissimo','paginasamarillas':'paginas_amarillas','openstreetmap':'openstreetmap','sortlist':'sortlist','europages':'europages','doctoralia':'doctoralia','hotfrog':'hotfrog','webs':'webs_propias'};
+  let sources=DEMO_MODE?['openstreetmap']:Object.keys(srcMap).filter(s=>document.getElementById('src-'+s)?.classList.contains('selected')).map(s=>srcMap[s]);
+  if(!DEMO_MODE&&getPlan()==='basic')sources=sources.filter(s=>['paginas_amarillas','europages','openstreetmap','hotfrog'].includes(s));
   if(currentMode==='libre'){
     const termino=document.getElementById('input-libre').value.trim(),ciudad=document.getElementById('input-ciudad-libre').value.trim();
-    const fuentesLibre=sources.filter(s=>['google_maps','paginas_amarillas','linkedin','instagram','webs_propias','europages','hotfrog'].includes(s));
+    const fuentesLibre=sources.filter(s=>['paginas_amarillas','webs_propias','europages','hotfrog'].includes(s));
     const demoLeads=DEMO_MODE?DEMO_MAX_LEADS:limits.leads;
     appState.currentSearch={sector:termino,ciudad,cats:[termino],sources:fuentesLibre};appState.currentJobId=null;
     const etaLibre=estimateScrapeTime(1,1,fuentesLibre.length||1,false);
@@ -1966,7 +1959,7 @@ async function launchScraping(){
 function estimateScrapeTime(numCats, numCities, numSources, quick){
   if(DEMO_MODE) return '~30-45 segundos';
   // Calibrado con pruebas reales (jul 2026): modo rápido ~45s/categoría,
-  // modo normal ~110-130s/categoría (Google Maps + Europages pesan bastante más).
+  // modo normal ~110-130s/categoría (Europages pesa bastante más).
   const secsPerCat = quick ? (10 + numSources * 4) : (15 + numSources * 12);
   const scraping = numCats * numCities * secsPerCat;
   const enrichment = numCats * numCities * 15; // enriquecimiento final con webs propias
@@ -2099,10 +2092,10 @@ async function runDemoScraping(sector, ciudad, cats){
   const logs=[
     `▶ Iniciando scraping: ${sector} | ${ciudad}`,
     `Categorías: ${cats[0]}`,
-    `Fuentes: google_maps`,
+    `Fuentes: openstreetmap`,
     `📁 Categoría: ${cats[0]}`,
-    `[Google Maps] Buscando '${cats[0]}' en ${ciudad}…`,
-    `✅ 20 resultados encontrados en Google Maps`,
+    `[OpenStreetMap] Buscando '${cats[0]}' en ${ciudad}…`,
+    `✅ 20 resultados encontrados en OpenStreetMap`,
     `🔍 Procesando leads…`,
     `✅ Verificando emails y teléfonos…`,
     `✅ Calculando scoring de calidad…`,
@@ -2175,7 +2168,7 @@ async function runScrapingMultiCiudad(sector,ciudades,cats,sources,maxLeads=1000
   _saveHistoryLeads(lastJobId,totalResult.leads);
   _clearPendingJob();
 }
-const SOURCE_ICONS={'Google Maps':'🗺️','Habitissimo':'🔨','Páginas Amarillas':'📒','Sortlist':'📋','LinkedIn':'💼','Instagram':'📸','Europages':'🌍','Webs propias':'🌐','OpenStreetMap':'🗺️','Doctoralia':'⚕️','Hotfrog':'🐸'};
+const SOURCE_ICONS={'Habitissimo':'🔨','Páginas Amarillas':'📒','Sortlist':'📋','Europages':'🌍','Webs propias':'🌐','OpenStreetMap':'🗺️','Doctoralia':'⚕️','Hotfrog':'🐸'};
 function _updateLiveStats(allLogs){
   const srcCounts={};let total=0,alta=0,media=0,baja=0,enriching=false,enrichDone=false;
   allLogs.forEach(line=>{
@@ -2651,7 +2644,7 @@ function _onNukeMapClick(e){
   _leafletMap.off('mousemove',_onNukeMapHover);
 }
 
-const _nukeSrcMap={'googlemaps':'google_maps','habitissimo':'habitissimo','openstreetmap':'openstreetmap','sortlist':'sortlist','europages':'europages','doctoralia':'doctoralia','hotfrog':'hotfrog','webs':'webs_propias','linkedin':'linkedin','instagram':'instagram'};
+const _nukeSrcMap={'habitissimo':'habitissimo','openstreetmap':'openstreetmap','sortlist':'sortlist','europages':'europages','doctoralia':'doctoralia','hotfrog':'hotfrog','webs':'webs_propias'};
 function toggleNukeSrc(id,el){el.classList.toggle('selected');}
 function _getNukeSources(){
   return Object.keys(_nukeSrcMap).filter(k=>document.getElementById('nuke-src-'+k)?.classList.contains('selected')).map(k=>_nukeSrcMap[k]);
@@ -2742,7 +2735,7 @@ async function _animateAndLaunch(type,latlng,cities,sector,nukeCats){
   // Lanzar scraping
   const targetCities=cities.length>0?cities:[_findNearestCity(latlng.lat,latlng.lng)];
   const cats=(nukeCats&&nukeCats.length>0)?nukeCats:(SECTORES[sector]||[]).map(c=>c.id);
-  const sources=_getNukeSources().length>0?_getNukeSources():['google_maps','webs_propias'];
+  const sources=_getNukeSources().length>0?_getNukeSources():['openstreetmap','webs_propias'];
   const limits=getPlanLimits();
   const ciudadStr=targetCities.join(', ');
   // El radio real (t.radiusKm) solo lo aplica OpenStreetMap (única fuente con
@@ -3371,14 +3364,14 @@ function applyPlanLimits(){
 
   // Fuentes bloqueadas para Basic (excluir las que ya son coming-soon)
   if(plan==='basic'){
-    ['habitissimo','sortlist','doctoralia','webs','linkedin','instagram'].forEach(src=>{
+    ['habitissimo','sortlist','doctoralia','webs'].forEach(src=>{
       const el=document.getElementById('src-'+src);
       if(!el||el.classList.contains('coming-soon'))return;
       el.classList.remove('selected');
       el.classList.add('locked');
     });
   } else {
-    ['habitissimo','sortlist','doctoralia','webs','linkedin','instagram'].forEach(src=>{
+    ['habitissimo','sortlist','doctoralia','webs'].forEach(src=>{
       const el=document.getElementById('src-'+src);
       if(el&&!el.classList.contains('coming-soon'))el.classList.remove('locked');
     });
