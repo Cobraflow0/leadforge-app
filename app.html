@@ -74,7 +74,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .alert.success{background:rgba(69,192,138,0.08);border:1px solid rgba(69,192,138,0.25);color:var(--green);}
 .alert.show{display:block;}
 .app-screen{flex-direction:row;align-items:stretch;height:100vh;overflow:hidden;}
-.sidebar{width:252px;height:100vh;background:rgba(5,8,15,0.92);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:28px 0;flex-shrink:0;overflow-y:auto;backdrop-filter:blur(20px);}
+.sidebar{width:252px;height:100vh;background:rgba(10,11,14,0.92);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:28px 0;flex-shrink:0;overflow-y:auto;backdrop-filter:blur(20px);}
 .sidebar-logo{display:flex;align-items:center;gap:12px;padding:0 20px 28px;border-bottom:1px solid var(--border);margin-bottom:24px;}
 .sidebar-logo .logo-mark{width:34px;height:34px;border-radius:9px;font-size:16px;}
 .sidebar-logo .logo-text{font-size:17px;font-weight:700;}
@@ -409,15 +409,17 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .leaflet-control-zoom a{background:#101216!important;color:var(--accent)!important;border-color:rgba(110,155,255,0.2)!important;}
 .leaflet-control-zoom a:hover{background:#1a2540!important;}
 @keyframes mapRing{0%{transform:scale(1);opacity:0.6}100%{transform:scale(2.5);opacity:0}}
-/* ── NUKE MODE ── */
-.nuke-mode-btn{background:rgba(236,106,99,0.08);border:1px solid rgba(236,106,99,0.3);border-radius:8px;color:#EC6A63;font-size:12px;font-family:var(--font-body);padding:5px 12px;cursor:pointer;transition:all 0.2s;font-weight:600;}
-.nuke-mode-btn:hover{background:rgba(236,106,99,0.15);}
-.nuke-mode-btn.active{background:rgba(236,106,99,0.18);border-color:#EC6A63;box-shadow:0 0 14px rgba(236,106,99,0.35);animation:nukeBtnPulse 1.5s ease-in-out infinite;}
-@keyframes nukeBtnPulse{0%,100%{box-shadow:0 0 14px rgba(236,106,99,0.35)}50%{box-shadow:0 0 22px rgba(236,106,99,0.6)}}
+/* ── RADAR MODE ── */
+.nuke-mode-btn{background:rgba(110,155,255,0.08);border:1px solid rgba(110,155,255,0.3);border-radius:8px;color:#6E9BFF;font-size:12px;font-family:var(--font-body);padding:5px 12px;cursor:pointer;transition:all 0.2s;font-weight:600;}
+.nuke-mode-btn:hover{background:rgba(110,155,255,0.15);}
+.nuke-mode-btn.active{background:rgba(110,155,255,0.18);border-color:#6E9BFF;box-shadow:0 0 14px rgba(110,155,255,0.35);animation:nukeBtnPulse 1.5s ease-in-out infinite;}
+@keyframes nukeBtnPulse{0%,100%{box-shadow:0 0 14px rgba(110,155,255,0.35)}50%{box-shadow:0 0 22px rgba(110,155,255,0.6)}}
+.radar-sweep{position:absolute;z-index:1500;pointer-events:none;border-radius:50%;background:conic-gradient(from 0deg,rgba(69,192,138,0) 0deg,rgba(69,192,138,0) 260deg,rgba(69,192,138,0.55) 340deg,rgba(69,192,138,0.9) 360deg);box-shadow:0 0 0 1px rgba(69,192,138,0.35) inset,0 0 26px rgba(69,192,138,0.25);animation-name:radarSweepSpin;animation-timing-function:linear;}
+@keyframes radarSweepSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 #map-coverage.nuke-active{cursor:crosshair!important;}
 #map-coverage.nuke-active .leaflet-container{cursor:crosshair!important;}
-#nuke-type-selector{display:none;margin-top:12px;padding:12px 14px;background:rgba(236,106,99,0.05);border:1px solid rgba(236,106,99,0.18);border-radius:10px;}
-#nuke-type-selector .nts-label{font-size:10px;color:#EC6A63;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;}
+#nuke-type-selector{display:none;margin-top:12px;padding:12px 14px;background:rgba(110,155,255,0.05);border:1px solid rgba(110,155,255,0.18);border-radius:10px;}
+#nuke-type-selector .nts-label{font-size:10px;color:#6E9BFF;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;}
 .nuke-type-btn{flex:1;padding:10px 6px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:11px;font-family:var(--font-body);cursor:pointer;transition:all 0.2s;text-align:center;line-height:1.5;}
 .nuke-type-btn .nt-emoji{font-size:20px;display:block;margin-bottom:3px;}
 .nuke-type-btn .nt-name{font-weight:700;font-size:12px;color:var(--text);}
@@ -428,7 +430,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .nuke-type-btn.selected.strategic{border-color:#FF7A00;background:rgba(255,122,0,0.08);box-shadow:0 0 12px rgba(255,122,0,0.2);}
 .nuke-type-btn.selected.moab{border-color:#EC6A63;background:rgba(236,106,99,0.1);box-shadow:0 0 12px rgba(236,106,99,0.3);}
 .nuke-type-btn:disabled{opacity:0.35;cursor:not-allowed;}
-#nuke-confirm-panel{position:absolute;z-index:1000;background:rgba(5,8,15,0.96);border-radius:14px;padding:18px 20px;backdrop-filter:blur(20px);box-shadow:0 16px 50px rgba(0,0,0,0.7);min-width:250px;pointer-events:all;}
+#nuke-confirm-panel{position:absolute;z-index:1000;background:rgba(10,11,14,0.96);border-radius:14px;padding:18px 20px;backdrop-filter:blur(20px);box-shadow:0 16px 50px rgba(0,0,0,0.7);min-width:250px;pointer-events:all;}
 #nuke-confirm-panel h3{font-size:13px;font-weight:700;margin-bottom:2px;}
 #nuke-confirm-panel .target-city{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px;}
 #nuke-cities-list{font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.6;background:rgba(255,255,255,0.03);border-radius:8px;padding:8px 10px;}
@@ -447,14 +449,12 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .nuke-launch-btn{width:100%;padding:11px;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;font-family:var(--font-body);cursor:pointer;letter-spacing:0.3px;margin-bottom:7px;transition:all 0.2s;}
 .nuke-launch-btn:hover{transform:translateY(-1px);}
 .nuke-cancel-btn{width:100%;padding:7px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;font-family:var(--font-body);cursor:pointer;}
-#nuke-missile{position:absolute;z-index:2000;pointer-events:none;display:none;transform-origin:center;}
-@keyframes nukeShake{0%,100%{transform:translateX(0)}15%{transform:translateX(-8px)}30%{transform:translateX(8px)}45%{transform:translateX(-6px)}60%{transform:translateX(6px)}75%{transform:translateX(-3px)}90%{transform:translateX(3px)}}
 @media(max-width:900px){.sidebar{display:none;}.main{padding:24px 20px;}.stats-grid{grid-template-columns:1fr 1fr;}.scraper-grid{grid-template-columns:1fr;}.categories-grid{grid-template-columns:repeat(2,1fr);}.results-summary{grid-template-columns:repeat(2,1fr);}.cuenta-grid{grid-template-columns:1fr;}.crm-stats{grid-template-columns:repeat(3,1fr);}.camp-stats{grid-template-columns:repeat(2,1fr);}.admin-grid{grid-template-columns:repeat(2,1fr);}}
 #demo-upgrade-overlay.open{display:flex !important;}
 .demo-locked{position:relative;pointer-events:none;opacity:0.45;}
 .demo-lock-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;z-index:10;}
 /* ── ONBOARDING ── */
-#modal-onboarding{z-index:9999;background:rgba(5,8,15,0.92);backdrop-filter:blur(16px);}
+#modal-onboarding{z-index:9999;background:rgba(10,11,14,0.92);backdrop-filter:blur(16px);}
 .ob-box{background:linear-gradient(160deg,#101216,#080c17);border:1px solid rgba(110,155,255,0.15);border-radius:24px;padding:40px 36px;max-width:520px;width:90%;margin:auto;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.7),0 0 40px rgba(110,155,255,0.05);}
 .ob-progress{display:flex;gap:6px;justify-content:center;margin-bottom:32px;}
 .ob-dot{width:28px;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);transition:all 0.3s;}
@@ -956,37 +956,37 @@ body.nav-open{overflow:hidden;}
           <div class="map-legend-item"><div class="map-legend-dot" style="background:#45C08A;box-shadow:0 0 6px #45C08A;"></div> 50–200 leads</div>
           <div class="map-legend-item"><div class="map-legend-dot" style="background:#6E9BFF;width:14px;height:14px;box-shadow:0 0 8px #6E9BFF;"></div> +200 leads</div>
           <div style="margin-left:auto;font-size:12px;color:var(--text3)" id="map-stats-label">—</div>
-          <button class="nuke-mode-btn" id="nuke-mode-btn" onclick="toggleNukeMode()">☢️ Nuke Mode</button>
+          <button class="nuke-mode-btn" id="nuke-mode-btn" onclick="toggleNukeMode()">📡 Modo Radar</button>
         </div>
 
-        <!-- Selector de tipo de nuke -->
+        <!-- Selector de alcance del radar -->
         <div id="nuke-type-selector">
-          <div class="nts-label">Selecciona tipo de nuke</div>
+          <div class="nts-label">Selecciona el alcance del radar</div>
           <div style="display:flex;gap:8px;">
             <button class="nuke-type-btn tactical" id="ntype-tactical" onclick="selectNukeType('tactical')">
-              <span class="nt-emoji">💣</span>
-              <span class="nt-name">Táctica</span>
-              <span class="nt-info">3 km</span>
+              <span class="nt-emoji">🔍</span>
+              <span class="nt-name">Cercano</span>
+              <span class="nt-info">4,5 km</span>
               <span class="nt-avail" id="navail-tactical" style="color:#E0B255;">—</span>
             </button>
             <button class="nuke-type-btn strategic" id="ntype-strategic" onclick="selectNukeType('strategic')">
-              <span class="nt-emoji">🚀</span>
-              <span class="nt-name">Estratégica</span>
-              <span class="nt-info">8 km</span>
+              <span class="nt-emoji">📡</span>
+              <span class="nt-name">Ciudad</span>
+              <span class="nt-info">12 km</span>
               <span class="nt-avail" id="navail-strategic" style="color:#FF7A00;">—</span>
             </button>
             <button class="nuke-type-btn moab" id="ntype-moab" onclick="selectNukeType('moab')">
-              <span class="nt-emoji">☢️</span>
-              <span class="nt-name">MOAB</span>
-              <span class="nt-info">15 km</span>
+              <span class="nt-emoji">🛰️</span>
+              <span class="nt-name">Metropolitano</span>
+              <span class="nt-info">22,5 km</span>
               <span class="nt-avail" id="navail-moab" style="color:#EC6A63;">—</span>
             </button>
           </div>
         </div>
 
-        <!-- Panel de confirmación nuke -->
+        <!-- Panel de confirmación del radar -->
         <div id="nuke-confirm-panel" style="display:none;">
-          <h3 id="nuke-panel-title">☢️ SCRAPING NUKE</h3>
+          <h3 id="nuke-panel-title">📡 ESCÁNER DE RADAR</h3>
           <div class="target-city" id="nuke-target-city">—</div>
           <div id="nuke-cities-list"></div>
           <select id="nuke-sector-select" onchange="nukeSectorChanged(this.value)">
@@ -1022,12 +1022,10 @@ body.nav-open{overflow:hidden;}
               <div class="nuke-tag" id="nuke-src-instagram" onclick="this.classList.toggle('selected')"><span class="ntag-dot"></span>Instagram <span style="opacity:0.45;font-size:9px;margin-left:2px;">beta</span></div>
             </div>
           </div>
-          <button class="nuke-launch-btn" id="nuke-launch-btn" onclick="confirmNukeLaunch()">☢️ LANZAR NUKE</button>
+          <button class="nuke-launch-btn" id="nuke-launch-btn" onclick="confirmNukeLaunch()">📡 ESCANEAR ZONA</button>
           <button class="nuke-cancel-btn" onclick="cancelNuke()">Cancelar</button>
         </div>
 
-        <!-- Misil animado -->
-        <div id="nuke-missile"></div>
       </div>
 
       <div class="card">
@@ -2498,12 +2496,12 @@ function initMap(){
 }
 
 /* ══════════════════════════════════════════════════════════
-   SCRAPING NUKE — Sistema completo
+   MODO RADAR — Sistema completo (antes "Scraping Nuke")
 ══════════════════════════════════════════════════════════ */
 const NUKE_TYPES={
-  tactical: {label:'Táctica',emoji:'💣',radiusKm:4.5,color:'#E0B255',flashColor:'rgba(224,178,85,0.28)',missileDuration:1000,rings:3,ringMax:28,sound:'tactical'},
-  strategic:{label:'Estratégica',emoji:'🚀',radiusKm:12,color:'#FF7A00',flashColor:'rgba(255,122,0,0.28)',missileDuration:1800,rings:5,ringMax:50,sound:'strategic'},
-  moab:     {label:'MOAB',emoji:'☢️',radiusKm:22.5,color:'#EC6A63',flashColor:'rgba(236,106,99,0.38)',missileDuration:3000,rings:7,ringMax:80,sound:'moab',shake:true},
+  tactical: {label:'Cercano',emoji:'🔍',radiusKm:4.5,color:'#E0B255',scanDuration:1000,rings:3,ringMax:28,sound:'tactical'},
+  strategic:{label:'Ciudad',emoji:'📡',radiusKm:12,color:'#FF7A00',scanDuration:1800,rings:5,ringMax:50,sound:'strategic'},
+  moab:     {label:'Metropolitano',emoji:'🛰️',radiusKm:22.5,color:'#EC6A63',scanDuration:3000,rings:7,ringMax:80,sound:'moab'},
 };
 const NUKE_LIMITS={
   demo:    {tactical:0,strategic:0,moab:0},
@@ -2541,7 +2539,7 @@ function toggleNukeMode(){
   const mapEl=document.getElementById('map-coverage');
   const selector=document.getElementById('nuke-type-selector');
   if(_nukeModeActive){
-    btn.classList.add('active');btn.textContent='✕ Salir de Nuke Mode';
+    btn.classList.add('active');btn.textContent='✕ Salir del Modo Radar';
     mapEl.classList.add('nuke-active');
     selector.style.display='block';
     _updateNukeAvailability();
@@ -2551,7 +2549,7 @@ function toggleNukeMode(){
       _leafletMap.on('mousemove',_onNukeMapHover);
     }
   }else{
-    btn.classList.remove('active');btn.textContent='☢️ Nuke Mode';
+    btn.classList.remove('active');btn.textContent='📡 Modo Radar';
     mapEl.classList.remove('nuke-active');
     selector.style.display='none';
     cancelNuke();
@@ -2605,7 +2603,7 @@ function _onNukeMapClick(e){
     return;
   }
   if(_nukeRemaining(_selectedNukeType)<=0){
-    showUpgradeModal(`Has agotado las nukes <strong>${NUKE_TYPES[_selectedNukeType].label}</strong> de este mes.<br><br>Selecciona otro tipo o actualiza tu plan.`);return;
+    showUpgradeModal(`Has agotado los escaneos <strong>${NUKE_TYPES[_selectedNukeType].label}</strong> de este mes.<br><br>Selecciona otro alcance o actualiza tu plan.`);return;
   }
   const t=NUKE_TYPES[_selectedNukeType];
   const cities=_getCitiesInRadius(e.latlng.lat,e.latlng.lng,t.radiusKm);
@@ -2616,12 +2614,12 @@ function _onNukeMapClick(e){
 
   // Actualizar panel
   const panel=document.getElementById('nuke-confirm-panel');
-  document.getElementById('nuke-panel-title').textContent=`${t.emoji} NUKE ${t.label.toUpperCase()}`;
+  document.getElementById('nuke-panel-title').textContent=`${t.emoji} RADAR — ${t.label.toUpperCase()}`;
   panel.style.borderColor=t.color+'66';
   panel.style.boxShadow=`0 0 24px ${t.color}30,0 16px 50px rgba(0,0,0,0.6)`;
   const launchBtn=document.getElementById('nuke-launch-btn');
   launchBtn.style.background=`linear-gradient(135deg,${t.color}cc,${t.color})`;
-  launchBtn.textContent=`${t.emoji} LANZAR NUKE`;
+  launchBtn.textContent=`${t.emoji} ESCANEAR ZONA`;
 
   const targetEl=document.getElementById('nuke-target-city');
   const listEl=document.getElementById('nuke-cities-list');
@@ -2703,7 +2701,7 @@ async function confirmNukeLaunch(){
     if(!confirm(`No hay ninguna ciudad guardada en este radio.\n\nOpenStreetMap buscará el punto exacto, pero el resto de fuentes buscarán la ciudad completa más cercana: ${nearCity}, a ${nearDist.toFixed(0)}km de donde has clicado.\n\n¿Lanzar de todos modos?`))return;
   }else if(type==='moab'&&cities.length>1){
     const cityList=cities.slice(0,12).join(', ')+(cities.length>12?` y ${cities.length-12} más`:'');
-    if(!confirm(`MOAB: vas a atacar ${cities.length} ciudad${cities.length!==1?'es':''} en el radio:\n\n${cityList}\n\n¿Confirmar lanzamiento?`))return;
+    if(!confirm(`Vas a escanear ${cities.length} ciudad${cities.length!==1?'es':''} en el radio:\n\n${cityList}\n\n¿Confirmar escaneo?`))return;
   }
   cancelNuke();
   toggleNukeMode();
@@ -2713,40 +2711,31 @@ async function confirmNukeLaunch(){
 
 async function _animateAndLaunch(type,latlng,cities,sector,nukeCats){
   const t=NUKE_TYPES[type];
-
-  // Sonido de lanzamiento
-  _nukeLaunchSound(type);
-
-  // Animación del misil
   const mapEl=document.getElementById('map-coverage');
-  const missile=document.getElementById('nuke-missile');
-  const mapRect=mapEl.getBoundingClientRect();
-  const targetPt=_leafletMap.latLngToContainerPoint(latlng);
-  const startX=mapRect.width/2,startY=-50;
-  const endX=targetPt.x,endY=targetPt.y;
-  const angle=Math.atan2(endY-startY,endX-startX)*(180/Math.PI)+45;
-  const fontSize=type==='moab'?42:type==='strategic'?34:26;
+  const pt=_leafletMap.latLngToContainerPoint(latlng);
 
-  missile.style.display='block';
-  missile.style.fontSize=fontSize+'px';
-  missile.style.left=startX+'px';missile.style.top=startY+'px';
-  missile.style.transform=`rotate(${angle}deg)`;
-  missile.style.transition='none';
-  missile.style.filter=`drop-shadow(0 0 ${type==='moab'?14:8}px ${t.color})`;
-  missile.textContent=t.emoji;
+  // Barrido de radar girando sobre el punto elegido (más vueltas cuanto mayor el radio)
+  const turns=type==='moab'?3:type==='strategic'?2:1;
+  const scanMs=t.scanDuration;
+  const sweep=document.createElement('div');
+  sweep.className='radar-sweep';
+  const d=t.ringMax*2;
+  sweep.style.width=d+'px';sweep.style.height=d+'px';
+  sweep.style.left=(pt.x-t.ringMax)+'px';sweep.style.top=(pt.y-t.ringMax)+'px';
+  sweep.style.animationDuration=(scanMs/turns)+'ms';
+  sweep.style.animationIterationCount=turns;
+  mapEl.appendChild(sweep);
 
-  await new Promise(r=>setTimeout(r,50));
-  const dur=t.missileDuration;
-  missile.style.transition=`left ${dur}ms cubic-bezier(0.25,0,0.85,1),top ${dur}ms cubic-bezier(0.1,0,0.9,1)`;
-  missile.style.left=endX+'px';missile.style.top=endY+'px';
+  _radarPingSound(type);
+  const pingEvery=scanMs/turns;
+  for(let i=1;i<turns;i++)setTimeout(()=>_radarPingSound(type),pingEvery*i);
 
-  await new Promise(r=>setTimeout(r,dur));
-  missile.style.display='none';
+  await new Promise(r=>setTimeout(r,scanMs));
+  sweep.remove();
 
-  // Impacto
-  _nukeImpactSound(type);
+  // Confirmación: pulso de contacto, como un sonar detectando objetivos
+  _radarConfirmSound(type);
   _animateExplosion(latlng,t);
-  if(t.shake)_shakeMap();
 
   await new Promise(r=>setTimeout(r,600));
 
@@ -2761,7 +2750,7 @@ async function _animateAndLaunch(type,latlng,cities,sector,nukeCats){
   // completa para no perder volumen, ver runScrapingMultiCiudad.
   const zone={lat:latlng.lat,lng:latlng.lng,radiusKm:t.radiusKm};
   appState.currentSearch={sector,ciudad:ciudadStr,cats,sources};appState.currentJobId=null;
-  _initResults(`${t.emoji} Nuke ${t.label} impactó — scrapeando ${targetCities.length} ciudad${targetCities.length>1?'es':''}…`,estimateScrapeTime(cats.length,targetCities.length,sources.length,true));
+  _initResults(`${t.emoji} Radar ${t.label} completado — escaneando ${targetCities.length} ciudad${targetCities.length>1?'es':''}…`,estimateScrapeTime(cats.length,targetCities.length,sources.length,true));
   await runScrapingMultiCiudad(sector,targetCities,cats,sources,limits.leads,true,zone);
 }
 
@@ -2777,22 +2766,13 @@ function _findNearestCity(lat,lng){
   return _findNearestCityWithDist(lat,lng).city;
 }
 
-function _shakeMap(){
-  const mapEl=document.getElementById('map-coverage');
-  mapEl.style.animation='nukeShake 0.6s ease-in-out';
-  setTimeout(()=>{mapEl.style.animation='';},700);
-}
-
 function _animateExplosion(latlng,t){
   const delays=Array.from({length:t.rings},(_,i)=>i*220);
   delays.forEach((delay,i)=>{
     setTimeout(()=>{
-      const pct=i/t.rings;
-      const colors=[t.color,'#FF7A00','#E0B255','#ffffff'];
-      const col=colors[Math.min(i,colors.length-1)];
       const ring=L.circleMarker(latlng,{
-        radius:t.ringMax*0.15,fillColor:col,fillOpacity:0.5,
-        color:col,weight:2,opacity:0.9
+        radius:t.ringMax*0.15,fillColor:'#45C08A',fillOpacity:0.5,
+        color:'#45C08A',weight:2,opacity:0.9
       }).addTo(_leafletMap);
       let rad=t.ringMax*0.15,op=0.9,fill=0.5;
       const speed=t.ringMax/25;
@@ -2804,114 +2784,45 @@ function _animateExplosion(latlng,t){
     },delay);
   });
   const flash=document.createElement('div');
-  flash.style.cssText=`position:absolute;inset:0;background:${t.flashColor};pointer-events:none;z-index:999;border-radius:10px;transition:opacity 0.5s;`;
+  flash.style.cssText=`position:absolute;inset:0;background:rgba(69,192,138,0.18);pointer-events:none;z-index:999;border-radius:10px;transition:opacity 0.5s;`;
   document.getElementById('map-coverage').appendChild(flash);
   setTimeout(()=>{flash.style.opacity='0';setTimeout(()=>flash.remove(),500);},100);
 }
 
-function _moabSiren(durationMs){
+function _radarPingSound(type){
   try{
     const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const dur=durationMs/1000;
     const now=ctx.currentTime;
-    // Capa 1: sirena principal (wail sube y baja)
+    const freq={tactical:1500,strategic:1150,moab:850}[type]||1200;
     const osc=ctx.createOscillator(),gain=ctx.createGain();
-    osc.type='sawtooth';
+    osc.type='sine';
+    osc.frequency.setValueAtTime(freq,now);
     osc.connect(gain);gain.connect(ctx.destination);
     gain.gain.setValueAtTime(0,now);
-    gain.gain.linearRampToValueAtTime(0.18,now+0.3);
-    gain.gain.setValueAtTime(0.18,now+dur-0.5);
-    gain.gain.linearRampToValueAtTime(0,now+dur);
-    const cycleLen=1.1;
-    for(let i=0;i<Math.ceil(dur/cycleLen)+1;i++){
-      const t=now+i*cycleLen;
-      osc.frequency.setValueAtTime(280,t);
-      osc.frequency.linearRampToValueAtTime(1050,t+cycleLen*0.45);
-      osc.frequency.linearRampToValueAtTime(280,t+cycleLen);
-    }
-    osc.start(now);osc.stop(now+dur);
-    // Capa 2: tono grave continuo de fondo
-    const osc2=ctx.createOscillator(),g2=ctx.createGain();
-    osc2.type='sine';osc2.frequency.value=55;
-    osc2.connect(g2);g2.connect(ctx.destination);
-    g2.gain.setValueAtTime(0,now);
-    g2.gain.linearRampToValueAtTime(0.12,now+0.5);
-    g2.gain.setValueAtTime(0.12,now+dur-0.4);
-    g2.gain.linearRampToValueAtTime(0,now+dur);
-    osc2.start(now);osc2.stop(now+dur);
-    // Capa 3: distorsión estática
-    const bufLen=ctx.sampleRate*dur;
-    const buf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
-    const d=buf.getChannelData(0);
-    for(let i=0;i<bufLen;i++)d[i]=(Math.random()*2-1)*0.04;
-    const noise=ctx.createBufferSource(),gn=ctx.createGain();
-    noise.buffer=buf;noise.connect(gn);gn.connect(ctx.destination);
-    gn.gain.value=1;noise.start(now);
-  }catch(e){}
-}
-function _nukeLaunchSound(type){
-  try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const osc=ctx.createOscillator(),gain=ctx.createGain();
-    osc.connect(gain);gain.connect(ctx.destination);
-    const cfg={
-      tactical: {type:'sine',  freqStart:1600,freqEnd:400, dur:0.9,  vol:0.12},
-      strategic:{type:'sawtooth',freqStart:1200,freqEnd:180,dur:1.5,vol:0.16},
-      moab:     {type:'sawtooth',freqStart:800, freqEnd:60,  dur:2.2,  vol:0.22},
-    }[type];
-    osc.type=cfg.type;
-    osc.frequency.setValueAtTime(cfg.freqStart,ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(cfg.freqEnd,ctx.currentTime+cfg.dur);
-    gain.gain.setValueAtTime(cfg.vol,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+cfg.dur);
-    osc.start();osc.stop(ctx.currentTime+cfg.dur);
-    // MOAB: añadir rumble grave adicional
-    if(type==='moab'){
-      const osc2=ctx.createOscillator(),g2=ctx.createGain();
-      osc2.type='sine';osc2.frequency.value=40;
-      osc2.connect(g2);g2.connect(ctx.destination);
-      g2.gain.setValueAtTime(0.3,ctx.currentTime);
-      g2.gain.linearRampToValueAtTime(0,ctx.currentTime+cfg.dur);
-      osc2.start();osc2.stop(ctx.currentTime+cfg.dur);
-    }
+    gain.gain.linearRampToValueAtTime(0.16,now+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001,now+0.85);
+    osc.start(now);osc.stop(now+0.85);
+    // eco corto, como un sonar de submarino
+    const delay=ctx.createDelay();delay.delayTime.value=0.19;
+    const echoGain=ctx.createGain();echoGain.gain.value=0.3;
+    osc.connect(delay);delay.connect(echoGain);echoGain.connect(ctx.destination);
   }catch(e){}
 }
 
-function _nukeImpactSound(type){
+function _radarConfirmSound(type){
   try{
     const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const cfg={
-      tactical: {boomDur:0.4,boomVol:0.8, boomFreq:120,crackFreq:600,crackDur:0.2},
-      strategic:{boomDur:0.7,boomVol:1.2, boomFreq:80, crackFreq:400,crackDur:0.3},
-      moab:     {boomDur:1.4,boomVol:2.0, boomFreq:40, crackFreq:200,crackDur:0.5},
-    }[type];
-    // Noise boom
-    const buf=ctx.createBuffer(1,ctx.sampleRate*cfg.boomDur,ctx.sampleRate);
-    const d=buf.getChannelData(0);
-    for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*(cfg.boomDur*0.3)));
-    const src=ctx.createBufferSource(),gain=ctx.createGain();
-    const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=cfg.boomFreq;
-    src.buffer=buf;src.connect(filter);filter.connect(gain);gain.connect(ctx.destination);
-    gain.gain.setValueAtTime(cfg.boomVol,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+cfg.boomDur);
-    src.start();
-    // Crack
-    const osc=ctx.createOscillator(),g2=ctx.createGain();
-    osc.connect(g2);g2.connect(ctx.destination);
-    osc.frequency.setValueAtTime(cfg.crackFreq,ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(30,ctx.currentTime+cfg.crackDur);
-    g2.gain.setValueAtTime(0.6,ctx.currentTime);
-    g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+cfg.crackDur);
-    osc.start();osc.stop(ctx.currentTime+cfg.crackDur);
-    // MOAB: sub-bass extra
-    if(type==='moab'){
-      const o3=ctx.createOscillator(),g3=ctx.createGain();
-      o3.type='sine';o3.frequency.value=25;
-      o3.connect(g3);g3.connect(ctx.destination);
-      g3.gain.setValueAtTime(1.5,ctx.currentTime);
-      g3.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+1.2);
-      o3.start();o3.stop(ctx.currentTime+1.2);
-    }
+    const now=ctx.currentTime;
+    [[0,900],[0.14,1350]].forEach(([offset,freq])=>{
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.type='sine';
+      osc.frequency.setValueAtTime(freq,now+offset);
+      osc.connect(gain);gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0,now+offset);
+      gain.gain.linearRampToValueAtTime(0.18,now+offset+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001,now+offset+0.5);
+      osc.start(now+offset);osc.stop(now+offset+0.5);
+    });
   }catch(e){}
 }
 
