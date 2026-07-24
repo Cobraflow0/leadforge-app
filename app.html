@@ -3088,8 +3088,13 @@ function openCampaignModal(){
   const limits=getPlanLimits();
   const btnWrap=document.getElementById('limit-50')?.parentElement;
   if(btnWrap){
-    btnWrap.innerHTML=limits.maxEmailBtns.map((n,i)=>`<div class="email-limit-btn ${i===limits.maxEmailBtns.length-1?'selected':''}" id="limit-${n}" onclick="selectLimit(${n})">${n} emails</div>`).join('');
-    selectedLimit=limits.maxEmailBtns[limits.maxEmailBtns.length-1];
+    if(DEMO_MODE){
+      btnWrap.innerHTML=`<div class="email-limit-btn selected" id="limit-${DEMO_MAX_LEADS}">${DEMO_MAX_LEADS} emails (demo)</div>`;
+      selectedLimit=DEMO_MAX_LEADS;
+    }else{
+      btnWrap.innerHTML=limits.maxEmailBtns.map((n,i)=>`<div class="email-limit-btn ${i===limits.maxEmailBtns.length-1?'selected':''}" id="limit-${n}" onclick="selectLimit(${n})">${n} emails</div>`).join('');
+      selectedLimit=limits.maxEmailBtns[limits.maxEmailBtns.length-1];
+    }
   }
   // Bloquear secuencias para Basic
   const followupCb=document.getElementById('camp-followup');
