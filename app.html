@@ -2316,7 +2316,6 @@ async function _checkPendingJob(){
   }catch(e){}
 }
 async function downloadExcel(){
-  if(DEMO_MODE){showDemoUpgrade('🔒 La descarga de Excel está disponible con cualquier plan de LeadForge.<br><br>Elige tu plan para descargar todos tus leads.');return;}
   const leads=appState.currentLeads;
   if(!leads?.length){alert('No hay leads disponibles. Lanza una búsqueda primero.');return;}
   const btn=document.querySelector('.btn-download');
@@ -3072,7 +3071,6 @@ async function loadCampaignsFromSupabase(){
 function showAlert(el,msg){el.textContent=msg;el.classList.add('show');}
 function delay(ms){return new Promise(r=>setTimeout(r,ms));}
 function openCampaignModal(){
-  if(DEMO_MODE){showDemoUpgrade('🔒 Las campañas de email están disponibles con cualquier plan de LeadForge.<br><br>Con el plan <strong>Pro</strong> puedes enviar hasta 1.000 emails personalizados con follow-up automático.');return;}
   if(!appState.currentJobId)return;
   document.getElementById('campaign-result').style.display='none';
   document.getElementById('camp-sender-status').style.display='none';
@@ -3165,6 +3163,7 @@ async function uploadCatalogFile(){
   }catch(err){spin.style.display='none';statusEl.style.color='var(--red)';statusEl.textContent=`❌ Error: ${err.message||'No se pudo conectar con la API'}`;input.value='';}
 }
 async function sendCampaign(){
+  if(DEMO_MODE){showDemoUpgrade('🔒 El envío real de campañas está disponible con cualquier plan de LeadForge.<br><br>Ya has visto cómo se prepara — con el plan <strong>Pro</strong> puedes mandar hasta 1.000 emails personalizados con follow-up automático.');return;}
   const name=document.getElementById('camp-name').value.trim(),company=document.getElementById('camp-company').value.trim(),product=document.getElementById('camp-product').value.trim(),subject=document.getElementById('camp-subject').value.trim(),email=document.getElementById('camp-email').value.trim(),catalogUrl=document.getElementById('camp-catalog-url').value.trim(),jobId=appState.currentJobId;
   if(!name||!company||!product||!email){alert('Rellena todos los campos.');return;}if(!email.includes('@')){alert('Introduce un email válido.');return;}
   const _bad=['tu nombre','tu empresa','tu producto o servicio','tu@empresa.com'];if(_bad.includes(name.toLowerCase())||_bad.includes(company.toLowerCase())||_bad.includes(product.toLowerCase())){alert('Parece que los campos contienen texto de ejemplo. Por favor, introduce tu información real (tu nombre, empresa y producto/servicio).');return;}
