@@ -1692,6 +1692,11 @@ const SECTORES={
 /* ── DEMO MODE ── */
 const DEMO_MODE = new URLSearchParams(window.location.search).get('demo') === 'true';
 const DEMO_MAX_LEADS = 20;
+/* Atajo solo para pruebas: ?demo=true&reset_demo=true olvida que este
+   navegador ya gastó su demo, sin tener que abrir incógnito cada vez. */
+if(DEMO_MODE && new URLSearchParams(window.location.search).get('reset_demo')==='true'){
+  localStorage.removeItem('lf_demo_used');
+}
 /* Sector/categoria/ciudad que puede venir precargada en el link de demo
    (ver TARGET_SECTOR_CAT en leadforge-prospector/prospector.py) — permite
    que quien hace clic en el email vea sus leads ya cargados en vez de un
