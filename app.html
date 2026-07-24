@@ -414,6 +414,14 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .nuke-mode-btn:hover{background:rgba(110,155,255,0.15);}
 .nuke-mode-btn.active{background:rgba(110,155,255,0.18);border-color:#6E9BFF;box-shadow:0 0 14px rgba(110,155,255,0.35);animation:nukeBtnPulse 1.5s ease-in-out infinite;}
 @keyframes nukeBtnPulse{0%,100%{box-shadow:0 0 14px rgba(110,155,255,0.35)}50%{box-shadow:0 0 22px rgba(110,155,255,0.6)}}
+/* ── TUTORIAL DE DEMO ── */
+.btn-launch.demo-tutorial-pulse{animation:nukeBtnPulse 1.4s ease-in-out infinite;box-shadow:0 0 18px rgba(110,155,255,0.5);}
+.demo-tutorial-tip{display:flex;align-items:flex-start;gap:12px;background:var(--card2);border:1px solid var(--border3);border-radius:var(--radius);padding:14px 16px;margin:14px 0;font-size:13px;color:var(--text2);line-height:1.6;position:relative;animation:dtFadeIn 0.3s var(--ease-out);}
+.demo-tutorial-tip strong{color:var(--text);}
+.demo-tutorial-tip .dt-step{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#06070A;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;}
+.demo-tutorial-tip .dt-close{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:4px;}
+.demo-tutorial-tip .dt-close:hover{color:var(--text);}
+@keyframes dtFadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 .radar-sweep{position:absolute;z-index:1500;pointer-events:none;border-radius:50%;background:conic-gradient(from 0deg,rgba(69,192,138,0) 0deg,rgba(69,192,138,0) 260deg,rgba(69,192,138,0.55) 340deg,rgba(69,192,138,0.9) 360deg);box-shadow:0 0 0 1px rgba(69,192,138,0.35) inset,0 0 26px rgba(69,192,138,0.25);animation-name:radarSweepSpin;animation-timing-function:linear;}
 @keyframes radarSweepSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 #map-coverage.nuke-active{cursor:crosshair!important;}
@@ -1785,18 +1793,31 @@ function loadDemoApp(){
   else if(DEMO_PRESET.sector && SECTORES[DEMO_PRESET.sector] && DEMO_PRESET.ciudad) autoLaunchDemo();
 }
 function autoLaunchDemo(){
+  // Precarga sector/categoría/ciudad del lead pero NO lanza la búsqueda
+  // sola — el cliente le da al botón él mismo, guiado por un tutorial,
+  // para que sienta cómo se usa la app de verdad en vez de ver un
+  // resultado aparecer mágicamente sin haber hecho nada.
   const opt=document.querySelector(`.sector-option[data-value="${DEMO_PRESET.sector}"]`);
   if(!opt) return;
-  const btn=document.getElementById('btn-launch'),label=document.getElementById('launch-label');
-  // Se bloquea el botón mientras se autorrellena el formulario para que un
-  // clic manual del usuario en ese margen no dispare launchScraping() dos
-  // veces — la segunda llamada veía la demo ya gastada por la primera y
-  // tapaba la búsqueda en curso con el aviso de "elige un plan".
-  if(btn){btn.disabled=true;}
-  if(label){label.textContent='Cargando tu demo…';}
   selectSector(DEMO_PRESET.sector, opt.textContent.trim());
   toggleCity(DEMO_PRESET.ciudad);
-  setTimeout(()=>{ if(!isDemoUsed()) launchScraping(); }, 150);
+  setTimeout(_showDemoTutorial, 200);
+}
+function _showDemoTutorial(){
+  if(document.getElementById('demo-tutorial-tip')) return;
+  const btn=document.getElementById('btn-launch');
+  if(!btn) return;
+  btn.classList.add('demo-tutorial-pulse');
+  const tip=document.createElement('div');
+  tip.id='demo-tutorial-tip';
+  tip.className='demo-tutorial-tip';
+  tip.innerHTML=`<span class="dt-step">1</span><div><strong>Ya tienes tu sector y tu ciudad listos.</strong><br>Dale a "Lanzar scraping" para ver tus 20 leads gratis, tal y como lo harías con tu cuenta real.</div><button class="dt-close" onclick="_hideDemoTutorial()" aria-label="Cerrar">✕</button>`;
+  btn.insertAdjacentElement('beforebegin', tip);
+}
+function _hideDemoTutorial(){
+  const tip=document.getElementById('demo-tutorial-tip');
+  if(tip) tip.remove();
+  document.getElementById('btn-launch')?.classList.remove('demo-tutorial-pulse');
 }
 /* Deja claro ANTES del clic que la demo ya se gastó, en vez de que el
    usuario pulse "Lanzar scraping" y aterrice de sopetón en "elige un plan"
@@ -1967,6 +1988,7 @@ async function launchScraping(){
       return;
     }
     markDemoUsed();
+    _hideDemoTutorial();
     _lockDemoLaunchButton();
   }
   const limits=getPlanLimits(),used=getSearchesThisMonth();
