@@ -1787,9 +1787,16 @@ function loadDemoApp(){
 function autoLaunchDemo(){
   const opt=document.querySelector(`.sector-option[data-value="${DEMO_PRESET.sector}"]`);
   if(!opt) return;
+  const btn=document.getElementById('btn-launch'),label=document.getElementById('launch-label');
+  // Se bloquea el botón mientras se autorrellena el formulario para que un
+  // clic manual del usuario en ese margen no dispare launchScraping() dos
+  // veces — la segunda llamada veía la demo ya gastada por la primera y
+  // tapaba la búsqueda en curso con el aviso de "elige un plan".
+  if(btn){btn.disabled=true;}
+  if(label){label.textContent='Cargando tu demo…';}
   selectSector(DEMO_PRESET.sector, opt.textContent.trim());
   toggleCity(DEMO_PRESET.ciudad);
-  setTimeout(()=>{ if(!document.getElementById('btn-launch').disabled) launchScraping(); }, 150);
+  setTimeout(()=>{ if(!isDemoUsed()) launchScraping(); }, 150);
 }
 /* Deja claro ANTES del clic que la demo ya se gastó, en vez de que el
    usuario pulse "Lanzar scraping" y aterrice de sopetón en "elige un plan"
