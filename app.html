@@ -1770,9 +1770,14 @@ function loadDemoApp(){
   banner.id = 'demo-banner';
   banner.innerHTML = `<div style="background:linear-gradient(135deg,rgba(61,111,224,0.15),rgba(110,155,255,0.1));border:1px solid rgba(110,155,255,0.3);border-radius:14px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;"><span style="font-size:14px;color:var(--text);font-weight:600;">⚡ Estás en la demo gratuita — 1 búsqueda de ${DEMO_MAX_LEADS} leads</span><a href="https://cobraflow0.github.io/leadforge-app/index.html#pricing" style="background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;padding:8px 18px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;">Ver planes →</a></div>`;
   document.getElementById('page-dashboard').insertBefore(banner, document.getElementById('page-dashboard').firstChild);
+  // Modo Radar: en demo se ve el mapa de España de fondo pero la función
+  // queda bloqueada con candado — la activa toggleNukeMode() más abajo.
+  const nukeBtn=document.getElementById('nuke-mode-btn');
+  if(nukeBtn) nukeBtn.textContent='📡 Modo Radar 🔒';
   showScreen('app');
   showPage('dashboard');
-  if(DEMO_PRESET.sector && SECTORES[DEMO_PRESET.sector] && DEMO_PRESET.ciudad) autoLaunchDemo();
+  if(isDemoUsed()) _lockDemoLaunchButton();
+  else if(DEMO_PRESET.sector && SECTORES[DEMO_PRESET.sector] && DEMO_PRESET.ciudad) autoLaunchDemo();
 }
 function autoLaunchDemo(){
   const opt=document.querySelector(`.sector-option[data-value="${DEMO_PRESET.sector}"]`);
@@ -1780,6 +1785,16 @@ function autoLaunchDemo(){
   selectSector(DEMO_PRESET.sector, opt.textContent.trim());
   toggleCity(DEMO_PRESET.ciudad);
   setTimeout(()=>{ if(!document.getElementById('btn-launch').disabled) launchScraping(); }, 150);
+}
+/* Deja claro ANTES del clic que la demo ya se gastó, en vez de que el
+   usuario pulse "Lanzar scraping" y aterrice de sopetón en "elige un plan"
+   sin previo aviso. */
+function _lockDemoLaunchButton(){
+  const btn=document.getElementById('btn-launch'),label=document.getElementById('launch-label');
+  if(!btn||!label) return;
+  btn.disabled=false;
+  btn.onclick=()=>showDemoUpgrade('Ya has visto tu demo gratuita.<br><br>Elige un plan para hacer búsquedas ilimitadas y descargar todos tus leads.');
+  label.textContent='🔒 Ver planes';
 }
 function showScreen(name){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const el=document.getElementById('screen-'+name);if(el)el.classList.add('active');}
 async function doLogin(){
@@ -1940,6 +1955,7 @@ async function launchScraping(){
       return;
     }
     markDemoUsed();
+    _lockDemoLaunchButton();
   }
   const limits=getPlanLimits(),used=getSearchesThisMonth();
   if(!DEMO_MODE&&limits.searches!==Infinity&&used>=limits.searches){
@@ -2540,6 +2556,10 @@ function _getCitiesInRadius(lat,lng,radiusKm){
 }
 
 function toggleNukeMode(){
+  if(DEMO_MODE){
+    showDemoUpgrade('🔒 El <strong>Modo Radar</strong> (búsqueda por radio geográfico) está disponible con cualquier plan de LeadForge.<br><br>Con Pro y Business puedes escanear un área exacta alrededor de cualquier punto del mapa.');
+    return;
+  }
   _nukeModeActive=!_nukeModeActive;
   const btn=document.getElementById('nuke-mode-btn');
   const mapEl=document.getElementById('map-coverage');
