@@ -1692,6 +1692,11 @@ const SECTORES={
 /* ── DEMO MODE ── */
 const DEMO_MODE = new URLSearchParams(window.location.search).get('demo') === 'true';
 const DEMO_MAX_LEADS = 20;
+/* Sector/categoria/ciudad que puede venir precargada en el link de demo
+   (ver TARGET_SECTOR_CAT en leadforge-prospector/prospector.py) — permite
+   que quien hace clic en el email vea sus leads ya cargados en vez de un
+   formulario vacío. */
+const DEMO_PRESET = (()=>{const p=new URLSearchParams(window.location.search);return{sector:p.get('sector')||'',cat:p.get('cat')||'',ciudad:p.get('ciudad')||''};})();
 /* ── TRACKING DE CLICS DE CAPTACIÓN (prospector, WhatsApp, gremios...) ──
    Antes no había forma de saber si alguien que recibía un email/mensaje
    de captación llegaba a hacer clic — solo si Brevo decía que se abrió
@@ -1767,6 +1772,14 @@ function loadDemoApp(){
   document.getElementById('page-dashboard').insertBefore(banner, document.getElementById('page-dashboard').firstChild);
   showScreen('app');
   showPage('dashboard');
+  if(DEMO_PRESET.sector && SECTORES[DEMO_PRESET.sector] && DEMO_PRESET.ciudad) autoLaunchDemo();
+}
+function autoLaunchDemo(){
+  const opt=document.querySelector(`.sector-option[data-value="${DEMO_PRESET.sector}"]`);
+  if(!opt) return;
+  selectSector(DEMO_PRESET.sector, opt.textContent.trim());
+  toggleCity(DEMO_PRESET.ciudad);
+  setTimeout(()=>{ if(!document.getElementById('btn-launch').disabled) launchScraping(); }, 150);
 }
 function showScreen(name){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const el=document.getElementById('screen-'+name);if(el)el.classList.add('active');}
 async function doLogin(){
@@ -1875,7 +1888,7 @@ function updateCategories(){
   wrap.style.display='block';
   SECTORES[sector].forEach((cat,i)=>{
     const pill=document.createElement('div');
-    const selected=DEMO_MODE?(i===0):(true);
+    const selected=DEMO_MODE?(DEMO_PRESET.cat?cat.id===DEMO_PRESET.cat:i===0):(true);
     pill.className='cat-pill'+(selected?' selected':'');
     pill.id='cat-'+cat.id;
     pill.innerHTML=`<div class="cat-check">${selected?'✓':''}</div><span>${cat.emoji} ${cat.label}</span>`;
